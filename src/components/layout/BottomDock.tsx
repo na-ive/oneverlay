@@ -60,9 +60,9 @@ export function BottomDock({ left, center, right }: BottomDockProps) {
       />
 
       {/* Three-panel layout */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* Left — Elements */}
-        <div className="flex-1 flex flex-col border-r border-border min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col border-r border-border min-w-0">
           {left}
         </div>
 

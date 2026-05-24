@@ -50,4 +50,4 @@ export const ZOOM_DEFAULT = 1;
 
 // ── Support Link ──
 
-export const SUPPORT_URL = 'https://ko-fi.com/oneverlay';
+export const SUPPORT_URL = 'https://tako.id/Ammaru';
