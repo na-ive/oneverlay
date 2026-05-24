@@ -93,6 +93,7 @@ dialog {
   background: transparent;
   max-width: 100vw;
   max-height: 100vh;
+  margin: auto;
 }
 
 /* ── Utility classes ── */
