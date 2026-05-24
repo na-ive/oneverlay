@@ -21,7 +21,7 @@ export function Navbar() {
 
   return (
     <header
-      className="relative flex items-center justify-between px-3 border-b border-border select-none shrink-0"
+      className="relative flex items-center justify-between px-4 border-b border-white/[0.06] select-none shrink-0"
       style={{
         height: `${NAVBAR_HEIGHT}px`,
         backgroundColor: 'var(--color-bg-secondary)',
@@ -29,7 +29,7 @@ export function Navbar() {
     >
       {/* Left — Title */}
       <div className="flex items-center gap-2">
-        <span className="text-base font-black uppercase tracking-widest text-text-primary">
+        <span className="text-base font-black uppercase tracking-widest text-text-primary pl-1">
           {APP_NAME}
         </span>
       </div>

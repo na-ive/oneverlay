@@ -104,10 +104,10 @@ export function ScenesPanel() {
   );
 
   return (
-    <div className="flex flex-col h-full border-r border-border" style={{ minWidth: '220px' }}>
+    <div className="flex flex-col h-full border-r border-white/[0.06] bg-bg-secondary/20" style={{ minWidth: '220px' }}>
       {/* Panel header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] shrink-0">
+        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">
           Scenes
         </span>
         <IconButton size="sm" tooltip="Add scene" onClick={handleAdd}>
@@ -116,7 +116,7 @@ export function ScenesPanel() {
       </div>
 
       {/* Scenes list */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 py-2">
         {scenes.map((scene, index) => {
           const isActive = scene.id === activeSceneId;
           const isEditing = scene.id === editingId;
@@ -129,12 +129,12 @@ export function ScenesPanel() {
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(index)}
               className={`
-                flex items-center gap-2 px-1 py-1.5 border-b border-border/50
-                transition-colors cursor-pointer group
+                flex items-center gap-2 px-2.5 py-1.5 mx-2 my-0.5 rounded-xl
+                transition-all duration-200 cursor-pointer group
                 ${
                   isActive
-                    ? 'bg-accent/10 border-l-2 border-l-accent'
-                    : 'hover:bg-bg-hover/50 border-l-2 border-l-transparent'
+                    ? 'bg-accent/12 text-accent shadow-sm shadow-accent/5'
+                    : 'hover:bg-white/[0.04] text-text-secondary hover:text-text-primary'
                 }
               `}
               onClick={() => handleSelect(scene.id)}
@@ -158,14 +158,14 @@ export function ScenesPanel() {
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={handleFinishRename}
                   onKeyDown={handleKeyDown}
-                  className="flex-1 min-w-0 bg-bg-primary border border-accent rounded px-1 py-0.5 text-xs text-text-primary outline-none"
+                  className="flex-1 min-w-0 bg-bg-primary/50 border border-accent rounded-lg px-2 py-0.5 text-xs text-text-primary outline-none"
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
                 <span
                   onDoubleClick={(e) => handleStartRename(e, scene.id, scene.name)}
                   className={`text-xs truncate flex-1 select-none ${
-                    isActive ? 'text-accent font-medium' : 'text-text-primary'
+                    isActive ? 'font-semibold text-accent' : 'text-text-primary'
                   }`}
                 >
                   {scene.name}
@@ -174,7 +174,7 @@ export function ScenesPanel() {
 
               {/* Actions */}
               <div
-                className={`flex items-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 pr-1`}
+                className={`flex items-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 gap-0.5`}
               >
                 {!isEditing && (
                   <IconButton

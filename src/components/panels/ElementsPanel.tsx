@@ -85,10 +85,10 @@ export function ElementsPanel() {
   const displayElements = [...elements].reverse();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-bg-secondary/10">
       {/* Panel header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] shrink-0">
+        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">
           Elements
         </span>
         <div className="relative">
@@ -103,8 +103,8 @@ export function ElementsPanel() {
           {/* Add menu dropdown */}
           {showAddMenu && (
             <div
-              className="absolute bottom-full right-0 mb-1 rounded-md border border-border shadow-lg py-1 z-50 min-w-[140px]"
-              style={{ backgroundColor: 'var(--color-bg-elevated)' }}
+              className="absolute bottom-full right-0 mb-2 rounded-2xl border border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-2xl py-1.5 z-50 min-w-[140px]"
+              style={{ backgroundColor: 'rgba(32, 32, 36, 0.85)' }}
             >
               {(['text', 'image', 'browser'] as ElementType[]).map((type) => {
                 const Icon = TYPE_ICONS[type];
@@ -112,7 +112,7 @@ export function ElementsPanel() {
                   <button
                     key={type}
                     onClick={() => handleAdd(type)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-text-primary hover:bg-bg-hover transition-colors cursor-pointer border-none bg-transparent text-left capitalize"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-all cursor-pointer border-none bg-transparent text-left capitalize"
                   >
                     <Icon size={13} className="text-text-secondary" />
                     {type}
@@ -125,7 +125,7 @@ export function ElementsPanel() {
       </div>
 
       {/* Elements list */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 py-2">
         {displayElements.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <p className="text-[11px] text-text-muted">No elements yet</p>
@@ -186,9 +186,13 @@ function ElementRow({
   return (
     <div
       className={`
-        flex items-center gap-1 px-1 py-0.5 border-b border-border/50
-        transition-colors cursor-pointer group
-        ${isSelected ? 'bg-accent/10' : 'hover:bg-bg-hover/50'}
+        flex items-center gap-1 px-2.5 py-1.5 mx-2 my-0.5 rounded-xl
+        transition-all duration-200 cursor-pointer group
+        ${
+          isSelected
+            ? 'bg-accent/12 text-accent shadow-sm shadow-accent/5'
+            : 'hover:bg-white/[0.04] text-text-secondary hover:text-text-primary'
+        }
       `}
       onClick={onSelect}
       draggable
@@ -213,16 +217,20 @@ function ElementRow({
         {element.hidden ? (
           <LuEyeOff size={12} className="text-text-muted" />
         ) : (
-          <LuEye size={12} />
+          <LuEye size={12} className={isSelected ? 'text-accent' : ''} />
         )}
       </IconButton>
 
       {/* Type icon + name */}
-      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        <Icon size={12} className="text-text-secondary shrink-0" />
+      <div className="flex items-center gap-1.5 flex-1 min-w-0 pl-1">
+        <Icon size={12} className={`shrink-0 ${isSelected ? 'text-accent' : 'text-text-secondary'}`} />
         <span
           className={`text-xs truncate ${
-            element.hidden ? 'text-text-muted line-through' : 'text-text-primary'
+            element.hidden
+              ? 'text-text-muted line-through'
+              : isSelected
+              ? 'font-semibold text-accent'
+              : 'text-text-primary'
           }`}
         >
           {element.name}
@@ -230,7 +238,7 @@ function ElementRow({
       </div>
 
       {/* Actions (visible on hover) */}
-      <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <IconButton
           size="sm"
           tooltip="Properties"

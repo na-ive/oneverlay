@@ -108,3 +108,14 @@ dialog {
 .resize-handle-ns {
   cursor: ns-resize;
 }
+
+/* ── Modern 2026 aesthetics transitions and glows ── */
+input, select, textarea, button {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glow-focus:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.15);
+}
+

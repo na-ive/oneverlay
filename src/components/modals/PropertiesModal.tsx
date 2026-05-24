@@ -32,25 +32,25 @@ export function PropertiesModal() {
       open={isOpen}
       onClose={closeProperties}
       title={`${element.name} — Properties`}
-      width="440px"
+      width="540px"
     >
       <div className="space-y-4">
         {/* Name */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Name
           </label>
           <input
             type="text"
             value={element.name}
             onChange={(e) => handleUpdate({ name: e.target.value })}
-            className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
           />
         </div>
 
         {/* Transform */}
         <div>
-          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide mb-1 block">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide mb-1.5 block pl-1">
             Transform
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -114,8 +114,8 @@ function TextProperties({
   onUpdate: (updates: Partial<TextElement>) => void;
 }) {
   return (
-    <div className="space-y-3 pt-3 border-t border-border">
-      <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide block">
+    <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+      <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide block pl-1">
         Text
       </label>
 
@@ -123,7 +123,7 @@ function TextProperties({
         value={element.text}
         onChange={(e) => onUpdate({ text: e.target.value })}
         rows={3}
-        className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors resize-y"
+        className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all resize-y"
         placeholder="Enter text..."
       />
 
@@ -137,27 +137,27 @@ function TextProperties({
           suffix="px"
         />
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Font Weight
           </label>
           <select
             value={element.fontWeight}
             onChange={(e) => onUpdate({ fontWeight: parseInt(e.target.value) })}
-            className="w-full px-2 py-1.5 rounded border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors cursor-pointer"
+            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 transition-all cursor-pointer"
           >
-            <option value={300}>Light</option>
-            <option value={400}>Regular</option>
-            <option value={500}>Medium</option>
-            <option value={600}>Semibold</option>
-            <option value={700}>Bold</option>
-            <option value={800}>Extra Bold</option>
+            <option value={300} className="bg-bg-surface text-text-primary">Light</option>
+            <option value={400} className="bg-bg-surface text-text-primary">Regular</option>
+            <option value={500} className="bg-bg-surface text-text-primary">Medium</option>
+            <option value={600} className="bg-bg-surface text-text-primary">Semibold</option>
+            <option value={700} className="bg-bg-surface text-text-primary">Bold</option>
+            <option value={800} className="bg-bg-surface text-text-primary">Extra Bold</option>
           </select>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Color
           </label>
           <div className="flex items-center gap-2">
@@ -165,25 +165,25 @@ function TextProperties({
               type="color"
               value={element.color}
               onChange={(e) => onUpdate({ color: e.target.value })}
-              className="w-7 h-7 rounded border border-border cursor-pointer bg-transparent"
+              className="w-8 h-8 rounded-xl border border-white/[0.08] cursor-pointer bg-transparent shrink-0"
             />
             <input
               type="text"
               value={element.color}
               onChange={(e) => onUpdate({ color: e.target.value })}
-              className="flex-1 px-2 py-1.5 rounded border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors font-mono"
+              className="flex-1 px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all font-mono"
             />
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Font Family
           </label>
           <input
             type="text"
             value={element.fontFamily}
             onChange={(e) => onUpdate({ fontFamily: e.target.value })}
-            className="w-full px-2 py-1.5 rounded border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
             placeholder="Inter"
           />
         </div>
@@ -200,23 +200,23 @@ function ImageProperties({
   onUpdate: (updates: Partial<ImageElement>) => void;
 }) {
   return (
-    <div className="space-y-3 pt-3 border-t border-border">
-      <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide block">
+    <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+      <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide block pl-1">
         Image Source
       </label>
       <input
         type="url"
         value={element.imageUrl}
         onChange={(e) => onUpdate({ imageUrl: e.target.value })}
-        className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+        className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
         placeholder="https://example.com/image.png"
       />
       {element.imageUrl && (
-        <div className="rounded-md border border-border overflow-hidden bg-bg-primary">
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden bg-bg-primary/40 p-1">
           <img
             src={element.imageUrl}
             alt="Preview"
-            className="w-full h-auto max-h-32 object-contain"
+            className="w-full h-auto max-h-32 object-contain rounded-lg"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
@@ -235,15 +235,15 @@ function BrowserProperties({
   onUpdate: (updates: Partial<BrowserElement>) => void;
 }) {
   return (
-    <div className="space-y-3 pt-3 border-t border-border">
-      <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide block">
+    <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+      <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide block pl-1">
         Browser Source URL
       </label>
       <input
         type="url"
         value={element.url}
         onChange={(e) => onUpdate({ url: e.target.value })}
-        className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+        className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
         placeholder="https://example.com"
       />
     </div>

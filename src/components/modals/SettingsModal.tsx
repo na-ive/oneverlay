@@ -25,37 +25,37 @@ export function SettingsModal() {
   }, [resetProject, clearHistory, handleClose]);
 
   return (
-    <Modal open={isOpen} onClose={handleClose} title="Settings" width="400px">
+    <Modal open={isOpen} onClose={handleClose} title="Settings" width="480px">
       <div className="space-y-4">
         {/* Scene name */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Scene Name
           </label>
           <input
             type="text"
             value={sceneName}
             onChange={(e) => setSceneName(activeSceneId, e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
             placeholder="My Overlay"
           />
         </div>
 
         {/* App info */}
-        <div className="flex flex-col gap-1 pt-2 border-t border-border">
-          <p className="text-[11px] text-text-muted">
+        <div className="flex flex-col gap-1 pt-3 border-t border-white/[0.06]">
+          <p className="text-[11px] text-text-muted pl-1">
             {APP_NAME} — Lightweight streaming overlay compositor
           </p>
-          <p className="text-[11px] text-text-muted">v0.1.0 MVP</p>
+          <p className="text-[11px] text-text-muted pl-1">v0.1.0 MVP</p>
         </div>
 
         {/* Danger zone */}
-        <div className="pt-2 border-t border-border">
+        <div className="pt-3 border-t border-white/[0.06]">
           <button
             onClick={handleReset}
-            className="px-3 py-1.5 rounded-md border border-danger/30 bg-transparent hover:bg-danger/10 text-danger text-xs font-medium transition-colors cursor-pointer"
+            className="w-full px-3 py-2.5 rounded-xl border border-danger/30 bg-danger/10 hover:bg-danger/20 text-danger text-xs font-semibold hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
-            Reset Overlay
+            Reset Project
           </button>
         </div>
       </div>

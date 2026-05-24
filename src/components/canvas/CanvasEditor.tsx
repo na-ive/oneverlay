@@ -174,8 +174,21 @@ export function CanvasEditor() {
 
       {/* Empty canvas guide */}
       {elements.length === 0 && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-10">
-          <div className="flex flex-col items-center text-center max-w-md pointer-events-auto">
+        <div
+          className="absolute pointer-events-none select-none z-10 flex flex-col items-center justify-center overflow-hidden"
+          style={{
+            left: `${offsetX}px`,
+            top: `${offsetY}px`,
+            width: `${canvasWidth * scale}px`,
+            height: `${canvasHeight * scale}px`,
+          }}
+        >
+          <div
+            className="flex flex-col items-center text-center max-w-md pointer-events-auto p-4 transition-transform duration-200"
+            style={{
+              transform: scale < 0.65 ? `scale(${scale / 0.65})` : 'none',
+            }}
+          >
             {/* Page title */}
             <span className="text-5xl font-black uppercase tracking-widest text-text-primary">
               {APP_NAME}
@@ -190,21 +203,21 @@ export function CanvasEditor() {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => handleQuickAdd('text')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold hover:scale-[1.05] active:scale-[0.95] transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
               >
                 <LuType size={13} className="text-text-secondary" />
                 Text
               </button>
               <button
                 onClick={() => handleQuickAdd('image')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold hover:scale-[1.05] active:scale-[0.95] transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
               >
                 <LuImage size={13} className="text-text-secondary" />
                 Image
               </button>
               <button
                 onClick={() => handleQuickAdd('browser')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold hover:scale-[1.05] active:scale-[0.95] transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
               >
                 <LuGlobe size={13} className="text-text-secondary" />
                 Browser

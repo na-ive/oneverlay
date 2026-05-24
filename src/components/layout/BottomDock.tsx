@@ -45,7 +45,7 @@ export function BottomDock({ left, center, right }: BottomDockProps) {
 
   return (
     <div
-      className="flex flex-col shrink-0 border-t border-border"
+      className="flex flex-col shrink-0 border-t border-white/[0.06]"
       style={{
         height: `${height}px`,
         backgroundColor: 'var(--color-bg-secondary)',
@@ -53,7 +53,7 @@ export function BottomDock({ left, center, right }: BottomDockProps) {
     >
       {/* Resize handle */}
       <div
-        className="resize-handle-ns h-1 w-full hover:bg-accent/30 transition-colors shrink-0"
+        className="resize-handle-ns h-1 w-full hover:bg-accent/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.5)] transition-all duration-200 shrink-0"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -62,12 +62,12 @@ export function BottomDock({ left, center, right }: BottomDockProps) {
       {/* Three-panel layout */}
       <div className="flex flex-1 min-h-0">
         {/* Left — Elements */}
-        <div className="flex-1 flex flex-col border-r border-border min-w-0">
+        <div className="flex-1 flex flex-col border-r border-white/[0.06] min-w-0">
           {left}
         </div>
 
         {/* Center — Canvas Settings */}
-        <div className="w-64 flex flex-col border-r border-border shrink-0 overflow-hidden">
+        <div className="w-64 flex flex-col border-r border-white/[0.06] shrink-0 overflow-hidden">
           {center}
         </div>
 

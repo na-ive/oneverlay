@@ -21,20 +21,20 @@ export function ActionsPanel() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-bg-secondary/10">
       {/* Panel header */}
-      <div className="flex items-center px-3 py-1.5 border-b border-border shrink-0">
+      <div className="flex items-center px-4 py-2.5 border-b border-white/[0.06] shrink-0">
         <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
           Actions
         </span>
       </div>
 
-      <div className="flex-1 flex flex-col justify-between p-3">
+      <div className="flex-1 flex flex-col justify-between p-3.5">
         {/* Top Actions */}
         <div className="flex flex-col gap-2">
           <button
             onClick={handleSave}
-            className="flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer border-none"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold shadow-md shadow-accent/15 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer border-none"
           >
             <LuSave size={13} />
             Save Overlay
@@ -42,7 +42,7 @@ export function ActionsPanel() {
 
           <button
             onClick={handleOpenOverlay}
-            className="flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-border bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-xs font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
             <LuGlobe size={13} />
             Open Overlay
@@ -53,7 +53,7 @@ export function ActionsPanel() {
         <div>
           <button
             onClick={handleSupport}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-border bg-transparent hover:bg-bg-hover text-text-secondary hover:text-text-primary text-xs font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
             <LuHeart size={13} />
             Support
