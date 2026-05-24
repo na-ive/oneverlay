@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
-/* ── Oneverlay Dark Theme Tokens ── */
+/* ── Oneverlay Premium Obsidian Dark Theme Tokens ── */
 @theme {
-  --color-bg-primary: #1a1a2e;
-  --color-bg-secondary: #16213e;
-  --color-bg-surface: #1e2a3a;
-  --color-bg-elevated: #253345;
-  --color-bg-hover: #2d3d50;
-  --color-bg-canvas: #0d1117;
-  --color-border: #2a3a4a;
-  --color-border-light: #354555;
-  --color-text-primary: #e0e0e0;
-  --color-text-secondary: #8892a0;
-  --color-text-muted: #5a6475;
-  --color-accent: #4a9eff;
-  --color-accent-hover: #5aafff;
-  --color-accent-muted: #4a9eff22;
-  --color-danger: #ff4757;
-  --color-danger-hover: #ff6b7a;
-  --color-success: #2ed573;
-  --color-warning: #ffa502;
+  --color-bg-primary: #09090b;       /* Zinc 950 (Obsidian background) */
+  --color-bg-secondary: #0f0f11;     /* Dark Charcoal for sub-panels and docks */
+  --color-bg-surface: #18181b;       /* Zinc 900 for floating components and modals */
+  --color-bg-elevated: #202024;      /* Elevated header elements */
+  --color-bg-hover: #27272a;         /* Zinc 800 for active hover states */
+  --color-bg-canvas: #040405;        /* Ultra dark gray for editor canvas wrapper */
+  --color-border: #1f1f23;           /* Thin subtle borders */
+  --color-border-light: #2e2e34;     /* Strong borders */
+  --color-text-primary: #fafafa;     /* High contrast off-white */
+  --color-text-secondary: #a1a1aa;   /* Muted grey */
+  --color-text-muted: #52525b;       /* Zinc 600 */
+  --color-accent: #6366f1;           /* Premium Indigo-500 */
+  --color-accent-hover: #4f46e5;     /* Indigo-600 */
+  --color-accent-muted: rgba(99, 102, 241, 0.12);
+  --color-danger: #ef4444;           /* Red 500 */
+  --color-danger-hover: #dc2626;     /* Red 600 */
+  --color-success: #10b981;          /* Emerald 500 */
+  --color-warning: #f59e0b;          /* Amber 500 */
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Google Sans Flex", "Inter", system-ui, -apple-system, sans-serif;
 }
 
 /* ── Base Styles ── */

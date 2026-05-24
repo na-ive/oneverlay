@@ -27,12 +27,9 @@ export function Navbar() {
         backgroundColor: 'var(--color-bg-secondary)',
       }}
     >
-      {/* Left — Logo */}
+      {/* Left — Title */}
       <div className="flex items-center gap-2">
-        <div className="w-5 h-5 rounded bg-accent/20 flex items-center justify-center">
-          <span className="text-accent text-[10px] font-bold">O</span>
-        </div>
-        <span className="text-sm font-semibold text-text-primary tracking-tight">
+        <span className="text-base font-black uppercase tracking-widest text-text-primary">
           {APP_NAME}
         </span>
       </div>

@@ -61,7 +61,7 @@ export function Modal({ open, onClose, title, children, width = '480px' }: Modal
           className="flex items-center justify-between px-4 py-3 border-b border-border"
           style={{ backgroundColor: 'var(--color-bg-elevated)' }}
         >
-          <h2 className="text-sm font-semibold text-text-primary m-0">{title}</h2>
+          <h2 className="text-xs font-bold text-text-primary uppercase tracking-wider m-0">{title}</h2>
           <button
             onClick={onClose}
             className="w-6 h-6 flex items-center justify-center rounded text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer border-none bg-transparent"

@@ -88,7 +88,7 @@ export function ElementsPanel() {
     <div className="flex flex-col h-full">
       {/* Panel header */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-        <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
+        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
           Elements
         </span>
         <div className="relative">
