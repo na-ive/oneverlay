@@ -6,6 +6,8 @@ import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useCanvasZoom } from '../../hooks/useCanvasZoom';
 import { CanvasElement } from './CanvasElement';
+import { LuType, LuImage, LuGlobe } from 'react-icons/lu';
+import { APP_NAME } from '../../lib/constants';
 
 
 export function CanvasEditor() {
@@ -16,6 +18,7 @@ export function CanvasEditor() {
   const elements = useSceneStore((s) => s.elements);
   const canvasWidth = useSceneStore((s) => s.canvas.width);
   const canvasHeight = useSceneStore((s) => s.canvas.height);
+  const addElement = useSceneStore((s) => s.addElement);
   const moveElement = useSceneStore((s) => s.moveElement);
   const resizeElement = useSceneStore((s) => s.resizeElement);
   const updateElement = useSceneStore((s) => s.updateElement);
@@ -25,6 +28,22 @@ export function CanvasEditor() {
   const bottomDockHeight = useEditorStore((s) => s.bottomDockHeight);
   const openProperties = useEditorStore((s) => s.openProperties);
   const pushHistory = useHistoryStore((s) => s.push);
+
+  const handleQuickAdd = useCallback(
+    (type: 'text' | 'image' | 'browser') => {
+      pushHistory();
+      addElement(type);
+      
+      // Auto-select the newly added element
+      const updatedElements = useSceneStore.getState().elements;
+      const newElement = updatedElements[updatedElements.length - 1];
+      if (newElement) {
+        selectElement(newElement.id);
+        openProperties(newElement.id);
+      }
+    },
+    [addElement, selectElement, openProperties, pushHistory],
+  );
 
   const { scale, offsetX, offsetY } = useCanvasZoom(
     containerSize.width,
@@ -152,6 +171,48 @@ export function CanvasEditor() {
       <div className="absolute bottom-2 right-3 text-[10px] text-text-muted select-none pointer-events-none">
         {canvasWidth}×{canvasHeight} · {Math.round(scale * 100)}%
       </div>
+
+      {/* Empty canvas guide */}
+      {elements.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-10">
+          <div className="flex flex-col items-center text-center max-w-md pointer-events-auto">
+            {/* Page title */}
+            <span className="text-5xl font-black uppercase tracking-widest text-text-primary">
+              {APP_NAME}
+            </span>
+
+            {/* Description text */}
+            <p className="text-sm text-text-secondary mt-3 mb-8 max-w-sm leading-relaxed">
+              Add your first element to start designing and composing your custom stream overlay.
+            </p>
+
+            {/* Quick CTA buttons in 1 row */}
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => handleQuickAdd('text')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+              >
+                <LuType size={13} className="text-text-secondary" />
+                Text
+              </button>
+              <button
+                onClick={() => handleQuickAdd('image')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+              >
+                <LuImage size={13} className="text-text-secondary" />
+                Image
+              </button>
+              <button
+                onClick={() => handleQuickAdd('browser')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+              >
+                <LuGlobe size={13} className="text-text-secondary" />
+                Browser
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
