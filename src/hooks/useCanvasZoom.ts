@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store/editorStore';
 import { useSceneStore } from '../store/sceneStore';
-import { NAVBAR_HEIGHT, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from '../lib/constants';
+import { ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from '../lib/constants';
 
 interface CanvasLayout {
   /** Scale factor to fit canvas into available space */

@@ -29,7 +29,8 @@ export function CanvasElement({
   onTransformEnd,
   onDoubleClick,
 }: CanvasElementProps) {
-  const shapeRef = useRef<Konva.Node>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shapeRef = useRef<any>(null);
   const trRef = useRef<Konva.Transformer>(null);
 
   // Attach transformer when selected
@@ -42,7 +43,7 @@ export function CanvasElement({
 
   const handleTransformEnd = useCallback(() => {
     if (shapeRef.current) {
-      onTransformEnd(shapeRef.current);
+      onTransformEnd(shapeRef.current as Konva.Node);
     }
   }, [onTransformEnd]);
 

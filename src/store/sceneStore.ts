@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type {
   OverlayElement,
-  CanvasSettings,
   SceneData,
   ElementType,
 } from '../types/elements';

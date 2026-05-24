@@ -6,7 +6,7 @@ import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useCanvasZoom } from '../../hooks/useCanvasZoom';
 import { CanvasElement } from './CanvasElement';
-import { NAVBAR_HEIGHT } from '../../lib/constants';
+
 
 export function CanvasEditor() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +50,7 @@ export function CanvasEditor() {
 
   // Click on empty canvas area → deselect
   const handleStageClick = useCallback(
-    (e: Konva.KonvaEventObject<MouseEvent>) => {
+    (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
       if (e.target === stageRef.current || e.target.name() === 'canvas-bg') {
         selectElement(null);
       }
