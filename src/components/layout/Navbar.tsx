@@ -21,7 +21,7 @@ export function Navbar() {
 
   return (
     <header
-      className="flex items-center justify-between px-3 border-b border-border select-none shrink-0"
+      className="relative flex items-center justify-between px-3 border-b border-border select-none shrink-0"
       style={{
         height: `${NAVBAR_HEIGHT}px`,
         backgroundColor: 'var(--color-bg-secondary)',
@@ -35,7 +35,7 @@ export function Navbar() {
       </div>
 
       {/* Center — Undo / Redo */}
-      <div className="flex items-center gap-0.5">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-0.5">
         <IconButton
           tooltip="Undo (Ctrl+Z)"
           onClick={handleUndo}
