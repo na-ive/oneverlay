@@ -28,6 +28,7 @@ interface SceneStoreState extends ProjectData {
   removeScene: (id: string) => void;
   setActiveScene: (id: string) => void;
   setSceneName: (id: string, name: string) => void;
+  reorderScene: (fromIndex: number, toIndex: number) => void;
 
   // ── Entire project state replacement ──
   loadProjectData: (data: ProjectData) => void;
@@ -185,6 +186,15 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
       ),
       updatedAt: Date.now(),
     }));
+  },
+
+  reorderScene: (fromIndex: number, toIndex: number) => {
+    set((state) => {
+      const scenes = [...state.scenes];
+      const [moved] = scenes.splice(fromIndex, 1);
+      scenes.splice(toIndex, 0, moved);
+      return { scenes, updatedAt: Date.now() };
+    });
   },
 
   // ── Entire project state replacement ──

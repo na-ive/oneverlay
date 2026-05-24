@@ -1,5 +1,5 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
-import { LuPlus, LuTrash2, LuMonitorPlay, LuPencil } from 'react-icons/lu';
+import { LuPlus, LuTrash2, LuMonitorPlay, LuPencil, LuGripVertical } from 'react-icons/lu';
 import { IconButton } from '../ui/IconButton';
 import { useSceneStore } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
@@ -12,12 +12,15 @@ export function ScenesPanel() {
   const removeScene = useSceneStore((s) => s.removeScene);
   const setActiveScene = useSceneStore((s) => s.setActiveScene);
   const setSceneName = useSceneStore((s) => s.setSceneName);
+  const reorderScene = useSceneStore((s) => s.reorderScene);
   const pushHistory = useHistoryStore((s) => s.push);
   const selectElement = useEditorStore((s) => s.selectElement);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (editingId && inputRef.current) {
@@ -82,6 +85,24 @@ export function ScenesPanel() {
     [handleFinishRename],
   );
 
+  const handleDragStart = useCallback((index: number) => {
+    setDragIndex(index);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDrop = useCallback(
+    (targetIndex: number) => {
+      if (dragIndex === null || dragIndex === targetIndex) return;
+      pushHistory();
+      reorderScene(dragIndex, targetIndex);
+      setDragIndex(null);
+    },
+    [dragIndex, reorderScene, pushHistory],
+  );
+
   return (
     <div className="flex flex-col h-full border-r border-border" style={{ minWidth: '220px' }}>
       {/* Panel header */}
@@ -96,15 +117,19 @@ export function ScenesPanel() {
 
       {/* Scenes list */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {scenes.map((scene) => {
+        {scenes.map((scene, index) => {
           const isActive = scene.id === activeSceneId;
           const isEditing = scene.id === editingId;
 
           return (
             <div
               key={scene.id}
+              draggable={!isEditing}
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index)}
               className={`
-                flex items-center gap-2 px-2 py-1.5 border-b border-border/50
+                flex items-center gap-2 px-1 py-1.5 border-b border-border/50
                 transition-colors cursor-pointer group
                 ${
                   isActive
@@ -114,6 +139,11 @@ export function ScenesPanel() {
               `}
               onClick={() => handleSelect(scene.id)}
             >
+              {/* Drag handle */}
+              <div className="drag-handle text-text-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                <LuGripVertical size={11} />
+              </div>
+
               <div className="shrink-0 flex items-center justify-center w-4">
                 <LuMonitorPlay
                   size={12}
@@ -144,7 +174,7 @@ export function ScenesPanel() {
 
               {/* Actions */}
               <div
-                className={`flex items-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0`}
+                className={`flex items-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 pr-1`}
               >
                 {!isEditing && (
                   <IconButton
