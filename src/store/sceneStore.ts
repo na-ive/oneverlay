@@ -148,12 +148,15 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
 
   // ── Scene actions (operate on project) ──
   addScene: () => {
-    const newScene = createDefaultScene();
-    set((state) => ({
-      scenes: [...state.scenes, newScene],
-      activeSceneId: newScene.id,
-      updatedAt: Date.now(),
-    }));
+    set((state) => {
+      const nextNumber = state.scenes.length + 1;
+      const newScene = createDefaultScene(`Scene ${nextNumber}`);
+      return {
+        scenes: [...state.scenes, newScene],
+        activeSceneId: newScene.id,
+        updatedAt: Date.now(),
+      };
+    });
   },
 
   removeScene: (id: string) => {

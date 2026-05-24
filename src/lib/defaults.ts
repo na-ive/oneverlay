@@ -76,10 +76,10 @@ export function createElement(type: ElementType): OverlayElement {
 
 // ── Default Scene ──
 
-export function createDefaultScene(): SceneData {
+export function createDefaultScene(name = 'Scene 1'): SceneData {
   return {
     id: uuidv4(),
-    name: 'Untitled Scene',
+    name,
     canvas: { ...DEFAULT_CANVAS },
     elements: [],
     updatedAt: Date.now(),
@@ -87,7 +87,7 @@ export function createDefaultScene(): SceneData {
 }
 
 export function createDefaultProject(): ProjectData {
-  const defaultScene = createDefaultScene();
+  const defaultScene = createDefaultScene('Scene 1');
   return {
     scenes: [defaultScene],
     activeSceneId: defaultScene.id,
