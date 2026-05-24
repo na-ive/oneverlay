@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* ── Oneverlay Dark Theme Tokens ── */
+@theme {
+  --color-bg-primary: #1a1a2e;
+  --color-bg-secondary: #16213e;
+  --color-bg-surface: #1e2a3a;
+  --color-bg-elevated: #253345;
+  --color-bg-hover: #2d3d50;
+  --color-bg-canvas: #0d1117;
+  --color-border: #2a3a4a;
+  --color-border-light: #354555;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #8892a0;
+  --color-text-muted: #5a6475;
+  --color-accent: #4a9eff;
+  --color-accent-hover: #5aafff;
+  --color-accent-muted: #4a9eff22;
+  --color-danger: #ff4757;
+  --color-danger-hover: #ff6b7a;
+  --color-success: #2ed573;
+  --color-warning: #ffa502;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Base Styles ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ── Input resets ── */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Dialog backdrop ── */
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* ── Utility classes ── */
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.resize-handle-ns {
+  cursor: ns-resize;
+}
