@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Modal } from '../ui/Modal';
 import { NumberInput } from '../ui/NumberInput';
 import { useEditorStore } from '../../store/editorStore';
-import { useSceneStore } from '../../store/sceneStore';
+import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
 import type { OverlayElement, TextElement, ImageElement, BrowserElement } from '../../types/elements';
 
@@ -10,7 +10,7 @@ export function PropertiesModal() {
   const isOpen = useEditorStore((s) => s.isPropertiesOpen);
   const elementId = useEditorStore((s) => s.propertiesElementId);
   const closeProperties = useEditorStore((s) => s.closeProperties);
-  const elements = useSceneStore((s) => s.elements);
+  const elements = useSceneStore(selectElements);
   const updateElement = useSceneStore((s) => s.updateElement);
   const pushHistory = useHistoryStore((s) => s.push);
 

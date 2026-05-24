@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import type { SceneData } from '../types/elements';
+import type { ProjectData } from '../types/elements';
 import { useSceneStore } from './sceneStore';
 import { HISTORY_LIMIT } from '../lib/constants';
 
 interface HistoryState {
-  past: SceneData[];
-  future: SceneData[];
+  past: ProjectData[];
+  future: ProjectData[];
   push: () => void;
   undo: () => void;
   redo: () => void;

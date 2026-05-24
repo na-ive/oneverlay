@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../store/editorStore';
-import { useSceneStore } from '../store/sceneStore';
+import { useSceneStore, selectCanvas } from '../store/sceneStore';
 import { ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from '../lib/constants';
 
 interface CanvasLayout {
@@ -21,8 +21,8 @@ export function useCanvasZoom(
   containerHeight: number,
 ): CanvasLayout {
   const zoom = useEditorStore((s) => s.zoom);
-  const canvasWidth = useSceneStore((s) => s.canvas.width);
-  const canvasHeight = useSceneStore((s) => s.canvas.height);
+  const canvasWidth = useSceneStore((s) => selectCanvas(s).width);
+  const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
 
   return useMemo(() => {
     // Fit canvas into container with padding

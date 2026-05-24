@@ -3,6 +3,7 @@ import { Navbar } from './Navbar';
 import { BottomDock } from './BottomDock';
 import { CanvasEditor } from '../canvas/CanvasEditor';
 import { ElementsPanel } from '../panels/ElementsPanel';
+import { ScenesPanel } from '../panels/ScenesPanel';
 import { CanvasPanel } from '../panels/CanvasPanel';
 import { ActionsPanel } from '../panels/ActionsPanel';
 import { SettingsModal } from '../modals/SettingsModal';
@@ -76,7 +77,14 @@ export function EditorLayout() {
       <CanvasEditor />
 
       <BottomDock
-        left={<ElementsPanel />}
+        left={
+          <div className="flex flex-1 min-w-0 h-full">
+            <ScenesPanel />
+            <div className="flex-1 flex flex-col min-w-0">
+              <ElementsPanel />
+            </div>
+          </div>
+        }
         center={<CanvasPanel />}
         right={<ActionsPanel />}
       />

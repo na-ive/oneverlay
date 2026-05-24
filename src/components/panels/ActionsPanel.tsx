@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
 import { LuSave, LuHeart, LuGlobe } from 'react-icons/lu';
 import { useSceneStore } from '../../store/sceneStore';
-import { saveScene } from '../../lib/persistence';
+import { saveProject } from '../../lib/persistence';
 import { SUPPORT_URL } from '../../lib/constants';
 
 export function ActionsPanel() {
   const getSnapshot = useSceneStore((s) => s.getSnapshot);
 
   const handleSave = useCallback(() => {
-    saveScene(getSnapshot());
+    saveProject(getSnapshot());
   }, [getSnapshot]);
 
   const handleOpenOverlay = useCallback(() => {

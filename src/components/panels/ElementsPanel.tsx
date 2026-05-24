@@ -11,7 +11,7 @@ import {
   LuSettings2,
 } from 'react-icons/lu';
 import { IconButton } from '../ui/IconButton';
-import { useSceneStore } from '../../store/sceneStore';
+import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import type { ElementType, OverlayElement } from '../../types/elements';
@@ -23,7 +23,7 @@ const TYPE_ICONS: Record<ElementType, typeof LuType> = {
 };
 
 export function ElementsPanel() {
-  const elements = useSceneStore((s) => s.elements);
+  const elements = useSceneStore(selectElements);
   const addElement = useSceneStore((s) => s.addElement);
   const removeElement = useSceneStore((s) => s.removeElement);
   const toggleVisibility = useSceneStore((s) => s.toggleVisibility);

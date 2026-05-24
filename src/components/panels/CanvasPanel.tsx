@@ -2,14 +2,14 @@ import { useCallback } from 'react';
 import { LuMinus, LuPlus, LuRotateCcw } from 'react-icons/lu';
 import { NumberInput } from '../ui/NumberInput';
 import { IconButton } from '../ui/IconButton';
-import { useSceneStore } from '../../store/sceneStore';
+import { useSceneStore, selectCanvas } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { RESOLUTION_PRESETS } from '../../lib/constants';
 import { zoomIn, zoomOut, zoomReset } from '../../hooks/useCanvasZoom';
 
 export function CanvasPanel() {
-  const canvas = useSceneStore((s) => s.canvas);
+  const canvas = useSceneStore(selectCanvas);
   const setCanvasSize = useSceneStore((s) => s.setCanvasSize);
   const zoom = useEditorStore((s) => s.zoom);
   const pushHistory = useHistoryStore((s) => s.push);

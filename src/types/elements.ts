@@ -52,3 +52,9 @@ export interface SceneData {
   elements: OverlayElement[];
   updatedAt: number;
 }
+
+export interface ProjectData {
+  scenes: SceneData[];
+  activeSceneId: string;
+  updatedAt: number;
+}

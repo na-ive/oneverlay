@@ -1,27 +1,28 @@
 import { useCallback } from 'react';
 import { Modal } from '../ui/Modal';
 import { useEditorStore } from '../../store/editorStore';
-import { useSceneStore } from '../../store/sceneStore';
+import { useSceneStore, selectActiveScene } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { APP_NAME } from '../../lib/constants';
 
 export function SettingsModal() {
   const isOpen = useEditorStore((s) => s.isSettingsOpen);
   const setOpen = useEditorStore((s) => s.setSettingsOpen);
-  const sceneName = useSceneStore((s) => s.name);
+  const activeSceneId = useSceneStore((s) => s.activeSceneId);
+  const sceneName = useSceneStore((s) => selectActiveScene(s).name);
   const setSceneName = useSceneStore((s) => s.setSceneName);
-  const resetScene = useSceneStore((s) => s.resetScene);
+  const resetProject = useSceneStore((s) => s.resetProject);
   const clearHistory = useHistoryStore((s) => s.clear);
 
   const handleClose = useCallback(() => setOpen(false), [setOpen]);
 
   const handleReset = useCallback(() => {
     if (window.confirm('Reset all elements and settings? This cannot be undone.')) {
-      resetScene();
+      resetProject();
       clearHistory();
       handleClose();
     }
-  }, [resetScene, clearHistory, handleClose]);
+  }, [resetProject, clearHistory, handleClose]);
 
   return (
     <Modal open={isOpen} onClose={handleClose} title="Settings" width="400px">
@@ -29,12 +30,12 @@ export function SettingsModal() {
         {/* Scene name */}
         <div className="flex flex-col gap-1">
           <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
-            Overlay Name
+            Scene Name
           </label>
           <input
             type="text"
             value={sceneName}
-            onChange={(e) => setSceneName(e.target.value)}
+            onChange={(e) => setSceneName(activeSceneId, e.target.value)}
             className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
             placeholder="My Overlay"
           />

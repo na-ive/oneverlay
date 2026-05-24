@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useSceneStore } from '../store/sceneStore';
-import { saveScene } from '../lib/persistence';
+import { saveProject } from '../lib/persistence';
 import { AUTO_SAVE_DELAY } from '../lib/constants';
 
 /**
@@ -14,7 +14,7 @@ export function usePersistence() {
     const unsub = useSceneStore.subscribe((state) => {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
-        saveScene(state.getSnapshot());
+        saveProject(state.getSnapshot());
       }, AUTO_SAVE_DELAY);
     });
 

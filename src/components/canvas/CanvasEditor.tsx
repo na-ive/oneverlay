@@ -1,7 +1,7 @@
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import type Konva from 'konva';
-import { useSceneStore } from '../../store/sceneStore';
+import { useSceneStore, selectElements, selectCanvas } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useCanvasZoom } from '../../hooks/useCanvasZoom';
@@ -15,9 +15,9 @@ export function CanvasEditor() {
   const stageRef = useRef<Konva.Stage>(null);
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
 
-  const elements = useSceneStore((s) => s.elements);
-  const canvasWidth = useSceneStore((s) => s.canvas.width);
-  const canvasHeight = useSceneStore((s) => s.canvas.height);
+  const elements = useSceneStore(selectElements);
+  const canvasWidth = useSceneStore((s) => selectCanvas(s).width);
+  const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
   const addElement = useSceneStore((s) => s.addElement);
   const moveElement = useSceneStore((s) => s.moveElement);
   const resizeElement = useSceneStore((s) => s.resizeElement);
@@ -35,7 +35,7 @@ export function CanvasEditor() {
       addElement(type);
       
       // Auto-select the newly added element
-      const updatedElements = useSceneStore.getState().elements;
+      const updatedElements = selectElements(useSceneStore.getState());
       const newElement = updatedElements[updatedElements.length - 1];
       if (newElement) {
         selectElement(newElement.id);

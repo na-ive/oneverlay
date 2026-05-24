@@ -79,9 +79,18 @@ export function createElement(type: ElementType): OverlayElement {
 export function createDefaultScene(): SceneData {
   return {
     id: uuidv4(),
-    name: 'Untitled Overlay',
+    name: 'Untitled Scene',
     canvas: { ...DEFAULT_CANVAS },
     elements: [],
+    updatedAt: Date.now(),
+  };
+}
+
+export function createDefaultProject(): ProjectData {
+  const defaultScene = createDefaultScene();
+  return {
+    scenes: [defaultScene],
+    activeSceneId: defaultScene.id,
     updatedAt: Date.now(),
   };
 }
