@@ -1,0 +1,251 @@
+import { useCallback } from 'react';
+import { Modal } from '../ui/Modal';
+import { NumberInput } from '../ui/NumberInput';
+import { useEditorStore } from '../../store/editorStore';
+import { useSceneStore } from '../../store/sceneStore';
+import { useHistoryStore } from '../../store/historyStore';
+import type { OverlayElement, TextElement, ImageElement, BrowserElement } from '../../types/elements';
+
+export function PropertiesModal() {
+  const isOpen = useEditorStore((s) => s.isPropertiesOpen);
+  const elementId = useEditorStore((s) => s.propertiesElementId);
+  const closeProperties = useEditorStore((s) => s.closeProperties);
+  const elements = useSceneStore((s) => s.elements);
+  const updateElement = useSceneStore((s) => s.updateElement);
+  const pushHistory = useHistoryStore((s) => s.push);
+
+  const element = elements.find((el) => el.id === elementId) || null;
+
+  const handleUpdate = useCallback(
+    (updates: Partial<OverlayElement>) => {
+      if (!elementId) return;
+      pushHistory();
+      updateElement(elementId, updates);
+    },
+    [elementId, updateElement, pushHistory],
+  );
+
+  if (!element) return null;
+
+  return (
+    <Modal
+      open={isOpen}
+      onClose={closeProperties}
+      title={`${element.name} — Properties`}
+      width="440px"
+    >
+      <div className="space-y-4">
+        {/* Name */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+            Name
+          </label>
+          <input
+            type="text"
+            value={element.name}
+            onChange={(e) => handleUpdate({ name: e.target.value })}
+            className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+          />
+        </div>
+
+        {/* Transform */}
+        <div>
+          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide mb-1 block">
+            Transform
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <NumberInput label="X" value={element.x} onChange={(v) => handleUpdate({ x: v })} />
+            <NumberInput label="Y" value={element.y} onChange={(v) => handleUpdate({ y: v })} />
+            <NumberInput
+              label="Width"
+              value={element.width}
+              onChange={(v) => handleUpdate({ width: v })}
+              min={1}
+            />
+            <NumberInput
+              label="Height"
+              value={element.height}
+              onChange={(v) => handleUpdate({ height: v })}
+              min={1}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <NumberInput
+              label="Rotation"
+              value={element.rotation}
+              onChange={(v) => handleUpdate({ rotation: v })}
+              min={0}
+              max={360}
+              suffix="°"
+            />
+            <NumberInput
+              label="Opacity"
+              value={Math.round(element.opacity * 100)}
+              onChange={(v) => handleUpdate({ opacity: v / 100 })}
+              min={0}
+              max={100}
+              suffix="%"
+            />
+          </div>
+        </div>
+
+        {/* Type-specific properties */}
+        {element.type === 'text' && (
+          <TextProperties element={element} onUpdate={handleUpdate} />
+        )}
+        {element.type === 'image' && (
+          <ImageProperties element={element} onUpdate={handleUpdate} />
+        )}
+        {element.type === 'browser' && (
+          <BrowserProperties element={element} onUpdate={handleUpdate} />
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+// ── Type-specific property editors ──
+
+function TextProperties({
+  element,
+  onUpdate,
+}: {
+  element: TextElement;
+  onUpdate: (updates: Partial<TextElement>) => void;
+}) {
+  return (
+    <div className="space-y-3 pt-3 border-t border-border">
+      <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide block">
+        Text
+      </label>
+
+      <textarea
+        value={element.text}
+        onChange={(e) => onUpdate({ text: e.target.value })}
+        rows={3}
+        className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors resize-y"
+        placeholder="Enter text..."
+      />
+
+      <div className="grid grid-cols-2 gap-2">
+        <NumberInput
+          label="Font Size"
+          value={element.fontSize}
+          onChange={(v) => onUpdate({ fontSize: v })}
+          min={1}
+          max={500}
+          suffix="px"
+        />
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+            Font Weight
+          </label>
+          <select
+            value={element.fontWeight}
+            onChange={(e) => onUpdate({ fontWeight: parseInt(e.target.value) })}
+            className="w-full px-2 py-1.5 rounded border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors cursor-pointer"
+          >
+            <option value={300}>Light</option>
+            <option value={400}>Regular</option>
+            <option value={500}>Medium</option>
+            <option value={600}>Semibold</option>
+            <option value={700}>Bold</option>
+            <option value={800}>Extra Bold</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+            Color
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={element.color}
+              onChange={(e) => onUpdate({ color: e.target.value })}
+              className="w-7 h-7 rounded border border-border cursor-pointer bg-transparent"
+            />
+            <input
+              type="text"
+              value={element.color}
+              onChange={(e) => onUpdate({ color: e.target.value })}
+              className="flex-1 px-2 py-1.5 rounded border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors font-mono"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide">
+            Font Family
+          </label>
+          <input
+            type="text"
+            value={element.fontFamily}
+            onChange={(e) => onUpdate({ fontFamily: e.target.value })}
+            className="w-full px-2 py-1.5 rounded border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+            placeholder="Inter"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImageProperties({
+  element,
+  onUpdate,
+}: {
+  element: ImageElement;
+  onUpdate: (updates: Partial<ImageElement>) => void;
+}) {
+  return (
+    <div className="space-y-3 pt-3 border-t border-border">
+      <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide block">
+        Image Source
+      </label>
+      <input
+        type="url"
+        value={element.imageUrl}
+        onChange={(e) => onUpdate({ imageUrl: e.target.value })}
+        className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+        placeholder="https://example.com/image.png"
+      />
+      {element.imageUrl && (
+        <div className="rounded-md border border-border overflow-hidden bg-bg-primary">
+          <img
+            src={element.imageUrl}
+            alt="Preview"
+            className="w-full h-auto max-h-32 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BrowserProperties({
+  element,
+  onUpdate,
+}: {
+  element: BrowserElement;
+  onUpdate: (updates: Partial<BrowserElement>) => void;
+}) {
+  return (
+    <div className="space-y-3 pt-3 border-t border-border">
+      <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wide block">
+        Browser Source URL
+      </label>
+      <input
+        type="url"
+        value={element.url}
+        onChange={(e) => onUpdate({ url: e.target.value })}
+        className="w-full px-3 py-2 rounded-md border border-border bg-bg-primary text-text-primary text-xs outline-none focus:border-accent transition-colors"
+        placeholder="https://example.com"
+      />
+    </div>
+  );
+}
