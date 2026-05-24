@@ -1,0 +1,69 @@
+import { useCallback } from 'react';
+import {
+  LuUndo2,
+  LuRedo2,
+  LuSettings,
+} from 'react-icons/lu';
+import { IconButton } from '../ui/IconButton';
+import { useEditorStore } from '../../store/editorStore';
+import { useHistoryStore } from '../../store/historyStore';
+import { APP_NAME, NAVBAR_HEIGHT } from '../../lib/constants';
+
+export function Navbar() {
+  const setSettingsOpen = useEditorStore((s) => s.setSettingsOpen);
+  const undo = useHistoryStore((s) => s.undo);
+  const redo = useHistoryStore((s) => s.redo);
+  const canUndo = useHistoryStore((s) => s.canUndo);
+  const canRedo = useHistoryStore((s) => s.canRedo);
+
+  const handleUndo = useCallback(() => undo(), [undo]);
+  const handleRedo = useCallback(() => redo(), [redo]);
+
+  return (
+    <header
+      className="flex items-center justify-between px-3 border-b border-border select-none shrink-0"
+      style={{
+        height: `${NAVBAR_HEIGHT}px`,
+        backgroundColor: 'var(--color-bg-secondary)',
+      }}
+    >
+      {/* Left — Logo */}
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded bg-accent/20 flex items-center justify-center">
+          <span className="text-accent text-[10px] font-bold">O</span>
+        </div>
+        <span className="text-sm font-semibold text-text-primary tracking-tight">
+          {APP_NAME}
+        </span>
+      </div>
+
+      {/* Center — Undo / Redo */}
+      <div className="flex items-center gap-0.5">
+        <IconButton
+          tooltip="Undo (Ctrl+Z)"
+          onClick={handleUndo}
+          disabled={!canUndo()}
+        >
+          <LuUndo2 size={14} />
+        </IconButton>
+        <IconButton
+          tooltip="Redo (Ctrl+Shift+Z)"
+          onClick={handleRedo}
+          disabled={!canRedo()}
+        >
+          <LuRedo2 size={14} />
+        </IconButton>
+      </div>
+
+      {/* Right — Settings */}
+      <div className="flex items-center gap-1">
+        <IconButton
+          tooltip="Settings"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <LuSettings size={14} />
+        </IconButton>
+      </div>
+    </header>
+  );
+}
