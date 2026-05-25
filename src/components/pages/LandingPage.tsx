@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LuArrowRight, LuGithub, LuStar } from 'react-icons/lu';
+import { LuArrowRight, LuGithub, LuStar, LuHeart } from 'react-icons/lu';
+import { SUPPORT_URL } from '../../lib/constants';
 
 export function LandingPage() {
   const [stars, setStars] = useState<number | string>('...');
@@ -83,7 +84,7 @@ export function LandingPage() {
               <LuArrowRight size={18} />
             </Link>
             <span className="text-xs text-text-muted font-bold uppercase tracking-wider mt-2">
-              No account required.
+              No account required. 100% free and open source.
             </span>
           </div>
         </section>
@@ -135,19 +136,31 @@ export function LandingPage() {
               BY NA-IVE
             </span>
           </div>
-          <a
-            href="https://github.com/na-ive/oneverlay"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-2 text-text-muted hover:text-text-secondary transition-colors"
-          >
-            <LuGithub size={16} className="text-text-muted group-hover:text-text-secondary transition-colors" />
-            <span className="text-sm font-medium uppercase tracking-wide">GitHub</span>
-            <div className="flex items-center gap-1 bg-white/[0.02] group-hover:bg-white/[0.04] border border-white/[0.04] group-hover:border-white/[0.08] px-2 py-0.5 rounded-md text-xs text-text-muted transition-colors">
-              <LuStar size={11} className="fill-current text-amber-500/40 group-hover:text-amber-500/60 transition-colors" />
-              <span className="text-xs text-text-muted group-hover:text-text-secondary transition-colors">{stars}</span>
-            </div>
-          </a>
+          <div className="flex items-center gap-6">
+            <a
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 text-text-muted hover:text-danger/80 transition-colors"
+            >
+              <LuHeart size={15} className="text-text-muted group-hover:text-danger/80 transition-colors fill-transparent group-hover:fill-danger/10" />
+              <span className="text-sm font-medium uppercase tracking-wide">Support</span>
+            </a>
+            <div className="w-[1px] h-4 bg-white/[0.06]" />
+            <a
+              href="https://github.com/na-ive/oneverlay"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 text-text-muted hover:text-text-secondary transition-colors"
+            >
+              <LuGithub size={16} className="text-text-muted group-hover:text-text-secondary transition-colors" />
+              <span className="text-sm font-medium uppercase tracking-wide">GitHub</span>
+              <div className="flex items-center gap-1 bg-white/[0.02] group-hover:bg-white/[0.04] border border-white/[0.04] group-hover:border-white/[0.08] px-2 py-0.5 rounded-md text-xs text-text-muted transition-colors">
+                <LuStar size={11} className="fill-current text-amber-500/40 group-hover:text-amber-500/60 transition-colors" />
+                <span className="text-xs text-text-muted group-hover:text-text-secondary transition-colors">{stars}</span>
+              </div>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
