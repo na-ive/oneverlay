@@ -153,9 +153,14 @@ export function LandingPage() {
             href="https://github.com/na-ive/oneverlay"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-text-muted hover:text-text-secondary font-medium tracking-wide uppercase transition-colors"
+            className="group flex items-center gap-2 text-text-muted hover:text-text-secondary transition-colors"
           >
-            GitHub
+            <LuGithub size={14} className="text-text-muted group-hover:text-text-secondary transition-colors" />
+            <span className="text-[11px] font-medium uppercase tracking-wide">GitHub</span>
+            <div className="flex items-center gap-0.5 bg-white/[0.02] group-hover:bg-white/[0.04] border border-white/[0.04] group-hover:border-white/[0.08] px-1.5 py-0.5 rounded-md text-[10px] text-text-muted transition-colors">
+              <LuStar size={10} className="fill-current text-amber-500/40 group-hover:text-amber-500/60 transition-colors" />
+              <span className="text-[10px] text-text-muted group-hover:text-text-secondary transition-colors">{stars}</span>
+            </div>
           </a>
         </div>
       </footer>
