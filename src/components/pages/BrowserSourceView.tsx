@@ -22,12 +22,38 @@ export function BrowserSourceView() {
 
   const fetchSceneData = () => {
     if (!sceneSlug) return;
-    const project = loadProject();
-    if (project) {
-      const matched = project.scenes.find((s) => slugify(s.name) === sceneSlug);
-      setScene(matched || null);
-    }
-    setLoading(false);
+    
+    // Try loading from local Vite disk API (works inside OBS browser source sandbox)
+    fetch('/api/project')
+      .then((res) => res.json())
+      .then((project) => {
+        let matched: SceneData | undefined;
+
+        if (project && Array.isArray(project.scenes)) {
+          matched = project.scenes.find((s: SceneData) => slugify(s.name) === sceneSlug);
+        }
+
+        // If not found in the disk API, fallback to LocalStorage (works for standard tabs in same browser)
+        if (!matched) {
+          const localProject = loadProject();
+          if (localProject && Array.isArray(localProject.scenes)) {
+            matched = localProject.scenes.find((s) => slugify(s.name) === sceneSlug);
+          }
+        }
+
+        setScene(matched || null);
+      })
+      .catch((err) => {
+        console.warn('[Oneverlay] Failed to fetch project from local disk API, falling back to LocalStorage:', err);
+        const localProject = loadProject();
+        if (localProject) {
+          const matched = localProject.scenes.find((s) => slugify(s.name) === sceneSlug);
+          setScene(matched || null);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   // Set transparent background for OBS browser source
@@ -44,12 +70,16 @@ export function BrowserSourceView() {
     };
   }, []);
 
-  // Initial load
+  // Initial load and polling fallback for OBS (OBS LocalStorage is isolated from main browser)
   useEffect(() => {
     fetchSceneData();
+
+    const intervalId = setInterval(fetchSceneData, 1500); // poll every 1.5 seconds
+
+    return () => clearInterval(intervalId);
   }, [sceneSlug]);
 
-  // Real-time synchronization using storage events
+  // Real-time synchronization using storage events (works instantly when in same browser)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY || e.key === null) {

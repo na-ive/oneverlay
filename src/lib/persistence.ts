@@ -5,6 +5,17 @@ export function saveProject(project: ProjectData): void {
   try {
     const json = JSON.stringify(project);
     localStorage.setItem(STORAGE_KEY, json);
+
+    // Sync to local Vite dev server file on disk so OBS can read it
+    fetch('/api/project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json,
+    }).catch((err) => {
+      console.warn('[Oneverlay] Failed to sync project layout to disk:', err);
+    });
   } catch (e) {
     console.warn('[Oneverlay] Failed to save project:', e);
   }

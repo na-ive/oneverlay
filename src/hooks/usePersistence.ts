@@ -11,6 +11,9 @@ export function usePersistence() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // Immediately sync the loaded state (from localStorage or defaults) to the local disk file
+    saveProject(useSceneStore.getState().getSnapshot());
+
     const unsub = useSceneStore.subscribe((state) => {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
