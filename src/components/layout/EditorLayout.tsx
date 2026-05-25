@@ -17,6 +17,20 @@ import { useSceneStore } from '../../store/sceneStore';
 export function EditorLayout() {
   usePersistence();
 
+  // Dynamic page scroll locking (prevents scrollbars on workspace view)
+  useEffect(() => {
+    const origBodyOverflow = document.body.style.overflow;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.documentElement.style.overflow = origHtmlOverflow;
+    };
+  }, []);
+
   const undo = useHistoryStore((s) => s.undo);
   const redo = useHistoryStore((s) => s.redo);
   const selectedId = useEditorStore((s) => s.selectedElementId);
