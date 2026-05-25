@@ -145,6 +145,87 @@ export function CanvasEditor() {
   const openProperties = useEditorStore((s) => s.openProperties);
   const pushHistory = useHistoryStore((s) => s.push);
   const showMenu = useContextMenuStore((s) => s.show);
+  const toolMode = useEditorStore((s) => s.toolMode);
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef({ startX: 0, startY: 0, panX: 0, panY: 0 });
+
+  const handleMouseDown = useCallback(() => {
+    const currentToolMode = useEditorStore.getState().toolMode;
+    if (currentToolMode !== 'hand') return;
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const store = useEditorStore.getState();
+    panStartRef.current = {
+      startX: pointer.x,
+      startY: pointer.y,
+      panX: store.panX,
+      panY: store.panY,
+    };
+    setIsPanning(true);
+  }, []);
+
+  const handleMouseMove = useCallback(() => {
+    if (!isPanning) return;
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const { startX, startY, panX: initialPanX, panY: initialPanY } = panStartRef.current;
+    const dx = pointer.x - startX;
+    const dy = pointer.y - startY;
+
+    useEditorStore.getState().setPan(initialPanX + dx, initialPanY + dy);
+  }, [isPanning]);
+
+  const handleMouseUp = useCallback(() => {
+    if (isPanning) {
+      setIsPanning(false);
+    }
+  }, [isPanning]);
+
+  const handleTouchStart = useCallback(() => {
+    const currentToolMode = useEditorStore.getState().toolMode;
+    if (currentToolMode !== 'hand') return;
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const store = useEditorStore.getState();
+    panStartRef.current = {
+      startX: pointer.x,
+      startY: pointer.y,
+      panX: store.panX,
+      panY: store.panY,
+    };
+    setIsPanning(true);
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    if (!isPanning) return;
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const { startX, startY, panX: initialPanX, panY: initialPanY } = panStartRef.current;
+    const dx = pointer.x - startX;
+    const dy = pointer.y - startY;
+
+    useEditorStore.getState().setPan(initialPanX + dx, initialPanY + dy);
+  }, [isPanning]);
 
   const handleQuickAdd = useCallback(
     (type: 'text' | 'image' | 'browser') => {
@@ -166,6 +247,63 @@ export function CanvasEditor() {
     containerSize.width,
     containerSize.height,
   );
+
+  const valuesRef = useRef({ scale, offsetX, offsetY, canvasWidth, canvasHeight });
+  useEffect(() => {
+    valuesRef.current = { scale, offsetX, offsetY, canvasWidth, canvasHeight };
+  }, [scale, offsetX, offsetY, canvasWidth, canvasHeight]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      const pointer = stage.getPointerPosition();
+      if (!pointer) return;
+
+      const { offsetX: currentOffsetX, offsetY: currentOffsetY, canvasWidth: cw, canvasHeight: ch } = valuesRef.current;
+
+      const direction = e.deltaY < 0 ? 1 : -1;
+      const zoomStep = 0.05;
+      const oldZoom = useEditorStore.getState().zoom;
+
+      const ZOOM_MIN = 0.1;
+      const ZOOM_MAX = 5;
+      const newZoom = Math.min(Math.max(oldZoom + direction * zoomStep, ZOOM_MIN), ZOOM_MAX);
+
+      if (newZoom === oldZoom) return;
+
+      const padding = 40;
+      const availW = container.clientWidth - padding * 2;
+      const availH = container.clientHeight - padding * 2;
+      const fitScale = Math.min(availW / cw, availH / ch, 1);
+
+      const oldScale = fitScale * oldZoom;
+      const newScale = fitScale * newZoom;
+
+      const localX = (pointer.x - currentOffsetX) / oldScale;
+      const localY = (pointer.y - currentOffsetY) / oldScale;
+
+      const newDefaultOffsetX = (container.clientWidth - cw * newScale) / 2;
+      const newDefaultOffsetY = (container.clientHeight - ch * newScale) / 2;
+
+      const newPanX = pointer.x - localX * newScale - newDefaultOffsetX;
+      const newPanY = pointer.y - localY * newScale - newDefaultOffsetY;
+
+      useEditorStore.getState().setZoom(newZoom);
+      useEditorStore.getState().setPan(newPanX, newPanY);
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // Measure container
   useEffect(() => {
@@ -545,7 +683,7 @@ export function CanvasEditor() {
             opacity: el.opacity,
             clipPath: `inset(${el.cropTop || 0}px ${el.cropRight || 0}px ${el.cropBottom || 0}px ${el.cropLeft || 0}px)`,
             zIndex,
-            pointerEvents: 'auto', // Allow clicks to select
+            pointerEvents: toolMode === 'hand' ? 'none' : 'auto', // Allow clicks to select
           };
 
           const handleMouseDown = (e: React.MouseEvent) => {
@@ -631,12 +769,20 @@ export function CanvasEditor() {
         height={containerSize.height}
         onClick={handleStageClick}
         onTap={handleStageClick}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
         style={{
           position: 'absolute',
           left: 0,
           top: 0,
           zIndex: 9999, // Render transformer handles on top of all HTML elements
           pointerEvents: 'auto',
+          cursor: toolMode === 'hand' ? (isPanning ? 'grabbing' : 'grab') : 'default',
         }}
       >
         <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>

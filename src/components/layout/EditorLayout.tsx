@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { Navbar } from './Navbar';
 import { BottomDock } from './BottomDock';
 import { CanvasEditor } from '../canvas/CanvasEditor';
@@ -21,12 +21,26 @@ export function EditorLayout() {
   const redo = useHistoryStore((s) => s.redo);
   const selectedId = useEditorStore((s) => s.selectedElementId);
   const selectElement = useEditorStore((s) => s.selectElement);
+  const setToolMode = useEditorStore((s) => s.setToolMode);
   const removeElement = useSceneStore((s) => s.removeElement);
   const pushHistory = useHistoryStore((s) => s.push);
+
+  const previousToolModeRef = useRef<'select' | 'hand'>('select');
+  const isSpacePressedRef = useRef(false);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if user is typing in an input
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable;
+
+      if (isInput) return;
+
       const isCtrl = e.ctrlKey || e.metaKey;
 
       // Undo
@@ -45,13 +59,31 @@ export function EditorLayout() {
         redo();
       }
 
-      // Delete selected element
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
-        // Don't delete if user is typing in an input
-        const target = e.target as HTMLElement;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+      // Tool switches: V and H
+      if (!isCtrl && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        setToolMode('select');
+      }
+      if (!isCtrl && e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        setToolMode('hand');
+      }
+
+      // Spacebar hold
+      if (e.key === ' ' || e.code === 'Space') {
+        if (e.repeat) {
+          e.preventDefault();
           return;
         }
+        e.preventDefault();
+        // Record current tool mode so we can restore it on keyup
+        previousToolModeRef.current = useEditorStore.getState().toolMode;
+        isSpacePressedRef.current = true;
+        setToolMode('hand');
+      }
+
+      // Delete selected element
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
         e.preventDefault();
         pushHistory();
         removeElement(selectedId);
@@ -63,13 +95,39 @@ export function EditorLayout() {
         selectElement(null);
       }
     },
-    [undo, redo, selectedId, removeElement, selectElement, pushHistory],
+    [undo, redo, selectedId, removeElement, selectElement, pushHistory, setToolMode],
+  );
+
+  const handleKeyUp = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.code === 'Space') {
+        if (isSpacePressedRef.current) {
+          isSpacePressedRef.current = false;
+          setToolMode(previousToolModeRef.current);
+        }
+      }
+    },
+    [setToolMode],
   );
 
   useEffect(() => {
+    const handleBlur = () => {
+      if (isSpacePressedRef.current) {
+        isSpacePressedRef.current = false;
+        setToolMode(previousToolModeRef.current);
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [handleKeyDown, handleKeyUp, setToolMode]);
 
   // Globally suppress the native browser context menu.
   // Shift+right-click is the escape hatch to access the browser's native menu.

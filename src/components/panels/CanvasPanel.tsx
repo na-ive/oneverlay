@@ -1,17 +1,12 @@
 import { useCallback } from 'react';
-import { LuMinus, LuPlus, LuRotateCcw } from 'react-icons/lu';
 import { NumberInput } from '../ui/NumberInput';
-import { IconButton } from '../ui/IconButton';
 import { useSceneStore, selectCanvas } from '../../store/sceneStore';
-import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { RESOLUTION_PRESETS } from '../../lib/constants';
-import { zoomIn, zoomOut, zoomReset } from '../../hooks/useCanvasZoom';
 
 export function CanvasPanel() {
   const canvas = useSceneStore(selectCanvas);
   const setCanvasSize = useSceneStore((s) => s.setCanvasSize);
-  const zoom = useEditorStore((s) => s.zoom);
   const pushHistory = useHistoryStore((s) => s.push);
 
   const handleWidthChange = useCallback(
@@ -99,26 +94,6 @@ export function CanvasPanel() {
           />
         </div>
 
-        {/* Zoom controls */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
-            Zoom
-          </label>
-          <div className="flex items-center gap-2 bg-bg-primary/30 border border-white/[0.08] rounded-xl px-2 py-1">
-            <IconButton size="sm" tooltip="Zoom out" onClick={zoomOut}>
-              <LuMinus size={12} />
-            </IconButton>
-            <span className="flex-1 text-center text-xs text-text-primary font-medium tabular-nums">
-              {Math.round(zoom * 100)}%
-            </span>
-            <IconButton size="sm" tooltip="Zoom in" onClick={zoomIn}>
-              <LuPlus size={12} />
-            </IconButton>
-            <IconButton size="sm" tooltip="Reset zoom" onClick={zoomReset}>
-              <LuRotateCcw size={11} />
-            </IconButton>
-          </div>
-        </div>
       </div>
     </div>
   );

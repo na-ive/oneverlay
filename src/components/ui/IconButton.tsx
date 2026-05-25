@@ -25,7 +25,7 @@ export function IconButton({
       ? 'hover:bg-danger/15 hover:text-danger'
       : 'hover:bg-bg-hover';
 
-  const activeClass = active ? 'bg-accent/15 text-accent' : '';
+  const activeClass = active ? 'bg-accent/20 text-accent font-semibold' : 'bg-transparent';
 
   return (
     <button
@@ -34,7 +34,7 @@ export function IconButton({
       className={`
         ${sizeClasses}
         flex items-center justify-center rounded-xl
-        border-none bg-transparent cursor-pointer
+        border-none cursor-pointer
         text-text-secondary transition-all duration-200
         ${variantClasses}
         ${activeClass}

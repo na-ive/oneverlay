@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { Transformer, Group, Rect, Line } from 'react-konva';
 import type Konva from 'konva';
 import type { OverlayElement } from '../../types/elements';
+import { useEditorStore } from '../../store/editorStore';
 
 
 interface CanvasElementProps {
@@ -27,6 +28,9 @@ export function CanvasElement({
   onTransformEnd,
   onDoubleClick,
 }: CanvasElementProps) {
+  const toolMode = useEditorStore((s) => s.toolMode);
+  const isHand = toolMode === 'hand';
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const shapeRef = useRef<any>(null);
   const trRef = useRef<Konva.Transformer>(null);
@@ -254,7 +258,8 @@ export function CanvasElement({
         scaleY={element.scaleY}
         rotation={element.rotation}
         opacity={element.opacity}
-        draggable={!element.locked}
+        draggable={!element.locked && !isHand}
+        listening={!isHand}
         onClick={onSelect}
         onTap={onSelect}
         onMouseDown={onSelect}
@@ -334,7 +339,7 @@ export function CanvasElement({
   return (
     <>
       {renderElement()}
-      {isSelected && !element.locked && (
+      {isSelected && !element.locked && !isHand && (
         <Transformer
           ref={trRef}
           rotateEnabled={true}

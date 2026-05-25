@@ -18,6 +18,14 @@ interface EditorState {
   // ── Canvas zoom ──
   zoom: number;
   setZoom: (zoom: number) => void;
+  panX: number;
+  panY: number;
+  setPan: (panX: number, panY: number) => void;
+  resetPan: () => void;
+
+  // ── Tool Mode ──
+  toolMode: 'select' | 'hand';
+  setToolMode: (mode: 'select' | 'hand') => void;
 
   // ── Bottom dock ──
   bottomDockHeight: number;
@@ -43,6 +51,14 @@ export const useEditorStore = create<EditorState>((set) => ({
   // ── Canvas zoom ──
   zoom: 1,
   setZoom: (zoom) => set({ zoom }),
+  panX: 0,
+  panY: 0,
+  setPan: (panX, panY) => set({ panX, panY }),
+  resetPan: () => set({ panX: 0, panY: 0 }),
+
+  // ── Tool Mode ──
+  toolMode: 'select',
+  setToolMode: (toolMode) => set({ toolMode }),
 
   // ── Bottom dock ──
   bottomDockHeight: DOCK_DEFAULT_HEIGHT,

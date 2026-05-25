@@ -21,6 +21,8 @@ export function useCanvasZoom(
   containerHeight: number,
 ): CanvasLayout {
   const zoom = useEditorStore((s) => s.zoom);
+  const panX = useEditorStore((s) => s.panX);
+  const panY = useEditorStore((s) => s.panY);
   const canvasWidth = useSceneStore((s) => selectCanvas(s).width);
   const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
 
@@ -36,11 +38,11 @@ export function useCanvasZoom(
     const scaledW = canvasWidth * scale;
     const scaledH = canvasHeight * scale;
 
-    const offsetX = (containerWidth - scaledW) / 2;
-    const offsetY = (containerHeight - scaledH) / 2;
+    const offsetX = (containerWidth - scaledW) / 2 + panX;
+    const offsetY = (containerHeight - scaledH) / 2 + panY;
 
     return { scale, offsetX, offsetY, containerWidth, containerHeight };
-  }, [containerWidth, containerHeight, canvasWidth, canvasHeight, zoom]);
+  }, [containerWidth, containerHeight, canvasWidth, canvasHeight, zoom, panX, panY]);
 }
 
 export function zoomIn() {
@@ -55,4 +57,5 @@ export function zoomOut() {
 
 export function zoomReset() {
   useEditorStore.getState().setZoom(1);
+  useEditorStore.getState().resetPan();
 }
