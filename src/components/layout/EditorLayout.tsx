@@ -30,17 +30,17 @@ export function EditorLayout() {
       const isCtrl = e.ctrlKey || e.metaKey;
 
       // Undo
-      if (isCtrl && e.key === 'z' && !e.shiftKey) {
+      if (isCtrl && e.key.toLowerCase() === 'z' && !e.shiftKey) {
         e.preventDefault();
         undo();
       }
 
       // Redo
-      if (isCtrl && e.key === 'z' && e.shiftKey) {
+      if (isCtrl && e.key.toLowerCase() === 'z' && e.shiftKey) {
         e.preventDefault();
         redo();
       }
-      if (isCtrl && e.key === 'y') {
+      if (isCtrl && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         redo();
       }

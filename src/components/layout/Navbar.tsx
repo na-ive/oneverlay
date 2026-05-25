@@ -13,11 +13,14 @@ export function Navbar() {
   const setSettingsOpen = useEditorStore((s) => s.setSettingsOpen);
   const undo = useHistoryStore((s) => s.undo);
   const redo = useHistoryStore((s) => s.redo);
-  const canUndo = useHistoryStore((s) => s.canUndo);
-  const canRedo = useHistoryStore((s) => s.canRedo);
+  const pastLength = useHistoryStore((s) => s.past.length);
+  const futureLength = useHistoryStore((s) => s.future.length);
 
   const handleUndo = useCallback(() => undo(), [undo]);
   const handleRedo = useCallback(() => redo(), [redo]);
+
+  const canUndo = pastLength > 0;
+  const canRedo = futureLength > 0;
 
   return (
     <header
@@ -39,14 +42,14 @@ export function Navbar() {
         <IconButton
           tooltip="Undo (Ctrl+Z)"
           onClick={handleUndo}
-          disabled={!canUndo()}
+          disabled={!canUndo}
         >
           <LuUndo2 size={14} />
         </IconButton>
         <IconButton
           tooltip="Redo (Ctrl+Shift+Z)"
           onClick={handleRedo}
-          disabled={!canRedo()}
+          disabled={!canRedo}
         >
           <LuRedo2 size={14} />
         </IconButton>
