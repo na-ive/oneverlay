@@ -68,6 +68,7 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           <IconButton
             tooltip="Select Tool (V)"
+            tooltipPlacement="bottom"
             onClick={() => setToolMode('select')}
             active={toolMode === 'select'}
           >
@@ -75,6 +76,7 @@ export function Navbar() {
           </IconButton>
           <IconButton
             tooltip="Hand Tool (H / Hold Space)"
+            tooltipPlacement="bottom"
             onClick={() => setToolMode('hand')}
             active={toolMode === 'hand'}
           >
@@ -87,19 +89,19 @@ export function Navbar() {
 
         {/* Zoom controls group */}
         <div className="flex items-center gap-1">
-          <IconButton tooltip="Zoom out" onClick={zoomOut}>
+          <IconButton tooltip="Zoom out" tooltipPlacement="bottom" onClick={zoomOut}>
             <LuMinus size={13} />
           </IconButton>
           <span className="text-[11px] text-text-primary font-medium tabular-nums min-w-[36px] text-center">
             {Math.round(zoom * 100)}%
           </span>
-          <IconButton tooltip="Zoom in" onClick={zoomIn}>
+          <IconButton tooltip="Zoom in" tooltipPlacement="bottom" onClick={zoomIn}>
             <LuPlus size={13} />
           </IconButton>
-          <IconButton tooltip="Reset zoom" onClick={zoomReset}>
+          <IconButton tooltip="Reset zoom" tooltipPlacement="bottom" onClick={zoomReset}>
             <LuRotateCcw size={12} />
           </IconButton>
-          <IconButton tooltip="Recenter view" onClick={resetPan}>
+          <IconButton tooltip="Recenter view" tooltipPlacement="bottom" onClick={resetPan}>
             <LuCrosshair size={12} />
           </IconButton>
         </div>
@@ -111,6 +113,7 @@ export function Navbar() {
         <div className="flex items-center gap-0.5">
           <IconButton
             tooltip="Undo (Ctrl+Z)"
+            tooltipPlacement="bottom"
             onClick={handleUndo}
             disabled={!canUndo}
           >
@@ -118,6 +121,7 @@ export function Navbar() {
           </IconButton>
           <IconButton
             tooltip="Redo (Ctrl+Shift+Z)"
+            tooltipPlacement="bottom"
             onClick={handleRedo}
             disabled={!canRedo}
           >
@@ -130,18 +134,22 @@ export function Navbar() {
       <div className="flex items-center gap-1">
         <IconButton
           tooltip="Keyboard Shortcuts"
+          tooltipPlacement="bottom"
           onClick={() => setHelpOpen(true)}
         >
           <LuCircleHelp size={14} />
         </IconButton>
         <IconButton
           tooltip="Support"
+          tooltipPlacement="bottom"
           onClick={handleSupport}
         >
           <LuHeart size={14} />
         </IconButton>
         <IconButton
           tooltip="Settings"
+          tooltipPlacement="bottom"
+          tooltipAlign="right"
           onClick={() => setSettingsOpen(true)}
         >
           <LuSettings size={14} />

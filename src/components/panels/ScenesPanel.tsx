@@ -335,6 +335,7 @@ export function ScenesPanel() {
                   <IconButton
                     size="sm"
                     tooltip="Rename"
+                    tooltipPlacement="left"
                     onClick={(e) => handleStartRename(e, scene.id, scene.name)}
                   >
                     <LuPencil size={11} />
@@ -345,6 +346,7 @@ export function ScenesPanel() {
                     size="sm"
                     variant="danger"
                     tooltip="Delete"
+                    tooltipPlacement="left"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(scene.id);

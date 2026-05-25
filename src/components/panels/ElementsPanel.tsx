@@ -499,6 +499,7 @@ function ElementRow({
       <IconButton
         size="sm"
         tooltip={element.hidden ? 'Show' : 'Hide'}
+        tooltipPlacement="right"
         onClick={(e) => {
           e.stopPropagation();
           onToggleVisibility();
@@ -515,6 +516,7 @@ function ElementRow({
       <IconButton
         size="sm"
         tooltip={element.locked ? 'Unlock' : 'Lock'}
+        tooltipPlacement="right"
         onClick={(e) => {
           e.stopPropagation();
           onToggleLock();
@@ -548,6 +550,7 @@ function ElementRow({
         <IconButton
           size="sm"
           tooltip="Properties"
+          tooltipPlacement="left"
           onClick={(e) => {
             e.stopPropagation();
             onOpenProperties();
@@ -559,6 +562,7 @@ function ElementRow({
           size="sm"
           variant="danger"
           tooltip="Delete"
+          tooltipPlacement="left"
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
