@@ -58,15 +58,23 @@ export function BrowserSourceView() {
 
   // Set transparent background for OBS browser source
   useEffect(() => {
+    const rootEl = document.getElementById('root');
     const origBodyBg = document.body.style.backgroundColor;
     const origHtmlBg = document.documentElement.style.backgroundColor;
+    const origRootBg = rootEl ? rootEl.style.backgroundColor : '';
 
     document.body.style.backgroundColor = 'transparent';
     document.documentElement.style.backgroundColor = 'transparent';
+    if (rootEl) {
+      rootEl.style.backgroundColor = 'transparent';
+    }
 
     return () => {
       document.body.style.backgroundColor = origBodyBg;
       document.documentElement.style.backgroundColor = origHtmlBg;
+      if (rootEl) {
+        rootEl.style.backgroundColor = origRootBg;
+      }
     };
   }, []);
 
