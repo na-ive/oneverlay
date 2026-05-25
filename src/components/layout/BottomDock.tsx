@@ -45,7 +45,7 @@ export function BottomDock({ left, center, right }: BottomDockProps) {
 
   return (
     <div
-      className="flex flex-col shrink-0 border-t border-white/[0.06]"
+      className="flex flex-col shrink-0 border-t border-white/[0.06] relative z-10"
       style={{
         height: `${height}px`,
         backgroundColor: 'var(--color-bg-secondary)',

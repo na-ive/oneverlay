@@ -642,7 +642,7 @@ export function CanvasEditor() {
   return (
     <div
       ref={containerRef}
-      className="flex-1 min-h-0 overflow-hidden relative"
+      className="flex-1 min-h-0 overflow-hidden relative z-0"
       style={{ backgroundColor: 'var(--color-bg-canvas)' }}
       onContextMenu={handleContextMenu}
     >
