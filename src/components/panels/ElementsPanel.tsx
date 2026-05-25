@@ -15,6 +15,8 @@ import {
   LuArrowUp,
   LuArrowDown,
   LuCrosshair,
+  LuRotateCw,
+  LuRefreshCw,
 } from 'react-icons/lu';
 import { v4 as uuidv4 } from 'uuid';
 import { IconButton } from '../ui/IconButton';
@@ -22,6 +24,7 @@ import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useContextMenuStore } from '../../store/contextMenuStore';
+import { createElement } from '../../lib/defaults';
 import type { ElementType, OverlayElement } from '../../types/elements';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 
@@ -227,6 +230,47 @@ export function ElementsPanel() {
         { type: 'separator' },
         {
           type: 'item',
+          id: 'rotate-submenu',
+          label: 'Rotate',
+          icon: <LuRotateCw size={12} />,
+          submenu: [
+            {
+              type: 'item',
+              id: 'rotate-90',
+              label: 'Rotate 90° CW',
+              onClick: () => {
+                pushHistory();
+                updateElement(el.id, {
+                  rotation: Math.round((el.rotation + 90) % 360),
+                });
+              },
+            },
+            {
+              type: 'item',
+              id: 'rotate-180',
+              label: 'Rotate 180°',
+              onClick: () => {
+                pushHistory();
+                updateElement(el.id, {
+                  rotation: Math.round((el.rotation + 180) % 360),
+                });
+              },
+            },
+            {
+              type: 'item',
+              id: 'rotate-270',
+              label: 'Rotate 90° CCW',
+              onClick: () => {
+                pushHistory();
+                updateElement(el.id, {
+                  rotation: Math.round((el.rotation + 270) % 360),
+                });
+              },
+            },
+          ],
+        },
+        {
+          type: 'item',
           id: 'center-canvas',
           label: 'Center on Canvas',
           icon: <LuCrosshair size={12} />,
@@ -238,6 +282,22 @@ export function ElementsPanel() {
             updateElement(el.id, {
               x: Math.round((canvas.width - el.width) / 2),
               y: Math.round((canvas.height - el.height) / 2),
+            });
+          },
+        },
+        {
+          type: 'item',
+          id: 'reset-defaults',
+          label: 'Reset to Defaults',
+          icon: <LuRefreshCw size={12} />,
+          onClick: () => {
+            pushHistory();
+            const defaultEl = createElement(el.type);
+            updateElement(el.id, {
+              ...defaultEl,
+              id: el.id,
+              name: el.name,
+              zIndex: el.zIndex,
             });
           },
         },

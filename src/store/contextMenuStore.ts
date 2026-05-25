@@ -8,7 +8,8 @@ export interface ContextMenuItem {
   shortcut?: string;
   danger?: boolean;
   disabled?: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  submenu?: ContextMenuEntry[];
 }
 
 export interface ContextMenuSeparator {

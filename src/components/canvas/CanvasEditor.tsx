@@ -21,8 +21,11 @@ import {
   LuArrowUp,
   LuArrowDown,
   LuCrosshair,
+  LuRotateCw,
+  LuRefreshCw,
 } from 'react-icons/lu';
 import { APP_NAME } from '../../lib/constants';
+import { createElement } from '../../lib/defaults';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 import type { BrowserElement } from '../../types/elements';
 
@@ -265,6 +268,47 @@ export function CanvasEditor() {
           { type: 'separator' },
           {
             type: 'item',
+            id: 'rotate-submenu',
+            label: 'Rotate',
+            icon: <LuRotateCw size={12} />,
+            submenu: [
+              {
+                type: 'item',
+                id: 'rotate-90',
+                label: 'Rotate 90° CW',
+                onClick: () => {
+                  pushHistory();
+                  updateElement(clickedEl.id, {
+                    rotation: Math.round((clickedEl.rotation + 90) % 360),
+                  });
+                },
+              },
+              {
+                type: 'item',
+                id: 'rotate-180',
+                label: 'Rotate 180°',
+                onClick: () => {
+                  pushHistory();
+                  updateElement(clickedEl.id, {
+                    rotation: Math.round((clickedEl.rotation + 180) % 360),
+                  });
+                },
+              },
+              {
+                type: 'item',
+                id: 'rotate-270',
+                label: 'Rotate 90° CCW',
+                onClick: () => {
+                  pushHistory();
+                  updateElement(clickedEl.id, {
+                    rotation: Math.round((clickedEl.rotation + 270) % 360),
+                  });
+                },
+              },
+            ],
+          },
+          {
+            type: 'item',
             id: 'center-canvas',
             label: 'Center on Canvas',
             icon: <LuCrosshair size={12} />,
@@ -273,6 +317,22 @@ export function CanvasEditor() {
               updateElement(clickedEl.id, {
                 x: Math.round((canvasWidth - clickedEl.width) / 2),
                 y: Math.round((canvasHeight - clickedEl.height) / 2),
+              });
+            },
+          },
+          {
+            type: 'item',
+            id: 'reset-defaults',
+            label: 'Reset to Defaults',
+            icon: <LuRefreshCw size={12} />,
+            onClick: () => {
+              pushHistory();
+              const defaultEl = createElement(clickedEl.type);
+              updateElement(clickedEl.id, {
+                ...defaultEl,
+                id: clickedEl.id,
+                name: clickedEl.name,
+                zIndex: clickedEl.zIndex,
               });
             },
           },

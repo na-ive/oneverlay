@@ -12,6 +12,7 @@ export function ContextMenu() {
 
   const menuRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: x, top: y, visible: false });
+  const [isFlippedLeft, setIsFlippedLeft] = useState(false);
 
   // State synchronization when menu coordinates or open status change
   const [lastOpen, setLastOpen] = useState(open);
@@ -23,6 +24,7 @@ export function ContextMenu() {
     setLastX(x);
     setLastY(y);
     setPos({ left: x, top: y, visible: false });
+    setIsFlippedLeft(false);
   }
 
   // Close on outside click, scroll, Escape
@@ -56,6 +58,7 @@ export function ContextMenu() {
 
     let left = x;
     let top = y;
+    let flippedLeft = false;
 
     // Flip upward if menu goes below bottom boundary
     if (top + rect.height > vh - 8) {
@@ -64,6 +67,7 @@ export function ContextMenu() {
     // Flip leftward if menu goes past right boundary
     if (left + rect.width > vw - 8) {
       left = x - rect.width;
+      flippedLeft = true;
     }
 
     // Safeguard clamping
@@ -73,6 +77,7 @@ export function ContextMenu() {
     if (top + rect.height > vh - 8) top = vh - rect.height - 8;
 
     setPos({ left, top, visible: true });
+    setIsFlippedLeft(flippedLeft);
   }, [open, x, y, items]);
 
   if (!open) return null;
@@ -101,38 +106,104 @@ export function ContextMenu() {
         }
 
         return (
-          <button
-            key={entry.id}
-            disabled={entry.disabled}
-            onClick={() => {
-              hide();
-              entry.onClick();
-            }}
-            className={`
-              w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium
-              transition-all duration-100 cursor-pointer border-none bg-transparent text-left
-              rounded-lg mx-1 my-0.5
-              ${entry.disabled
-                ? 'text-text-muted cursor-not-allowed opacity-50'
-                : entry.danger
-                  ? 'text-red-400 hover:bg-red-500/15 hover:text-red-300'
-                  : 'text-text-primary hover:bg-white/[0.07] hover:text-white'
-              }
-            `}
-            style={{ width: 'calc(100% - 8px)' }}
-          >
-            {entry.icon && (
-              <span className="shrink-0 opacity-70 w-3.5 flex items-center justify-center">
-                {entry.icon}
-              </span>
+          <div key={entry.id} className="relative group/menu-item w-full">
+            <button
+              disabled={entry.disabled}
+              onClick={() => {
+                if (entry.onClick) {
+                  hide();
+                  entry.onClick();
+                }
+              }}
+              className={`
+                w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium
+                transition-all duration-100 cursor-pointer border-none bg-transparent text-left
+                rounded-lg mx-1 my-0.5
+                ${entry.disabled
+                  ? 'text-text-muted cursor-not-allowed opacity-50'
+                  : entry.danger
+                    ? 'text-red-400 hover:bg-red-500/15 hover:text-red-300'
+                    : 'text-text-primary hover:bg-white/[0.07] hover:text-white'
+                }
+              `}
+              style={{ width: 'calc(100% - 8px)' }}
+            >
+              {entry.icon && (
+                <span className="shrink-0 opacity-70 w-3.5 flex items-center justify-center">
+                  {entry.icon}
+                </span>
+              )}
+              <span className="flex-1 truncate">{entry.label}</span>
+              {entry.shortcut && (
+                <span className="text-[10px] text-text-muted shrink-0 ml-2">
+                  {entry.shortcut}
+                </span>
+              )}
+              {entry.submenu && (
+                <span className="text-[9px] text-text-muted shrink-0 ml-2 opacity-55">
+                  ▶
+                </span>
+              )}
+            </button>
+
+            {entry.submenu && (
+              <div
+                className={`
+                  absolute top-0 hidden group-hover/menu-item:block min-w-[150px] py-1.5 rounded-2xl border border-white/[0.10] shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-2xl z-[10000]
+                  ${isFlippedLeft ? 'right-full mr-0.5' : 'left-full ml-0.5'}
+                `}
+                style={{
+                  backgroundColor: 'rgba(22, 22, 26, 0.95)',
+                }}
+              >
+                {entry.submenu.map((sub, subIdx) => {
+                  if (sub.type === 'separator') {
+                    return (
+                      <div
+                        key={subIdx}
+                        className="my-1 mx-2 border-t border-white/[0.07]"
+                      />
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={sub.id}
+                      disabled={sub.disabled}
+                      onClick={() => {
+                        hide();
+                        sub.onClick?.();
+                      }}
+                      className={`
+                        w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium
+                        transition-all duration-100 cursor-pointer border-none bg-transparent text-left
+                        rounded-lg mx-1 my-0.5
+                        ${sub.disabled
+                          ? 'text-text-muted cursor-not-allowed opacity-50'
+                          : sub.danger
+                            ? 'text-red-400 hover:bg-red-500/15 hover:text-red-300'
+                            : 'text-text-primary hover:bg-white/[0.07] hover:text-white'
+                        }
+                      `}
+                      style={{ width: 'calc(100% - 8px)' }}
+                    >
+                      {sub.icon && (
+                        <span className="shrink-0 opacity-70 w-3.5 flex items-center justify-center">
+                          {sub.icon}
+                        </span>
+                      )}
+                      <span className="flex-1 truncate">{sub.label}</span>
+                      {sub.shortcut && (
+                        <span className="text-[10px] text-text-muted shrink-0 ml-2">
+                          {sub.shortcut}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             )}
-            <span className="flex-1 truncate">{entry.label}</span>
-            {entry.shortcut && (
-              <span className="text-[10px] text-text-muted shrink-0 ml-2">
-                {entry.shortcut}
-              </span>
-            )}
-          </button>
+          </div>
         );
       })}
     </div>,
