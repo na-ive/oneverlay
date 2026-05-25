@@ -40,13 +40,13 @@ export function LandingPage() {
           href="https://github.com/na-ive/oneverlay"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center gap-2.5 px-4 py-2 rounded-xl bg-bg-surface hover:bg-bg-hover text-text-secondary hover:text-text-primary text-sm font-semibold border border-white/[0.08] hover:border-accent/30 transition-all cursor-pointer"
+          className="group flex items-center gap-2 text-text-primary hover:text-white transition-colors"
         >
-          <LuGithub size={16} className="text-text-secondary group-hover:text-text-primary transition-colors" />
-          <span>GitHub</span>
-          <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-md text-xs text-text-muted group-hover:text-text-secondary transition-colors">
-            <LuStar size={11} className="fill-current text-amber-500/80" />
-            <span>{stars}</span>
+          <LuGithub size={16} className="text-text-primary group-hover:text-white transition-colors" />
+          <span className="text-sm font-medium uppercase tracking-wide">GitHub</span>
+          <div className="flex items-center gap-1 bg-white/[0.02] group-hover:bg-white/[0.04] border border-white/[0.04] group-hover:border-white/[0.08] px-2 py-0.5 rounded-md text-xs transition-colors">
+            <LuStar size={11} className="fill-current text-amber-500/80 group-hover:text-amber-500 transition-colors" />
+            <span className="text-xs text-text-secondary group-hover:text-text-primary transition-colors">{stars}</span>
           </div>
         </a>
       </header>
