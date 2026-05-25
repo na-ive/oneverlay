@@ -27,6 +27,8 @@ export function EditorLayout() {
 
   const previousToolModeRef = useRef<'select' | 'hand'>('select');
   const isSpacePressedRef = useRef(false);
+  const isNudgingRef = useRef(false);
+  const nudgeTimeoutRef = useRef<any>(null);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -94,6 +96,44 @@ export function EditorLayout() {
       if (e.key === 'Escape') {
         selectElement(null);
       }
+
+      // Arrow keys nudging
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        const activeId = useEditorStore.getState().selectedElementId;
+        if (!activeId) return;
+
+        const sceneState = useSceneStore.getState();
+        const activeScene = sceneState.scenes.find((s) => s.id === sceneState.activeSceneId) || sceneState.scenes[0];
+        const element = activeScene.elements.find((el) => el.id === activeId);
+        if (!element || element.locked) return;
+
+        e.preventDefault();
+
+        // Start nudge session if not active (saves state for single Undo step)
+        if (!isNudgingRef.current) {
+          pushHistory();
+          isNudgingRef.current = true;
+        }
+
+        // Clear existing end-session timeout
+        if (nudgeTimeoutRef.current) {
+          clearTimeout(nudgeTimeoutRef.current);
+        }
+
+        const step = e.shiftKey ? 10 : 1;
+        let dx = 0;
+        let dy = 0;
+
+        if (e.key === 'ArrowLeft') dx = -step;
+        if (e.key === 'ArrowRight') dx = step;
+        if (e.key === 'ArrowUp') dy = -step;
+        if (e.key === 'ArrowDown') dy = step;
+
+        sceneState.updateElement(activeId, {
+          x: element.x + dx,
+          y: element.y + dy,
+        });
+      }
     },
     [undo, redo, selectedId, removeElement, selectElement, pushHistory, setToolMode],
   );
@@ -106,6 +146,15 @@ export function EditorLayout() {
           setToolMode(previousToolModeRef.current);
         }
       }
+
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        if (nudgeTimeoutRef.current) {
+          clearTimeout(nudgeTimeoutRef.current);
+        }
+        nudgeTimeoutRef.current = setTimeout(() => {
+          isNudgingRef.current = false;
+        }, 600);
+      }
     },
     [setToolMode],
   );
@@ -116,6 +165,7 @@ export function EditorLayout() {
         isSpacePressedRef.current = false;
         setToolMode(previousToolModeRef.current);
       }
+      isNudgingRef.current = false;
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -126,6 +176,9 @@ export function EditorLayout() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('blur', handleBlur);
+      if (nudgeTimeoutRef.current) {
+        clearTimeout(nudgeTimeoutRef.current);
+      }
     };
   }, [handleKeyDown, handleKeyUp, setToolMode]);
 
