@@ -6,12 +6,14 @@ import type {
   BrowserElement,
   SceneData,
   ElementType,
+  BaseElement,
+  ProjectData,
 } from '../types/elements';
 import { DEFAULT_CANVAS } from './constants';
 
 // ── Element Factories ──
 
-const baseDefaults = (type: ElementType, name: string): Omit<OverlayElement, 'type' | keyof TextElement | keyof ImageElement | keyof BrowserElement> & { id: string; type: ElementType; name: string; x: number; y: number; scaleX: number; scaleY: number; rotation: number; opacity: number; zIndex: number; hidden: boolean; locked: boolean; cropLeft: number; cropTop: number; cropRight: number; cropBottom: number; } => ({
+const baseDefaults = (type: ElementType, name: string): BaseElement => ({
   id: uuidv4(),
   type,
   name,

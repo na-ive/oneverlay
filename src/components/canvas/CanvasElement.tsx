@@ -257,8 +257,26 @@ export function CanvasElement({
         draggable={!element.locked}
         onClick={onSelect}
         onTap={onSelect}
+        onMouseDown={onSelect}
+        onTouchStart={onSelect}
         onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
+        onDragEnd={(e) => {
+          onDragEnd(e);
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = 'default';
+        }}
+        onMouseEnter={(e) => {
+          const stage = e.target.getStage();
+          if (stage) {
+            stage.container().style.cursor = element.locked ? 'not-allowed' : 'move';
+          }
+        }}
+        onMouseLeave={(e) => {
+          const stage = e.target.getStage();
+          if (stage) {
+            stage.container().style.cursor = 'default';
+          }
+        }}
         onDblClick={(e) => {
           if (e.evt && e.evt.button === 0) {
             onDoubleClick();
@@ -316,7 +334,7 @@ export function CanvasElement({
   return (
     <>
       {renderElement()}
-      {isSelected && (
+      {isSelected && !element.locked && (
         <Transformer
           ref={trRef}
           rotateEnabled={true}

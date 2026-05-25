@@ -17,8 +17,9 @@ import {
   LuCrosshair,
   LuRotateCw,
   LuRefreshCw,
+  LuLock,
+  LuLockOpen,
 } from 'react-icons/lu';
-import { v4 as uuidv4 } from 'uuid';
 import { IconButton } from '../ui/IconButton';
 import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
@@ -86,6 +87,14 @@ export function ElementsPanel() {
       toggleVisibility(id);
     },
     [toggleVisibility, pushHistory],
+  );
+
+  const handleToggleLock = useCallback(
+    (id: string, currentLocked: boolean) => {
+      pushHistory();
+      updateElement(id, { locked: !currentLocked });
+    },
+    [updateElement, pushHistory],
   );
 
   // Drag reorder handlers
@@ -181,6 +190,13 @@ export function ElementsPanel() {
           label: el.hidden ? 'Show' : 'Hide',
           icon: el.hidden ? <LuEye size={12} /> : <LuEyeOff size={12} />,
           onClick: () => handleToggleVisibility(el.id),
+        },
+        {
+          type: 'item',
+          id: 'toggle-lock',
+          label: el.locked ? 'Unlock' : 'Lock',
+          icon: el.locked ? <LuLockOpen size={12} /> : <LuLock size={12} />,
+          onClick: () => handleToggleLock(el.id, el.locked),
         },
         { type: 'separator' },
         {
@@ -319,6 +335,7 @@ export function ElementsPanel() {
       openProperties,
       duplicateElement,
       handleToggleVisibility,
+      handleToggleLock,
       reorderElement,
       updateElement,
       handleDelete,
@@ -388,6 +405,7 @@ export function ElementsPanel() {
               isSelected={selectedId === el.id}
               onSelect={() => selectElement(el.id)}
               onToggleVisibility={() => handleToggleVisibility(el.id)}
+              onToggleLock={() => handleToggleLock(el.id, el.locked)}
               onDelete={() => handleDelete(el.id)}
               onOpenProperties={() => openProperties(el.id)}
               onDragStart={() => handleDragStart(realIndex)}
@@ -410,6 +428,7 @@ interface ElementRowProps {
   isSelected: boolean;
   onSelect: () => void;
   onToggleVisibility: () => void;
+  onToggleLock: () => void;
   onDelete: () => void;
   onOpenProperties: () => void;
   onDragStart: () => void;
@@ -423,6 +442,7 @@ function ElementRow({
   isSelected,
   onSelect,
   onToggleVisibility,
+  onToggleLock,
   onDelete,
   onOpenProperties,
   onDragStart,
@@ -468,6 +488,22 @@ function ElementRow({
           <LuEyeOff size={12} className="text-text-muted" />
         ) : (
           <LuEye size={12} className={isSelected ? 'text-accent' : ''} />
+        )}
+      </IconButton>
+
+      {/* Lock */}
+      <IconButton
+        size="sm"
+        tooltip={element.locked ? 'Unlock' : 'Lock'}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleLock();
+        }}
+      >
+        {element.locked ? (
+          <LuLock size={12} className="text-accent" />
+        ) : (
+          <LuLockOpen size={12} className="text-text-muted" />
         )}
       </IconButton>
 

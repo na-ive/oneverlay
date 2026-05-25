@@ -35,17 +35,32 @@ export function PropertiesModal() {
       width="540px"
     >
       <div className="space-y-4">
-        {/* Name */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
-            Name
-          </label>
-          <input
-            type="text"
-            value={element.name}
-            onChange={(e) => handleUpdate({ name: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
-          />
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 flex flex-col gap-1.5">
+            <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
+              Name
+            </label>
+            <input
+              type="text"
+              value={element.name}
+              onChange={(e) => handleUpdate({ name: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
+            />
+          </div>
+
+          <div
+            className="flex items-center gap-2 h-[34px] cursor-pointer select-none pl-2 shrink-0"
+            onClick={() => handleUpdate({ locked: !element.locked })}
+          >
+            <input
+              type="checkbox"
+              checked={element.locked}
+              onChange={(e) => handleUpdate({ locked: e.target.checked })}
+              className="w-3.5 h-3.5 accent-accent rounded border-white/[0.1] bg-bg-primary/30 cursor-pointer"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <span className="text-xs text-text-secondary font-medium">Locked</span>
+          </div>
         </div>
 
         {/* Transform */}

@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useContextMenuStore } from '../../store/contextMenuStore';
-import type { ContextMenuEntry } from '../../store/contextMenuStore';
 
 export function ContextMenu() {
   const open = useContextMenuStore((s) => s.open);
@@ -30,7 +29,7 @@ export function ContextMenu() {
   // Close on outside click, scroll, Escape
   useEffect(() => {
     if (!open) return;
-    const close = (e: MouseEvent) => {
+    const close = (e: Event) => {
       if (menuRef.current && menuRef.current.contains(e.target as Node)) {
         return;
       }

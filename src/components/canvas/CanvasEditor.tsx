@@ -7,6 +7,7 @@ import { useHistoryStore } from '../../store/historyStore';
 import { useCanvasZoom } from '../../hooks/useCanvasZoom';
 import { useContextMenuStore } from '../../store/contextMenuStore';
 import { CanvasElement } from './CanvasElement';
+import type { TextElement, ImageElement, BrowserElement, OverlayElement } from '../../types/elements';
 import {
   LuType,
   LuImage,
@@ -23,6 +24,8 @@ import {
   LuCrosshair,
   LuRotateCw,
   LuRefreshCw,
+  LuLock,
+  LuLockOpen,
 } from 'react-icons/lu';
 import { APP_NAME } from '../../lib/constants';
 import { createElement } from '../../lib/defaults';
@@ -130,7 +133,6 @@ export function CanvasEditor() {
   const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
   const addElement = useSceneStore((s) => s.addElement);
   const moveElement = useSceneStore((s) => s.moveElement);
-  const resizeElement = useSceneStore((s) => (s as any).resizeElement); // Keep for now in case
   const updateElement = useSceneStore((s) => s.updateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
   const toggleVisibility = useSceneStore((s) => s.toggleVisibility);
@@ -182,31 +184,14 @@ export function CanvasEditor() {
     return () => observer.disconnect();
   }, [bottomDockHeight]);
 
-  // Click on empty canvas area → deselect or delegate selection to elements behind Stage overlay
+  // Click on empty canvas area → deselect
   const handleStageClick = useCallback(
     (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
       if (e.target === stageRef.current || e.target.name() === 'canvas-bg') {
-        if (stageRef.current) {
-          const pointerPos = stageRef.current.getPointerPosition();
-          if (pointerPos) {
-            const localX = (pointerPos.x - offsetX) / scale;
-            const localY = (pointerPos.y - offsetY) / scale;
-
-            const clickedElement = [...elements]
-              .filter((el) => !el.hidden)
-              .reverse() // check top-most first
-              .find((el) => isPointInElement(localX, localY, el));
-
-            if (clickedElement) {
-              selectElement(clickedElement.id);
-              return;
-            }
-          }
-        }
         selectElement(null);
       }
     },
-    [selectElement, elements, offsetX, offsetY, scale],
+    [selectElement],
   );
 
   // Drag end
@@ -320,6 +305,16 @@ export function CanvasEditor() {
             onClick: () => {
               pushHistory();
               toggleVisibility(clickedEl.id);
+            },
+          },
+          {
+            type: 'item',
+            id: 'toggle-lock',
+            label: clickedEl.locked ? 'Unlock' : 'Lock',
+            icon: clickedEl.locked ? <LuLockOpen size={12} /> : <LuLock size={12} />,
+            onClick: () => {
+              pushHistory();
+              updateElement(clickedEl.id, { locked: !clickedEl.locked });
             },
           },
           { type: 'separator' },
@@ -641,7 +636,7 @@ export function CanvasEditor() {
           left: 0,
           top: 0,
           zIndex: 9999, // Render transformer handles on top of all HTML elements
-          pointerEvents: selectedId ? 'auto' : 'none', // Only receive events when an element is active
+          pointerEvents: 'auto',
         }}
       >
         <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>
@@ -657,24 +652,28 @@ export function CanvasEditor() {
             strokeWidth={1 / scale}
           />
 
-          {/* Render only the active element's CanvasElement */}
-          {selectedId && (() => {
-            const selectedElement = elements.find((el) => el.id === selectedId);
-            if (!selectedElement || selectedElement.hidden) return null;
+          {/* Render all elements in Konva for dragging and selection */}
+          {elements.map((el) => {
+            if (el.hidden) return null;
+            const isSel = el.id === selectedId;
             return (
               <CanvasElement
-                element={selectedElement}
-                isSelected={true}
+                key={el.id}
+                element={el}
+                isSelected={isSel}
                 scale={scale}
-                onSelect={() => {}}
-                onDragStart={handleDragStart}
-                onDragEnd={(e) => handleDragEnd(selectedElement.id, e)}
+                onSelect={() => selectElement(el.id)}
+                onDragStart={() => {
+                  selectElement(el.id);
+                  handleDragStart();
+                }}
+                onDragEnd={(e) => handleDragEnd(el.id, e)}
                 onTransformStart={handleDragStart}
-                onTransformEnd={(node) => handleTransformEnd(selectedElement.id, node)}
-                onDoubleClick={() => handleDoubleClick(selectedElement.id)}
+                onTransformEnd={(node) => handleTransformEnd(el.id, node)}
+                onDoubleClick={() => handleDoubleClick(el.id)}
               />
             );
-          })()}
+          })}
         </Layer>
       </Stage>
 
