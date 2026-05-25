@@ -43,9 +43,12 @@ export function Navbar() {
       }}
     >
       {/* Left — Title */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-baseline gap-1">
         <span className="text-base font-black uppercase tracking-widest text-text-primary pl-1">
           {APP_NAME}
+        </span>
+        <span className="text-[9px] font-bold tracking-widest text-text-muted">
+          BY NA-IVE
         </span>
       </div>
 

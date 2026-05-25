@@ -55,7 +55,7 @@ const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
         color: el.color,
         fontFamily: el.fontFamily,
         fontWeight: el.fontWeight,
-        whiteSpace: 'nowrap',
+        whiteSpace: 'pre-wrap',
         userSelect: 'none',
         display: 'inline-block',
       }}
