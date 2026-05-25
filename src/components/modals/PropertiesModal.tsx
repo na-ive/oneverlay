@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { Modal } from '../ui/Modal';
 import { NumberInput } from '../ui/NumberInput';
+import { Select } from '../ui/Select';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
@@ -161,18 +162,18 @@ function TextProperties({
           <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Font Weight
           </label>
-          <select
+          <Select
             value={element.fontWeight}
-            onChange={(e) => onUpdate({ fontWeight: parseInt(e.target.value) })}
-            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 transition-all cursor-pointer"
-          >
-            <option value={300} className="bg-bg-surface text-text-primary">Light</option>
-            <option value={400} className="bg-bg-surface text-text-primary">Regular</option>
-            <option value={500} className="bg-bg-surface text-text-primary">Medium</option>
-            <option value={600} className="bg-bg-surface text-text-primary">Semibold</option>
-            <option value={700} className="bg-bg-surface text-text-primary">Bold</option>
-            <option value={800} className="bg-bg-surface text-text-primary">Extra Bold</option>
-          </select>
+            onChange={(val) => onUpdate({ fontWeight: parseInt(val) })}
+            options={[
+              { value: 300, label: 'Light' },
+              { value: 400, label: 'Regular' },
+              { value: 500, label: 'Medium' },
+              { value: 600, label: 'Semibold' },
+              { value: 700, label: 'Bold' },
+              { value: 800, label: 'Extra Bold' },
+            ]}
+          />
         </div>
       </div>
 

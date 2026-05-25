@@ -29,7 +29,7 @@ export function ActionsPanel() {
   return (
     <div className="flex flex-col h-full bg-bg-secondary/10">
       {/* Panel header */}
-      <div className="flex items-center px-4 py-2.5 border-b border-white/[0.06] shrink-0">
+      <div className="flex items-center px-4 h-[38px] border-b border-white/[0.06] shrink-0">
         <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
           Actions
         </span>

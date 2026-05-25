@@ -260,7 +260,7 @@ export function ScenesPanel() {
       onContextMenu={handlePanelContextMenu}
     >
       {/* Panel header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] shrink-0">
+      <div className="flex items-center justify-between px-4 h-[38px] border-b border-white/[0.06] shrink-0">
         <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">
           Scenes
         </span>
@@ -270,7 +270,7 @@ export function ScenesPanel() {
       </div>
 
       {/* Scenes list */}
-      <div className="flex-1 overflow-y-auto min-h-0 py-2">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 py-2">
         {scenes.map((scene, index) => {
           const isActive = scene.id === activeSceneId;
           const isEditing = scene.id === editingId;
