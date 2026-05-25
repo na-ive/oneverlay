@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect, useState } from 'react';
+import { useCallback, useRef, useEffect, useState, useLayoutEffect } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import type Konva from 'konva';
 import { useSceneStore, selectElements, selectCanvas } from '../../store/sceneStore';
@@ -27,8 +27,98 @@ import {
 import { APP_NAME } from '../../lib/constants';
 import { createElement } from '../../lib/defaults';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
-import type { BrowserElement } from '../../types/elements';
+interface HTMLTextElementProps {
+  el: TextElement;
+  updateElement: (id: string, updates: Partial<OverlayElement>) => void;
+}
 
+const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    if (ref.current) {
+      const width = ref.current.offsetWidth;
+      const height = ref.current.offsetHeight;
+      if (width !== el.width || height !== el.height) {
+        updateElement(el.id, { width, height });
+      }
+    }
+  }, [el.text, el.fontSize, el.fontFamily, el.fontWeight, el.id, updateElement]);
+
+  return (
+    <span
+      ref={ref}
+      style={{
+        fontSize: `${el.fontSize}px`,
+        color: el.color,
+        fontFamily: el.fontFamily,
+        fontWeight: el.fontWeight,
+        whiteSpace: 'nowrap',
+        userSelect: 'none',
+        display: 'inline-block',
+      }}
+    >
+      {el.text}
+    </span>
+  );
+};
+
+interface HTMLImageElementProps {
+  el: ImageElement;
+  updateElement: (id: string, updates: Partial<OverlayElement>) => void;
+}
+
+const HTMLImageElement = ({ el, updateElement }: HTMLImageElementProps) => {
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (el.width !== img.naturalWidth || el.height !== img.naturalHeight) {
+      updateElement(el.id, {
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+    }
+  };
+
+  if (!el.imageUrl) {
+    return (
+      <div className="w-full h-full bg-[#1e2a3a] border border-[#2a3a4a] rounded flex items-center justify-center text-text-muted text-xs select-none">
+        <span>🖼 Image</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={el.imageUrl}
+      alt={el.name}
+      onLoad={handleLoad}
+      className="w-full h-full object-cover pointer-events-none select-none"
+      style={{ pointerEvents: 'none' }}
+    />
+  );
+};
+
+function isPointInElement(px: number, py: number, el: OverlayElement) {
+  const dx = px - el.x;
+  const dy = py - el.y;
+  const rad = (-el.rotation * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const localX = dx * cos - dy * sin;
+  const localY = dx * sin + dy * cos;
+
+  const cropLeft = el.cropLeft || 0;
+  const cropTop = el.cropTop || 0;
+  const cropRight = el.cropRight || 0;
+  const cropBottom = el.cropBottom || 0;
+
+  const width = el.width - cropLeft - cropRight;
+  const height = el.height - cropTop - cropBottom;
+
+  const visualX = localX / el.scaleX;
+  const visualY = localY / el.scaleY;
+
+  return visualX >= 0 && visualX <= width && visualY >= 0 && visualY <= height;
+}
 
 export function CanvasEditor() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,14 +182,31 @@ export function CanvasEditor() {
     return () => observer.disconnect();
   }, [bottomDockHeight]);
 
-  // Click on empty canvas area → deselect
+  // Click on empty canvas area → deselect or delegate selection to elements behind Stage overlay
   const handleStageClick = useCallback(
     (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
       if (e.target === stageRef.current || e.target.name() === 'canvas-bg') {
+        if (stageRef.current) {
+          const pointerPos = stageRef.current.getPointerPosition();
+          if (pointerPos) {
+            const localX = (pointerPos.x - offsetX) / scale;
+            const localY = (pointerPos.y - offsetY) / scale;
+
+            const clickedElement = [...elements]
+              .filter((el) => !el.hidden)
+              .reverse() // check top-most first
+              .find((el) => isPointInElement(localX, localY, el));
+
+            if (clickedElement) {
+              selectElement(clickedElement.id);
+              return;
+            }
+          }
+        }
         selectElement(null);
       }
     },
-    [selectElement],
+    [selectElement, elements, offsetX, offsetY, scale],
   );
 
   // Drag end
@@ -156,31 +263,26 @@ export function CanvasEditor() {
       e.preventDefault();
 
       // Determine if right-clicking on an element or blank canvas
-      let clickedId: string | null = selectedId;
+      let clickedId: string | null = null;
 
-      if (stageRef.current) {
-        const pointerPos = stageRef.current.getPointerPosition();
-        if (pointerPos) {
-          const shape = stageRef.current.getIntersection(pointerPos);
-          if (shape && shape.name() !== 'canvas-bg') {
-            let node: Konva.Node | null = shape;
-            let foundId = '';
-            while (node) {
-              const id = node.id();
-              if (id) {
-                foundId = id;
-                break;
-              }
-              node = node.getParent();
-            }
-            if (foundId) {
-              clickedId = foundId;
-              selectElement(foundId);
-            }
-          } else {
-            selectElement(null);
-            clickedId = null;
-          }
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const clientX = e.clientX - rect.left;
+        const clientY = e.clientY - rect.top;
+
+        const localX = (clientX - offsetX) / scale;
+        const localY = (clientY - offsetY) / scale;
+
+        const clickedEl = [...elements]
+          .filter((el) => !el.hidden)
+          .reverse() // check top-most first
+          .find((el) => isPointInElement(localX, localY, el));
+
+        if (clickedEl) {
+          clickedId = clickedEl.id;
+          selectElement(clickedEl.id);
+        } else {
+          selectElement(null);
         }
       }
 
@@ -423,7 +525,7 @@ export function CanvasEditor() {
         }}
       />
 
-      {/* HTML Overlays for Browser Elements */}
+      {/* HTML Elements Layer (rendered natively for perfect stacking order) */}
       <div
         className="absolute pointer-events-none overflow-hidden select-none"
         style={{
@@ -431,44 +533,101 @@ export function CanvasEditor() {
           top: `${offsetY}px`,
           width: `${canvasWidth * scale}px`,
           height: `${canvasHeight * scale}px`,
-          zIndex: 5,
+          pointerEvents: 'none',
         }}
       >
-        {sortedElements
-          .filter((el) => el.type === 'browser')
-          .map((el) => {
+        {sortedElements.map((el) => {
+          const zIndex = 10 + el.zIndex;
+
+          const commonStyle: React.CSSProperties = {
+            position: 'absolute',
+            left: `${el.x * scale}px`,
+            top: `${el.y * scale}px`,
+            width: `${el.width}px`,
+            height: `${el.height}px`,
+            transform: `rotate(${el.rotation}deg) scale(${scale * el.scaleX}, ${scale * el.scaleY})`,
+            transformOrigin: 'top left',
+            opacity: el.opacity,
+            clipPath: `inset(${el.cropTop || 0}px ${el.cropRight || 0}px ${el.cropBottom || 0}px ${el.cropLeft || 0}px)`,
+            zIndex,
+            pointerEvents: 'auto', // Allow clicks to select
+          };
+
+          const handleMouseDown = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            selectElement(el.id);
+          };
+
+          if (el.type === 'browser') {
             const browserEl = el as BrowserElement;
             const hasUrl = !!browserEl.url && browserEl.url !== 'about:blank';
-            if (!hasUrl) return null;
-
             return (
               <div
-                key={browserEl.id}
-                className="absolute overflow-hidden"
+                key={el.id}
                 style={{
-                  left: `${browserEl.x * scale}px`,
-                  top: `${browserEl.y * scale}px`,
+                  ...commonStyle,
                   width: `${browserEl.browserWidth}px`,
                   height: `${browserEl.browserHeight}px`,
-                  transform: `rotate(${browserEl.rotation}deg) scale(${scale * browserEl.scaleX}, ${scale * browserEl.scaleY})`,
-                  transformOrigin: 'top left',
-                  opacity: browserEl.opacity,
                   clipPath: `inset(${browserEl.cropTop}px ${browserEl.cropRight}px ${browserEl.cropBottom}px ${browserEl.cropLeft}px)`,
                   borderRadius: '4px',
-                  pointerEvents: 'none',
                 }}
+                onMouseDown={handleMouseDown}
               >
-                <iframe
-                  src={browserEl.url}
-                  title={`browser-source-${browserEl.id}`}
-                  className="w-full h-full border-0 pointer-events-none"
-                  style={{
-                    backgroundColor: 'transparent',
-                  }}
-                />
+                {/* Transparent click catcher to prevent direct iframe interaction during layout */}
+                <div className="absolute inset-0 z-10 cursor-pointer" />
+                {hasUrl ? (
+                  <iframe
+                    src={browserEl.url}
+                    title={`browser-source-${browserEl.id}`}
+                    className="w-full h-full border-0 pointer-events-none"
+                    style={{
+                      backgroundColor: 'transparent',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#16213e] border border-[#2a3a4a] rounded flex flex-col items-center justify-center text-text-muted text-xs select-none">
+                    <span>🌐 Empty Browser Source</span>
+                  </div>
+                )}
               </div>
             );
-          })}
+          }
+
+          if (el.type === 'image') {
+            const imageEl = el as ImageElement;
+            return (
+              <div
+                key={el.id}
+                style={{ ...commonStyle, borderRadius: '4px' }}
+                onMouseDown={handleMouseDown}
+              >
+                <div className="absolute inset-0 z-10 cursor-pointer" />
+                <HTMLImageElement el={imageEl} updateElement={updateElement} />
+              </div>
+            );
+          }
+
+          if (el.type === 'text') {
+            const textEl = el as TextElement;
+            return (
+              <div
+                key={el.id}
+                style={{
+                  ...commonStyle,
+                  width: 'auto',
+                  height: 'auto',
+                }}
+                onMouseDown={handleMouseDown}
+              >
+                <div className="absolute inset-0 z-10 cursor-pointer" />
+                <HTMLTextElement el={textEl} updateElement={updateElement} />
+              </div>
+            );
+          }
+
+          return null;
+        })}
       </div>
 
       <Stage
@@ -477,7 +636,13 @@ export function CanvasEditor() {
         height={containerSize.height}
         onClick={handleStageClick}
         onTap={handleStageClick}
-        style={{ position: 'absolute', left: 0, top: 0, zIndex: 10 }}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          zIndex: 9999, // Render transformer handles on top of all HTML elements
+          pointerEvents: selectedId ? 'auto' : 'none', // Only receive events when an element is active
+        }}
       >
         <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>
           {/* Canvas background outline only */}
@@ -492,21 +657,24 @@ export function CanvasEditor() {
             strokeWidth={1 / scale}
           />
 
-          {/* Elements */}
-          {sortedElements.map((element) => (
-            <CanvasElement
-              key={element.id}
-              element={element}
-              isSelected={selectedId === element.id}
-              scale={scale}
-              onSelect={() => selectElement(element.id)}
-              onDragStart={handleDragStart}
-              onDragEnd={(e) => handleDragEnd(element.id, e)}
-              onTransformStart={handleDragStart}
-              onTransformEnd={(node) => handleTransformEnd(element.id, node)}
-              onDoubleClick={() => handleDoubleClick(element.id)}
-            />
-          ))}
+          {/* Render only the active element's CanvasElement */}
+          {selectedId && (() => {
+            const selectedElement = elements.find((el) => el.id === selectedId);
+            if (!selectedElement || selectedElement.hidden) return null;
+            return (
+              <CanvasElement
+                element={selectedElement}
+                isSelected={true}
+                scale={scale}
+                onSelect={() => {}}
+                onDragStart={handleDragStart}
+                onDragEnd={(e) => handleDragEnd(selectedElement.id, e)}
+                onTransformStart={handleDragStart}
+                onTransformEnd={(node) => handleTransformEnd(selectedElement.id, node)}
+                onDoubleClick={() => handleDoubleClick(selectedElement.id)}
+              />
+            );
+          })()}
         </Layer>
       </Stage>
 

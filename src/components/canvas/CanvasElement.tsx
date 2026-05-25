@@ -1,11 +1,8 @@
 import { useRef, useEffect, useCallback } from 'react';
-import { Transformer, Group } from 'react-konva';
+import { Transformer, Group, Rect, Line } from 'react-konva';
 import type Konva from 'konva';
 import type { OverlayElement } from '../../types/elements';
-import { TextElementNode } from './TextElement';
-import { ImageElementNode } from './ImageElement';
-import { BrowserElementNode } from './BrowserElement';
-import { Line } from 'react-konva';
+
 
 interface CanvasElementProps {
   element: OverlayElement;
@@ -245,27 +242,6 @@ export function CanvasElement({
     const visibleWidth = Math.max(1, element.width - cropLeft - cropRight);
     const visibleHeight = Math.max(1, element.height - cropTop - cropBottom);
 
-    const innerProps = {
-      element,
-      x: -cropLeft,
-      y: -cropTop,
-      width: element.width,
-      height: element.height,
-    };
-
-    const InnerNode = () => {
-      switch (element.type) {
-        case 'text':
-          return <TextElementNode {...innerProps} />;
-        case 'image':
-          return <ImageElementNode {...innerProps} />;
-        case 'browser':
-          return <BrowserElementNode {...innerProps} />;
-        default:
-          return null;
-      }
-    };
-
     return (
       <Group
         ref={shapeRef}
@@ -283,14 +259,24 @@ export function CanvasElement({
         onTap={onSelect}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        onDblClick={onDoubleClick}
+        onDblClick={(e) => {
+          if (e.evt && e.evt.button === 0) {
+            onDoubleClick();
+          }
+        }}
         onDblTap={onDoubleClick}
         clipX={0}
         clipY={0}
         clipWidth={visibleWidth}
         clipHeight={visibleHeight}
       >
-        <InnerNode />
+        <Rect
+          x={-cropLeft}
+          y={-cropTop}
+          width={element.width}
+          height={element.height}
+          fill="rgba(0,0,0,0.001)"
+        />
         {isSelected && (
           <Group listening={false}>
             <Line
