@@ -25,8 +25,6 @@ export const ImageElementNode = ({ element, x, y, width, height }: ImageElementN
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      setImage(img);
-      setError(false);
       // Auto-update intrinsic dimensions to original image size
       if (element.width !== img.width || element.height !== img.height) {
         useSceneStore.getState().updateElement(element.id, {
@@ -34,6 +32,36 @@ export const ImageElementNode = ({ element, x, y, width, height }: ImageElementN
           height: img.height,
         });
       }
+
+      // Performance Optimization: Downscale extremely large images for rendering
+      // This prevents GPU memory exhaustion (which causes images to disappear) and eliminates lag.
+      const MAX_SIZE = 2048;
+      if (img.width > MAX_SIZE || img.height > MAX_SIZE) {
+        let newWidth = img.width;
+        let newHeight = img.height;
+
+        if (newWidth > newHeight) {
+          newHeight = Math.round((newHeight * MAX_SIZE) / newWidth);
+          newWidth = MAX_SIZE;
+        } else {
+          newWidth = Math.round((newWidth * MAX_SIZE) / newHeight);
+          newHeight = MAX_SIZE;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          setImage(canvas as any);
+        } else {
+          setImage(img);
+        }
+      } else {
+        setImage(img);
+      }
+      setError(false);
     };
     img.onerror = () => {
       setImage(null);
