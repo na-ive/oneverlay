@@ -51,8 +51,8 @@ export function LandingPage() {
       {/* Main Body */}
       <main className="flex-1 flex flex-col items-center max-w-[1400px] mx-auto px-6 pb-20 w-full">
         {/* Screenshot Showcase Section (At the top, cropped from the top edge, bottom fully shown) */}
-        <section className="w-full flex justify-center mb-12 md:mb-16">
-          <div className="w-full max-w-[1400px] h-[220px] sm:h-[300px] md:h-[380px] rounded-b-3xl border-x border-b border-white/[0.08] bg-bg-surface overflow-hidden relative shadow-[0_24px_80px_rgba(0,0,0,0.85)] shadow-accent/5 hover:border-accent/15 transition-all duration-300 -mt-px">
+        <section className="w-full flex justify-center mb-6 md:mb-8">
+          <div className="w-full max-w-[1200px] h-[220px] sm:h-[300px] md:h-[380px] rounded-b-3xl border-x border-b border-white/[0.08] bg-bg-surface overflow-hidden relative shadow-[0_24px_80px_rgba(0,0,0,0.85)] shadow-accent/5 hover:border-accent/15 transition-all duration-300 -mt-px">
             <img
               src="/landing.png"
               alt="Oneverlay Editor Workspace Screenshot"
@@ -86,7 +86,7 @@ export function LandingPage() {
         </section>
 
         {/* Features Grid Section */}
-        <section className="w-full max-w-[1400px] mb-24 md:mb-32">
+        <section className="w-full max-w-[1200px] mb-24 md:mb-32">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
             <div className="p-6 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-white/[0.1] transition-all duration-200">
