@@ -9,12 +9,21 @@ import {
   LuGlobe,
   LuGripVertical,
   LuSettings2,
+  LuCopyPlus,
+  LuArrowUpToLine,
+  LuArrowDownToLine,
+  LuArrowUp,
+  LuArrowDown,
+  LuCrosshair,
 } from 'react-icons/lu';
+import { v4 as uuidv4 } from 'uuid';
 import { IconButton } from '../ui/IconButton';
 import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
+import { useContextMenuStore } from '../../store/contextMenuStore';
 import type { ElementType, OverlayElement } from '../../types/elements';
+import type { ContextMenuEntry } from '../../store/contextMenuStore';
 
 const TYPE_ICONS: Record<ElementType, typeof LuType> = {
   text: LuType,
@@ -28,13 +37,19 @@ export function ElementsPanel() {
   const removeElement = useSceneStore((s) => s.removeElement);
   const toggleVisibility = useSceneStore((s) => s.toggleVisibility);
   const reorderElement = useSceneStore((s) => s.reorderElement);
+  const duplicateElement = useSceneStore((s) => s.duplicateElement);
+  const updateElement = useSceneStore((s) => s.updateElement);
   const selectedId = useEditorStore((s) => s.selectedElementId);
   const selectElement = useEditorStore((s) => s.selectElement);
   const openProperties = useEditorStore((s) => s.openProperties);
   const pushHistory = useHistoryStore((s) => s.push);
+  const showMenu = useContextMenuStore((s) => s.show);
 
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  // Display order is reversed (top = highest z-index)
+  const displayElements = [...elements].reverse();
 
   const handleAdd = useCallback(
     (type: ElementType) => {
@@ -81,11 +96,174 @@ export function ElementsPanel() {
     [dragIndex, reorderElement, pushHistory],
   );
 
-  // Reversed for display (top = highest z-index)
-  const displayElements = [...elements].reverse();
+  // ── Context Menu Handlers ──
+
+  /** Right-click on blank panel area → add element submenu */
+  const handlePanelContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.shiftKey) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const items: ContextMenuEntry[] = [
+        {
+          type: 'item',
+          id: 'add-text',
+          label: 'Add Text',
+          icon: <LuType size={12} />,
+          onClick: () => handleAdd('text'),
+        },
+        {
+          type: 'item',
+          id: 'add-image',
+          label: 'Add Image',
+          icon: <LuImage size={12} />,
+          onClick: () => handleAdd('image'),
+        },
+        {
+          type: 'item',
+          id: 'add-browser',
+          label: 'Add Browser Source',
+          icon: <LuGlobe size={12} />,
+          onClick: () => handleAdd('browser'),
+        },
+      ];
+
+      showMenu(e.clientX, e.clientY, items);
+    },
+    [handleAdd, showMenu],
+  );
+
+  /** Right-click on a specific element row */
+  const handleElementContextMenu = useCallback(
+    (e: React.MouseEvent, el: OverlayElement, displayIdx: number) => {
+      if (e.shiftKey) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      // realIndex in the underlying (non-reversed) array
+      const realIndex = elements.length - 1 - displayIdx;
+      const canMoveUp = realIndex < elements.length - 1; // higher z-index
+      const canMoveDown = realIndex > 0; // lower z-index
+
+      const items: ContextMenuEntry[] = [
+        {
+          type: 'item',
+          id: 'properties',
+          label: 'Properties',
+          icon: <LuSettings2 size={12} />,
+          onClick: () => openProperties(el.id),
+        },
+        {
+          type: 'item',
+          id: 'duplicate',
+          label: 'Duplicate',
+          icon: <LuCopyPlus size={12} />,
+          onClick: () => {
+            pushHistory();
+            duplicateElement(el.id);
+          },
+        },
+        {
+          type: 'item',
+          id: 'toggle-visibility',
+          label: el.hidden ? 'Show' : 'Hide',
+          icon: el.hidden ? <LuEye size={12} /> : <LuEyeOff size={12} />,
+          onClick: () => handleToggleVisibility(el.id),
+        },
+        { type: 'separator' },
+        {
+          type: 'item',
+          id: 'move-top',
+          label: 'Bring to Front',
+          icon: <LuArrowUpToLine size={12} />,
+          disabled: !canMoveUp,
+          onClick: () => {
+            pushHistory();
+            reorderElement(realIndex, elements.length - 1);
+          },
+        },
+        {
+          type: 'item',
+          id: 'move-up',
+          label: 'Bring Forward',
+          icon: <LuArrowUp size={12} />,
+          disabled: !canMoveUp,
+          onClick: () => {
+            pushHistory();
+            reorderElement(realIndex, realIndex + 1);
+          },
+        },
+        {
+          type: 'item',
+          id: 'move-down',
+          label: 'Send Backward',
+          icon: <LuArrowDown size={12} />,
+          disabled: !canMoveDown,
+          onClick: () => {
+            pushHistory();
+            reorderElement(realIndex, realIndex - 1);
+          },
+        },
+        {
+          type: 'item',
+          id: 'move-bottom',
+          label: 'Send to Back',
+          icon: <LuArrowDownToLine size={12} />,
+          disabled: !canMoveDown,
+          onClick: () => {
+            pushHistory();
+            reorderElement(realIndex, 0);
+          },
+        },
+        { type: 'separator' },
+        {
+          type: 'item',
+          id: 'center-canvas',
+          label: 'Center on Canvas',
+          icon: <LuCrosshair size={12} />,
+          onClick: () => {
+            const state = useSceneStore.getState();
+            const activeScene = state.scenes.find((s) => s.id === state.activeSceneId) || state.scenes[0];
+            const canvas = activeScene.canvas;
+            pushHistory();
+            updateElement(el.id, {
+              x: Math.round((canvas.width - el.width) / 2),
+              y: Math.round((canvas.height - el.height) / 2),
+            });
+          },
+        },
+        { type: 'separator' },
+        {
+          type: 'item',
+          id: 'delete',
+          label: 'Delete',
+          icon: <LuTrash2 size={12} />,
+          danger: true,
+          onClick: () => handleDelete(el.id),
+        },
+      ];
+
+      showMenu(e.clientX, e.clientY, items);
+    },
+    [
+      elements,
+      openProperties,
+      duplicateElement,
+      handleToggleVisibility,
+      reorderElement,
+      updateElement,
+      handleDelete,
+      pushHistory,
+      showMenu,
+    ],
+  );
 
   return (
-    <div className="flex flex-col h-full bg-bg-secondary/10">
+    <div
+      className="flex flex-col h-full bg-bg-secondary/10"
+      onContextMenu={handlePanelContextMenu}
+    >
       {/* Panel header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] shrink-0">
         <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">
@@ -147,6 +325,7 @@ export function ElementsPanel() {
               onDragStart={() => handleDragStart(realIndex)}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(realIndex)}
+              onContextMenu={(e) => handleElementContextMenu(e, el, displayIdx)}
             />
           );
         })}
@@ -168,6 +347,7 @@ interface ElementRowProps {
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
 }
 
 function ElementRow({
@@ -180,6 +360,7 @@ function ElementRow({
   onDragStart,
   onDragOver,
   onDrop,
+  onContextMenu,
 }: ElementRowProps) {
   const Icon = TYPE_ICONS[element.type];
 
@@ -195,6 +376,7 @@ function ElementRow({
         }
       `}
       onClick={onSelect}
+      onContextMenu={onContextMenu}
       draggable
       onDragStart={onDragStart}
       onDragOver={onDragOver}

@@ -8,6 +8,7 @@ import { CanvasPanel } from '../panels/CanvasPanel';
 import { ActionsPanel } from '../panels/ActionsPanel';
 import { SettingsModal } from '../modals/SettingsModal';
 import { PropertiesModal } from '../modals/PropertiesModal';
+import { ContextMenu } from '../ui/ContextMenu';
 import { usePersistence } from '../../hooks/usePersistence';
 import { useHistoryStore } from '../../store/historyStore';
 import { useEditorStore } from '../../store/editorStore';
@@ -70,6 +71,16 @@ export function EditorLayout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  // Globally suppress the native browser context menu.
+  // Shift+right-click is the escape hatch to access the browser's native menu.
+  useEffect(() => {
+    const suppress = (e: MouseEvent) => {
+      if (!e.shiftKey) e.preventDefault();
+    };
+    document.addEventListener('contextmenu', suppress);
+    return () => document.removeEventListener('contextmenu', suppress);
+  }, []);
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <Navbar />
@@ -91,6 +102,7 @@ export function EditorLayout() {
 
       <SettingsModal />
       <PropertiesModal />
+      <ContextMenu />
     </div>
   );
 }

@@ -50,6 +50,7 @@ export function CanvasElement({
   const renderElement = () => {
     const commonProps = {
       ref: shapeRef,
+      id: element.id,
       x: element.x,
       y: element.y,
       width: element.width,

@@ -5,9 +5,25 @@ import { useSceneStore, selectElements, selectCanvas } from '../../store/sceneSt
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useCanvasZoom } from '../../hooks/useCanvasZoom';
+import { useContextMenuStore } from '../../store/contextMenuStore';
 import { CanvasElement } from './CanvasElement';
-import { LuType, LuImage, LuGlobe } from 'react-icons/lu';
+import {
+  LuType,
+  LuImage,
+  LuGlobe,
+  LuSettings2,
+  LuTrash2,
+  LuCopyPlus,
+  LuEye,
+  LuEyeOff,
+  LuArrowUpToLine,
+  LuArrowDownToLine,
+  LuArrowUp,
+  LuArrowDown,
+  LuCrosshair,
+} from 'react-icons/lu';
 import { APP_NAME } from '../../lib/constants';
+import type { ContextMenuEntry } from '../../store/contextMenuStore';
 
 
 export function CanvasEditor() {
@@ -22,18 +38,23 @@ export function CanvasEditor() {
   const moveElement = useSceneStore((s) => s.moveElement);
   const resizeElement = useSceneStore((s) => s.resizeElement);
   const updateElement = useSceneStore((s) => s.updateElement);
+  const removeElement = useSceneStore((s) => s.removeElement);
+  const toggleVisibility = useSceneStore((s) => s.toggleVisibility);
+  const reorderElement = useSceneStore((s) => s.reorderElement);
+  const duplicateElement = useSceneStore((s) => s.duplicateElement);
 
   const selectedId = useEditorStore((s) => s.selectedElementId);
   const selectElement = useEditorStore((s) => s.selectElement);
   const bottomDockHeight = useEditorStore((s) => s.bottomDockHeight);
   const openProperties = useEditorStore((s) => s.openProperties);
   const pushHistory = useHistoryStore((s) => s.push);
+  const showMenu = useContextMenuStore((s) => s.show);
 
   const handleQuickAdd = useCallback(
     (type: 'text' | 'image' | 'browser') => {
       pushHistory();
       addElement(type);
-      
+
       // Auto-select the newly added element
       const updatedElements = selectElements(useSceneStore.getState());
       const newElement = updatedElements[updatedElements.length - 1];
@@ -118,6 +139,201 @@ export function CanvasEditor() {
     [openProperties],
   );
 
+  // ── Context Menu ──
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      // Shift+right-click → native browser context menu
+      if (e.shiftKey) return;
+      e.preventDefault();
+
+      // Determine if right-clicking on an element or blank canvas
+      let clickedId: string | null = selectedId;
+
+      if (stageRef.current) {
+        const pointerPos = stageRef.current.getPointerPosition();
+        if (pointerPos) {
+          const shape = stageRef.current.getIntersection(pointerPos);
+          if (shape && shape.name() !== 'canvas-bg') {
+            let node: Konva.Node | null = shape;
+            let foundId = '';
+            while (node) {
+              const id = node.id();
+              if (id) {
+                foundId = id;
+                break;
+              }
+              node = node.getParent();
+            }
+            if (foundId) {
+              clickedId = foundId;
+              selectElement(foundId);
+            }
+          } else {
+            selectElement(null);
+            clickedId = null;
+          }
+        }
+      }
+
+      const clickedEl = clickedId ? elements.find((el) => el.id === clickedId) : null;
+
+      if (clickedEl) {
+        // ── Context menu for selected element ──
+        const elIndex = elements.findIndex((el) => el.id === clickedEl.id);
+        const canMoveUp = elIndex < elements.length - 1;
+        const canMoveDown = elIndex > 0;
+
+        const items: ContextMenuEntry[] = [
+          {
+            type: 'item',
+            id: 'properties',
+            label: 'Properties',
+            icon: <LuSettings2 size={12} />,
+            onClick: () => openProperties(clickedEl.id),
+          },
+          {
+            type: 'item',
+            id: 'duplicate',
+            label: 'Duplicate',
+            icon: <LuCopyPlus size={12} />,
+            onClick: () => {
+              pushHistory();
+              duplicateElement(clickedEl.id);
+            },
+          },
+          {
+            type: 'item',
+            id: 'toggle-visibility',
+            label: clickedEl.hidden ? 'Show' : 'Hide',
+            icon: clickedEl.hidden ? <LuEye size={12} /> : <LuEyeOff size={12} />,
+            onClick: () => {
+              pushHistory();
+              toggleVisibility(clickedEl.id);
+            },
+          },
+          { type: 'separator' },
+          {
+            type: 'item',
+            id: 'move-top',
+            label: 'Bring to Front',
+            icon: <LuArrowUpToLine size={12} />,
+            disabled: !canMoveUp,
+            onClick: () => {
+              pushHistory();
+              reorderElement(elIndex, elements.length - 1);
+            },
+          },
+          {
+            type: 'item',
+            id: 'move-up',
+            label: 'Bring Forward',
+            icon: <LuArrowUp size={12} />,
+            disabled: !canMoveUp,
+            onClick: () => {
+              pushHistory();
+              reorderElement(elIndex, elIndex + 1);
+            },
+          },
+          {
+            type: 'item',
+            id: 'move-down',
+            label: 'Send Backward',
+            icon: <LuArrowDown size={12} />,
+            disabled: !canMoveDown,
+            onClick: () => {
+              pushHistory();
+              reorderElement(elIndex, elIndex - 1);
+            },
+          },
+          {
+            type: 'item',
+            id: 'move-bottom',
+            label: 'Send to Back',
+            icon: <LuArrowDownToLine size={12} />,
+            disabled: !canMoveDown,
+            onClick: () => {
+              pushHistory();
+              reorderElement(elIndex, 0);
+            },
+          },
+          { type: 'separator' },
+          {
+            type: 'item',
+            id: 'center-canvas',
+            label: 'Center on Canvas',
+            icon: <LuCrosshair size={12} />,
+            onClick: () => {
+              pushHistory();
+              updateElement(clickedEl.id, {
+                x: Math.round((canvasWidth - clickedEl.width) / 2),
+                y: Math.round((canvasHeight - clickedEl.height) / 2),
+              });
+            },
+          },
+          { type: 'separator' },
+          {
+            type: 'item',
+            id: 'delete',
+            label: 'Delete',
+            icon: <LuTrash2 size={12} />,
+            danger: true,
+            onClick: () => {
+              pushHistory();
+              removeElement(clickedEl.id);
+              selectElement(null);
+            },
+          },
+        ];
+
+        showMenu(e.clientX, e.clientY, items);
+      } else {
+        // ── Context menu for blank canvas ──
+        const items: ContextMenuEntry[] = [
+          {
+            type: 'item',
+            id: 'add-text',
+            label: 'Add Text',
+            icon: <LuType size={12} />,
+            onClick: () => handleQuickAdd('text'),
+          },
+          {
+            type: 'item',
+            id: 'add-image',
+            label: 'Add Image',
+            icon: <LuImage size={12} />,
+            onClick: () => handleQuickAdd('image'),
+          },
+          {
+            type: 'item',
+            id: 'add-browser',
+            label: 'Add Browser Source',
+            icon: <LuGlobe size={12} />,
+            onClick: () => handleQuickAdd('browser'),
+          },
+        ];
+
+        showMenu(e.clientX, e.clientY, items);
+      }
+    },
+    [
+      selectedId,
+      elements,
+      canvasWidth,
+      canvasHeight,
+      openProperties,
+      duplicateElement,
+      toggleVisibility,
+      reorderElement,
+      updateElement,
+      removeElement,
+      selectElement,
+      handleQuickAdd,
+      pushHistory,
+      showMenu,
+    ],
+  );
+
   // Sort by zIndex for rendering order
   const sortedElements = [...elements]
     .filter((el) => !el.hidden)
@@ -128,6 +344,7 @@ export function CanvasEditor() {
       ref={containerRef}
       className="flex-1 min-h-0 overflow-hidden relative"
       style={{ backgroundColor: 'var(--color-bg-canvas)' }}
+      onContextMenu={handleContextMenu}
     >
       <Stage
         ref={stageRef}
