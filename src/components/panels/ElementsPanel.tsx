@@ -56,8 +56,16 @@ export function ElementsPanel() {
       pushHistory();
       addElement(type);
       setShowAddMenu(false);
+
+      // Auto-select and open properties for the newly added element
+      const updatedElements = selectElements(useSceneStore.getState());
+      const newElement = updatedElements[updatedElements.length - 1];
+      if (newElement) {
+        selectElement(newElement.id);
+        openProperties(newElement.id);
+      }
     },
-    [addElement, pushHistory],
+    [addElement, selectElement, openProperties, pushHistory],
   );
 
   const handleDelete = useCallback(
