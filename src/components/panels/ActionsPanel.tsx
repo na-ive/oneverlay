@@ -6,15 +6,26 @@ import { SUPPORT_URL } from '../../lib/constants';
 
 export function ActionsPanel() {
   const getSnapshot = useSceneStore((s) => s.getSnapshot);
+  const activeSceneId = useSceneStore((s) => s.activeSceneId);
+  const scenes = useSceneStore((s) => s.scenes);
+  const activeScene = scenes.find((s) => s.id === activeSceneId);
 
   const handleSave = useCallback(() => {
     saveProject(getSnapshot());
   }, [getSnapshot]);
 
   const handleOpenOverlay = useCallback(() => {
-    // Placeholder for opening/loading overlay in the future
-    alert('Open saved Overlay feature is coming soon!');
-  }, []);
+    if (activeScene) {
+      const slug = activeScene.name
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-');
+      window.open(`/o/${slug}`, '_blank', 'noopener,noreferrer');
+    }
+  }, [activeScene]);
 
   const handleSupport = useCallback(() => {
     window.open(SUPPORT_URL, '_blank', 'noopener,noreferrer');
