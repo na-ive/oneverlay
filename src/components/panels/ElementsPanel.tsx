@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import {
   LuPlus,
   LuEye,
@@ -50,6 +50,26 @@ export function ElementsPanel() {
   const showMenu = useContextMenuStore((s) => s.show);
 
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showAddMenu) return;
+
+    const handleOutsideClick = (e: Event) => {
+      if (addMenuRef.current && addMenuRef.current.contains(e.target as Node)) {
+        return;
+      }
+      setShowAddMenu(false);
+    };
+
+    window.addEventListener('mousedown', handleOutsideClick, { capture: true });
+    window.addEventListener('touchstart', handleOutsideClick, { capture: true });
+
+    return () => {
+      window.removeEventListener('mousedown', handleOutsideClick, { capture: true });
+      window.removeEventListener('touchstart', handleOutsideClick, { capture: true });
+    };
+  }, [showAddMenu]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   // Display order is reversed (top = highest z-index)
@@ -354,7 +374,7 @@ export function ElementsPanel() {
         <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">
           Elements
         </span>
-        <div className="relative">
+        <div ref={addMenuRef} className="relative">
           <IconButton
             size="sm"
             tooltip="Add element"

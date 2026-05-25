@@ -37,12 +37,16 @@ export function ContextMenu() {
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') hide(); };
 
-    document.addEventListener('mousedown', close);
-    document.addEventListener('scroll', close, { capture: true });
+    // Use capturing listeners on window to intercept clicks/taps before stopPropagation() blocks them
+    window.addEventListener('mousedown', close, { capture: true });
+    window.addEventListener('touchstart', close, { capture: true });
+    window.addEventListener('scroll', close, { capture: true });
     window.addEventListener('keydown', onKey);
+
     return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('scroll', close, { capture: true });
+      window.removeEventListener('mousedown', close, { capture: true });
+      window.removeEventListener('touchstart', close, { capture: true });
+      window.removeEventListener('scroll', close, { capture: true });
       window.removeEventListener('keydown', onKey);
     };
   }, [open, hide]);

@@ -831,12 +831,13 @@ export function CanvasEditor() {
       {/* Empty canvas guide */}
       {elements.length === 0 && (
         <div
-          className="absolute pointer-events-none select-none z-10 flex flex-col items-center justify-center overflow-hidden"
+          className="absolute pointer-events-none select-none flex flex-col items-center justify-center overflow-hidden"
           style={{
             left: `${offsetX}px`,
             top: `${offsetY}px`,
             width: `${canvasWidth * scale}px`,
             height: `${canvasHeight * scale}px`,
+            zIndex: 10000,
           }}
         >
           <div
