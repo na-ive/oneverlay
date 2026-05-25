@@ -22,7 +22,10 @@ export function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col selection:bg-accent/30 selection:text-white">
+    <div className="relative min-h-screen bg-bg-primary text-text-primary flex flex-col selection:bg-accent/30 selection:text-white overflow-hidden">
+      {/* Background glow atmosphere */}
+      <div className="absolute top-[250px] left-1/2 -translate-x-1/2 w-[300px] sm:w-[600px] md:w-[900px] h-[300px] bg-gradient-to-r from-indigo-600/12 to-purple-600/8 rounded-full blur-[120px] sm:blur-[140px] pointer-events-none -z-10" />
+
       {/* Navigation Header */}
       <header className="w-full max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between border-b border-white/[0.04] z-10">
         <div className="flex items-baseline gap-2">
