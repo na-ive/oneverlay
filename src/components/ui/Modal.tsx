@@ -64,7 +64,7 @@ export function Modal({ open, onClose, title, children, width = '480px' }: Modal
           <h2 className="text-xs font-bold text-text-primary uppercase tracking-wider m-0">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-text-secondary hover:text-text-primary hover:bg-white/[0.08] hover:scale-105 active:scale-95 transition-all cursor-pointer border-none bg-transparent"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-text-secondary hover:text-text-primary hover:bg-white/[0.08] transition-all cursor-pointer border-none bg-transparent"
             aria-label="Close"
           >
             ✕

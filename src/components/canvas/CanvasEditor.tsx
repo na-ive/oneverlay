@@ -467,42 +467,42 @@ export function CanvasEditor() {
           }}
         >
           <div
-            className="flex flex-col items-center text-center max-w-md pointer-events-auto p-4 transition-transform duration-200"
+            className="flex flex-col items-center text-center max-w-xl pointer-events-auto p-8 transition-transform duration-200"
             style={{
               transform: scale < 0.65 ? `scale(${scale / 0.65})` : 'none',
             }}
           >
             {/* Page title */}
-            <span className="text-5xl font-black uppercase tracking-widest text-text-primary">
+            <h1 className="text-7xl font-black uppercase tracking-widest text-text-primary drop-shadow-sm select-none">
               {APP_NAME}
-            </span>
+            </h1>
 
             {/* Description text */}
-            <p className="text-sm text-text-secondary mt-3 mb-8 max-w-sm leading-relaxed">
+            <p className="text-base text-text-secondary mt-4 mb-10 max-w-md leading-relaxed select-none">
               Add your first element to start designing and composing your custom stream overlay.
             </p>
 
             {/* Quick CTA buttons in 1 row */}
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-4">
               <button
                 onClick={() => handleQuickAdd('text')}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold hover:scale-[1.05] active:scale-[0.95] transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+                className="flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-sm font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
               >
-                <LuType size={13} className="text-text-secondary" />
+                <LuType size={16} className="text-text-secondary" />
                 Text
               </button>
               <button
                 onClick={() => handleQuickAdd('image')}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold hover:scale-[1.05] active:scale-[0.95] transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+                className="flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-sm font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
               >
-                <LuImage size={13} className="text-text-secondary" />
+                <LuImage size={16} className="text-text-secondary" />
                 Image
               </button>
               <button
                 onClick={() => handleQuickAdd('browser')}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-xs font-semibold hover:scale-[1.05] active:scale-[0.95] transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
+                className="flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-white/[0.08] bg-bg-surface hover:bg-bg-hover text-text-primary text-sm font-semibold transition-all cursor-pointer hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
               >
-                <LuGlobe size={13} className="text-text-secondary" />
+                <LuGlobe size={16} className="text-text-secondary" />
                 Browser
               </button>
             </div>

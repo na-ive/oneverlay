@@ -36,7 +36,6 @@ export function IconButton({
         flex items-center justify-center rounded-xl
         border-none bg-transparent cursor-pointer
         text-text-secondary transition-all duration-200
-        hover:scale-105 active:scale-95
         ${variantClasses}
         ${activeClass}
         ${disabled ? 'opacity-30 cursor-not-allowed' : 'hover:text-text-primary'}

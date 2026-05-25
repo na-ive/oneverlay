@@ -34,7 +34,7 @@ export function ActionsPanel() {
         <div className="flex flex-col gap-2">
           <button
             onClick={handleSave}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold shadow-md shadow-accent/15 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer border-none"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-semibold shadow-md shadow-accent/15 transition-all cursor-pointer border-none"
           >
             <LuSave size={13} />
             Save Overlay
@@ -42,7 +42,7 @@ export function ActionsPanel() {
 
           <button
             onClick={handleOpenOverlay}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer"
           >
             <LuGlobe size={13} />
             Open Overlay
@@ -53,7 +53,7 @@ export function ActionsPanel() {
         <div>
           <button
             onClick={handleSupport}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer"
           >
             <LuHeart size={13} />
             Support

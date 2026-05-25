@@ -53,7 +53,7 @@ export function SettingsModal() {
         <div className="pt-3 border-t border-white/[0.06]">
           <button
             onClick={handleReset}
-            className="w-full px-3 py-2.5 rounded-xl border border-danger/30 bg-danger/10 hover:bg-danger/20 text-danger text-xs font-semibold hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full px-3 py-2.5 rounded-xl border border-danger/30 bg-danger/10 hover:bg-danger/20 text-danger text-xs font-semibold transition-all cursor-pointer"
           >
             Reset Project
           </button>
