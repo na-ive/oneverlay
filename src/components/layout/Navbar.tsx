@@ -10,6 +10,7 @@ import {
   LuRotateCcw,
   LuCrosshair,
 } from 'react-icons/lu';
+import { Link } from 'react-router-dom';
 import { IconButton } from '../ui/IconButton';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
@@ -42,15 +43,18 @@ export function Navbar() {
         backgroundColor: 'var(--color-bg-secondary)',
       }}
     >
-      {/* Left — Title */}
-      <div className="flex items-baseline gap-1">
-        <span className="text-base font-black uppercase tracking-widest text-text-primary pl-1">
+      {/* Left — Title Link */}
+      <Link
+        to="/"
+        className="flex items-baseline gap-1 hover:opacity-85 transition-opacity cursor-pointer group"
+      >
+        <span className="text-base font-black uppercase tracking-widest text-text-primary pl-1 group-hover:text-white transition-colors">
           {APP_NAME}
         </span>
-        <span className="text-[9px] font-bold tracking-widest text-text-muted">
+        <span className="text-[9px] font-bold tracking-widest text-text-muted group-hover:text-text-secondary transition-colors">
           BY NA-IVE
         </span>
-      </div>
+      </Link>
 
       {/* Center — Unified Toolbar */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3.5 bg-bg-primary/20 border border-white/[0.04] px-3.5 py-1 rounded-2xl">
