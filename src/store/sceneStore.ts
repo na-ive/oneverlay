@@ -15,7 +15,6 @@ interface SceneStoreState extends ProjectData {
   updateElement: (id: string, updates: Partial<OverlayElement>) => void;
   removeElement: (id: string) => void;
   moveElement: (id: string, x: number, y: number) => void;
-  resizeElement: (id: string, width: number, height: number) => void;
   toggleVisibility: (id: string) => void;
   reorderElement: (fromIndex: number, toIndex: number) => void;
   duplicateElement: (id: string) => void;
@@ -90,16 +89,6 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
     updateActiveScene(set, (scene) => ({
       elements: scene.elements.map((el) =>
         el.id === id ? { ...el, x: Math.round(x), y: Math.round(y) } : el
-      ),
-    }));
-  },
-
-  resizeElement: (id: string, width: number, height: number) => {
-    updateActiveScene(set, (scene) => ({
-      elements: scene.elements.map((el) =>
-        el.id === id
-          ? { ...el, width: Math.round(width), height: Math.round(height) }
-          : el
       ),
     }));
   },

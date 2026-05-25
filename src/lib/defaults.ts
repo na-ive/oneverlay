@@ -11,7 +11,7 @@ import { DEFAULT_CANVAS } from './constants';
 
 // ── Element Factories ──
 
-const baseDefaults = (type: ElementType, name: string): Omit<OverlayElement, 'type' | keyof TextElement | keyof ImageElement | keyof BrowserElement> & { id: string; type: ElementType; name: string; x: number; y: number; width: number; height: number; rotation: number; opacity: number; zIndex: number; hidden: boolean; locked: boolean } => ({
+const baseDefaults = (type: ElementType, name: string): Omit<OverlayElement, 'type' | keyof TextElement | keyof ImageElement | keyof BrowserElement> & { id: string; type: ElementType; name: string; x: number; y: number; scaleX: number; scaleY: number; rotation: number; opacity: number; zIndex: number; hidden: boolean; locked: boolean; cropLeft: number; cropTop: number; cropRight: number; cropBottom: number; } => ({
   id: uuidv4(),
   type,
   name,
@@ -19,11 +19,17 @@ const baseDefaults = (type: ElementType, name: string): Omit<OverlayElement, 'ty
   y: 100,
   width: 300,
   height: 200,
+  scaleX: 1,
+  scaleY: 1,
   rotation: 0,
   opacity: 1,
   zIndex: 0,
   hidden: false,
   locked: false,
+  cropLeft: 0,
+  cropTop: 0,
+  cropRight: 0,
+  cropBottom: 0,
 });
 
 export function createTextElement(overrides?: Partial<TextElement>): TextElement {
@@ -57,8 +63,10 @@ export function createBrowserElement(overrides?: Partial<BrowserElement>): Brows
     ...baseDefaults('browser', 'Browser'),
     type: 'browser',
     url: 'https://example.com',
-    width: 600,
-    height: 400,
+    browserWidth: 800,
+    browserHeight: 600,
+    width: 800,
+    height: 600,
     ...overrides,
   };
 }

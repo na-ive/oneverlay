@@ -1,7 +1,7 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, Rect, Text, Group } from 'react-konva';
-import type Konva from 'konva';
 import type { ImageElement } from '../../types/elements';
+import { useSceneStore } from '../../store/sceneStore';
 
 interface ImageElementNodeProps {
   element: ImageElement;
@@ -9,82 +9,75 @@ interface ImageElementNodeProps {
   y: number;
   width: number;
   height: number;
-  rotation: number;
-  opacity: number;
-  draggable: boolean;
-  onClick: () => void;
-  onTap: () => void;
-  onDragStart: () => void;
-  onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
-  onDblClick: () => void;
-  onDblTap: () => void;
 }
 
-export const ImageElementNode = forwardRef<Konva.Group, ImageElementNodeProps>(
-  ({ element, ...props }, ref) => {
-    const [image, setImage] = useState<HTMLImageElement | null>(null);
-    const [error, setError] = useState(false);
+export const ImageElementNode = ({ element, x, y, width, height }: ImageElementNodeProps) => {
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [error, setError] = useState(false);
 
-    useEffect(() => {
-      if (!element.imageUrl) {
-        setImage(null);
-        setError(false);
-        return;
-      }
-
-      const img = new window.Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        setImage(img);
-        setError(false);
-      };
-      img.onerror = () => {
-        setImage(null);
-        setError(true);
-      };
-      img.src = element.imageUrl;
-
-      return () => {
-        img.onload = null;
-        img.onerror = null;
-      };
-    }, [element.imageUrl]);
-
-    // Show placeholder if no image or error
-    if (!image || error) {
-      return (
-        <Group ref={ref} {...props}>
-          <Rect
-            width={element.width}
-            height={element.height}
-            fill="#1e2a3a"
-            stroke="#2a3a4a"
-            strokeWidth={1}
-            cornerRadius={4}
-          />
-          <Text
-            text={error ? '⚠ Image failed to load' : '🖼 Image'}
-            fontSize={13}
-            fill="#5a6475"
-            width={element.width}
-            height={element.height}
-            align="center"
-            verticalAlign="middle"
-          />
-        </Group>
-      );
+  useEffect(() => {
+    if (!element.imageUrl) {
+      setImage(null);
+      setError(false);
+      return;
     }
 
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      setImage(img);
+      setError(false);
+      // Auto-update intrinsic dimensions to original image size
+      if (element.width !== img.width || element.height !== img.height) {
+        useSceneStore.getState().updateElement(element.id, {
+          width: img.width,
+          height: img.height,
+        });
+      }
+    };
+    img.onerror = () => {
+      setImage(null);
+      setError(true);
+    };
+    img.src = element.imageUrl;
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [element.imageUrl]);
+
+  if (!image || error) {
     return (
-      <Group ref={ref} {...props}>
-        <Image
-          image={image}
-          width={element.width}
-          height={element.height}
+      <Group x={x} y={y}>
+        <Rect
+          width={width}
+          height={height}
+          fill="#1e2a3a"
+          stroke="#2a3a4a"
+          strokeWidth={1}
+          cornerRadius={4}
+        />
+        <Text
+          text={error ? '⚠ Image failed to load' : '🖼 Image'}
+          fontSize={13}
+          fill="#5a6475"
+          width={width}
+          height={height}
+          align="center"
+          verticalAlign="middle"
         />
       </Group>
     );
-  },
-);
+  }
 
-ImageElementNode.displayName = 'ImageElementNode';
+  return (
+    <Image
+      image={image}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+    />
+  );
+};

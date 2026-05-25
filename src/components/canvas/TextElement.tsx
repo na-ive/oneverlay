@@ -1,39 +1,41 @@
-import { forwardRef } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import { Text } from 'react-konva';
 import type Konva from 'konva';
 import type { TextElement } from '../../types/elements';
+import { useSceneStore } from '../../store/sceneStore';
 
 interface TextElementNodeProps {
   element: TextElement;
   x: number;
   y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  opacity: number;
-  draggable: boolean;
-  onClick: () => void;
-  onTap: () => void;
-  onDragStart: () => void;
-  onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
-  onDblClick: () => void;
-  onDblTap: () => void;
+  width?: number;
+  height?: number;
 }
 
-export const TextElementNode = forwardRef<Konva.Text, TextElementNodeProps>(
-  ({ element, ...props }, ref) => {
-    return (
-      <Text
-        ref={ref}
-        text={element.text}
-        fontSize={element.fontSize}
-        fontStyle={element.fontWeight >= 700 ? 'bold' : element.fontWeight >= 500 ? '500' : 'normal'}
-        fontFamily={element.fontFamily}
-        fill={element.color}
-        {...props}
-      />
-    );
-  },
-);
+export const TextElementNode = ({ element, x, y }: TextElementNodeProps) => {
+  const textRef = useRef<Konva.Text>(null);
 
-TextElementNode.displayName = 'TextElementNode';
+  useLayoutEffect(() => {
+    if (textRef.current) {
+      const width = textRef.current.width();
+      const height = textRef.current.height();
+      
+      if (width !== element.width || height !== element.height) {
+        useSceneStore.getState().updateElement(element.id, { width, height });
+      }
+    }
+  }, [element.id, element.text, element.fontSize, element.fontFamily, element.fontWeight, element.width, element.height]);
+
+  return (
+    <Text
+      ref={textRef}
+      text={element.text}
+      fontSize={element.fontSize}
+      fontStyle={element.fontWeight >= 700 ? 'bold' : element.fontWeight >= 500 ? '500' : 'normal'}
+      fontFamily={element.fontFamily}
+      fill={element.color}
+      x={x}
+      y={y}
+    />
+  );
+};

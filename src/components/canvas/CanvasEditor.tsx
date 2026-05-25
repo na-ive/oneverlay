@@ -37,7 +37,7 @@ export function CanvasEditor() {
   const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
   const addElement = useSceneStore((s) => s.addElement);
   const moveElement = useSceneStore((s) => s.moveElement);
-  const resizeElement = useSceneStore((s) => s.resizeElement);
+  const resizeElement = useSceneStore((s) => (s as any).resizeElement); // Keep for now in case
   const updateElement = useSceneStore((s) => s.updateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
   const toggleVisibility = useSceneStore((s) => s.toggleVisibility);
@@ -112,24 +112,28 @@ export function CanvasEditor() {
     pushHistory();
   }, [pushHistory]);
 
-  // Transform end (resize)
+  // Transform end (resize or crop)
   const handleTransformEnd = useCallback(
     (id: string, node: Konva.Node) => {
-      const scaleX = node.scaleX();
-      const scaleY = node.scaleY();
+      const updates: Partial<OverlayElement> = {
+        x: node.x(),
+        y: node.y(),
+        scaleX: node.scaleX(),
+        scaleY: node.scaleY(),
+        rotation: node.rotation(),
+      };
 
-      // Reset scale and apply to width/height
-      node.scaleX(1);
-      node.scaleY(1);
+      // Extract crop from node if it was set
+      if (node.attrs.cropLeft !== undefined) {
+        updates.cropLeft = node.attrs.cropLeft;
+        updates.cropTop = node.attrs.cropTop;
+        updates.cropRight = node.attrs.cropRight;
+        updates.cropBottom = node.attrs.cropBottom;
+      }
 
-      const newWidth = Math.max(10, node.width() * scaleX);
-      const newHeight = Math.max(10, node.height() * scaleY);
-
-      resizeElement(id, newWidth, newHeight);
-      moveElement(id, node.x(), node.y());
-      updateElement(id, { rotation: node.rotation() });
+      updateElement(id, updates);
     },
-    [resizeElement, moveElement, updateElement],
+    [updateElement],
   );
 
   // Double-click to open properties
@@ -384,11 +388,12 @@ export function CanvasEditor() {
                 style={{
                   left: `${browserEl.x * scale}px`,
                   top: `${browserEl.y * scale}px`,
-                  width: `${browserEl.width * scale}px`,
-                  height: `${browserEl.height * scale}px`,
-                  transform: `rotate(${browserEl.rotation}deg)`,
+                  width: `${browserEl.browserWidth}px`,
+                  height: `${browserEl.browserHeight}px`,
+                  transform: `rotate(${browserEl.rotation}deg) scale(${scale * browserEl.scaleX}, ${scale * browserEl.scaleY})`,
                   transformOrigin: 'top left',
                   opacity: browserEl.opacity,
+                  clipPath: `inset(${browserEl.cropTop}px ${browserEl.cropRight}px ${browserEl.cropBottom}px ${browserEl.cropLeft}px)`,
                   borderRadius: '4px',
                   pointerEvents: 'none',
                 }}

@@ -10,11 +10,17 @@ export interface BaseElement {
   y: number;
   width: number;
   height: number;
+  scaleX: number;
+  scaleY: number;
   rotation: number;
   opacity: number;
   zIndex: number;
   hidden: boolean;
   locked: boolean;
+  cropLeft: number;
+  cropTop: number;
+  cropRight: number;
+  cropBottom: number;
 }
 
 export interface TextElement extends BaseElement {
@@ -34,6 +40,8 @@ export interface ImageElement extends BaseElement {
 export interface BrowserElement extends BaseElement {
   type: 'browser';
   url: string;
+  browserWidth: number;
+  browserHeight: number;
 }
 
 export type OverlayElement = TextElement | ImageElement | BrowserElement;

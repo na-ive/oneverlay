@@ -57,17 +57,23 @@ export function PropertiesModal() {
             <NumberInput label="X" value={element.x} onChange={(v) => handleUpdate({ x: v })} />
             <NumberInput label="Y" value={element.y} onChange={(v) => handleUpdate({ y: v })} />
             <NumberInput
-              label="Width"
-              value={element.width}
-              onChange={(v) => handleUpdate({ width: v })}
-              min={1}
+              label="Scale X"
+              value={Number(element.scaleX.toFixed(2))}
+              onChange={(v) => handleUpdate({ scaleX: v })}
+              step={0.1}
             />
             <NumberInput
-              label="Height"
-              value={element.height}
-              onChange={(v) => handleUpdate({ height: v })}
-              min={1}
+              label="Scale Y"
+              value={Number(element.scaleY.toFixed(2))}
+              onChange={(v) => handleUpdate({ scaleY: v })}
+              step={0.1}
             />
+          </div>
+          <div className="grid grid-cols-4 gap-2 mt-2">
+            <NumberInput label="Crop L" value={Math.round(element.cropLeft)} onChange={(v) => handleUpdate({ cropLeft: v })} min={0} />
+            <NumberInput label="Crop T" value={Math.round(element.cropTop)} onChange={(v) => handleUpdate({ cropTop: v })} min={0} />
+            <NumberInput label="Crop R" value={Math.round(element.cropRight)} onChange={(v) => handleUpdate({ cropRight: v })} min={0} />
+            <NumberInput label="Crop B" value={Math.round(element.cropBottom)} onChange={(v) => handleUpdate({ cropBottom: v })} min={0} />
           </div>
           <div className="grid grid-cols-2 gap-2 mt-2">
             <NumberInput
@@ -246,6 +252,20 @@ function BrowserProperties({
         className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
         placeholder="https://example.com"
       />
+      <div className="grid grid-cols-2 gap-2 mt-2">
+        <NumberInput
+          label="Viewport Width"
+          value={element.browserWidth}
+          onChange={(v) => onUpdate({ browserWidth: v, width: v })}
+          min={100}
+        />
+        <NumberInput
+          label="Viewport Height"
+          value={element.browserHeight}
+          onChange={(v) => onUpdate({ browserHeight: v, height: v })}
+          min={100}
+        />
+      </div>
     </div>
   );
 }
