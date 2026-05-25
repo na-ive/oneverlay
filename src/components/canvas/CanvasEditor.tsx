@@ -24,6 +24,7 @@ import {
 } from 'react-icons/lu';
 import { APP_NAME } from '../../lib/constants';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
+import type { BrowserElement } from '../../types/elements';
 
 
 export function CanvasEditor() {
@@ -346,22 +347,82 @@ export function CanvasEditor() {
       style={{ backgroundColor: 'var(--color-bg-canvas)' }}
       onContextMenu={handleContextMenu}
     >
+      {/* Canvas background in DOM (below the Stage) */}
+      <div
+        className="absolute pointer-events-none shadow-2xl transition-all duration-75"
+        style={{
+          left: `${offsetX}px`,
+          top: `${offsetY}px`,
+          width: `${canvasWidth * scale}px`,
+          height: `${canvasHeight * scale}px`,
+          backgroundColor: '#0a0a0a',
+        }}
+      />
+
+      {/* HTML Overlays for Browser Elements */}
+      <div
+        className="absolute pointer-events-none overflow-hidden select-none"
+        style={{
+          left: `${offsetX}px`,
+          top: `${offsetY}px`,
+          width: `${canvasWidth * scale}px`,
+          height: `${canvasHeight * scale}px`,
+          zIndex: 5,
+        }}
+      >
+        {sortedElements
+          .filter((el) => el.type === 'browser')
+          .map((el) => {
+            const browserEl = el as BrowserElement;
+            const hasUrl = !!browserEl.url && browserEl.url !== 'about:blank';
+            if (!hasUrl) return null;
+
+            return (
+              <div
+                key={browserEl.id}
+                className="absolute overflow-hidden"
+                style={{
+                  left: `${browserEl.x * scale}px`,
+                  top: `${browserEl.y * scale}px`,
+                  width: `${browserEl.width * scale}px`,
+                  height: `${browserEl.height * scale}px`,
+                  transform: `rotate(${browserEl.rotation}deg)`,
+                  transformOrigin: 'top left',
+                  opacity: browserEl.opacity,
+                  borderRadius: '4px',
+                  pointerEvents: 'none',
+                }}
+              >
+                <iframe
+                  src={browserEl.url}
+                  title={`browser-source-${browserEl.id}`}
+                  className="w-full h-full border-0 pointer-events-none"
+                  style={{
+                    backgroundColor: 'transparent',
+                  }}
+                />
+              </div>
+            );
+          })}
+      </div>
+
       <Stage
         ref={stageRef}
         width={containerSize.width}
         height={containerSize.height}
         onClick={handleStageClick}
         onTap={handleStageClick}
+        style={{ position: 'absolute', left: 0, top: 0, zIndex: 10 }}
       >
         <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>
-          {/* Canvas background */}
+          {/* Canvas background outline only */}
           <Rect
             name="canvas-bg"
             x={0}
             y={0}
             width={canvasWidth}
             height={canvasHeight}
-            fill="#0a0a0a"
+            fill="transparent"
             stroke="#333"
             strokeWidth={1 / scale}
           />

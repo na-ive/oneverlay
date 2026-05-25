@@ -22,9 +22,27 @@ interface BrowserElementNodeProps {
 
 export const BrowserElementNode = forwardRef<Konva.Group, BrowserElementNodeProps>(
   ({ element, ...props }, ref) => {
+    const hasUrl = !!element.url && element.url !== 'about:blank';
+
+    if (hasUrl) {
+      return (
+        <Group ref={ref} {...props}>
+          <Rect
+            width={element.width}
+            height={element.height}
+            fill="rgba(0,0,0,0.01)" // Clickable area
+            stroke="rgba(255, 255, 255, 0.15)"
+            strokeWidth={1}
+            dash={[4, 4]}
+            cornerRadius={4}
+          />
+        </Group>
+      );
+    }
+
     // Truncate URL for display
     const displayUrl =
-      element.url.length > 40 ? element.url.substring(0, 40) + '…' : element.url;
+      element.url && element.url.length > 40 ? element.url.substring(0, 40) + '…' : 'about:blank';
 
     return (
       <Group ref={ref} {...props}>
@@ -62,7 +80,7 @@ export const BrowserElementNode = forwardRef<Konva.Group, BrowserElementNodeProp
         <Text
           x={14}
           y={9}
-          text={displayUrl || 'about:blank'}
+          text={displayUrl}
           fontSize={9}
           fill="#5a6475"
           width={element.width - 28}
@@ -72,7 +90,7 @@ export const BrowserElementNode = forwardRef<Konva.Group, BrowserElementNodeProp
 
         {/* Globe icon text */}
         <Text
-          text="🌐 Browser Source"
+          text="🌐 Empty Browser Source"
           fontSize={14}
           fill="#5a6475"
           width={element.width}
