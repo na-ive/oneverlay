@@ -89,52 +89,38 @@ export function LandingPage() {
         </section>
 
         {/* Features Grid Section */}
-        <section className="w-full max-w-[1100px] mb-24 md:mb-32">
+        <section className="w-full max-w-[1100px] mb-12 md:mb-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <div className="p-6 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-white/[0.1] transition-all duration-200">
-              <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide mb-2">
+            <div className="p-8 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-accent/25 hover:bg-bg-secondary/60 hover:shadow-2xl hover:shadow-accent/[0.02] transition-all duration-300">
+              <h3 className="text-lg font-black text-text-primary uppercase tracking-wide mb-3">
                 Scene-Based Workflow
               </h3>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Organize overlays into reusable streaming scenes.
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Organize and toggle streaming components into reusable scene collections. Swap layouts, text sources, and browser captures instantly without disrupting your stream setup.
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="p-6 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-white/[0.1] transition-all duration-200">
-              <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide mb-2">
+            <div className="p-8 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-accent/25 hover:bg-bg-secondary/60 hover:shadow-2xl hover:shadow-accent/[0.02] transition-all duration-300">
+              <h3 className="text-lg font-black text-text-primary uppercase tracking-wide mb-3">
                 OBS-Inspired Editing
               </h3>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Familiar scaling, transforms, and crop behavior.
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Position, scale, crop, and transform overlay elements with a pixel-perfect WYSIWYG editor. Familiar canvas grids, alignment snaps, and overlays render exactly as they do in OBS Studio.
               </p>
             </div>
 
             {/* Card 3 */}
-            <div className="p-6 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-white/[0.1] transition-all duration-200">
-              <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide mb-2">
+            <div className="p-8 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-accent/25 hover:bg-bg-secondary/60 hover:shadow-2xl hover:shadow-accent/[0.02] transition-all duration-300">
+              <h3 className="text-lg font-black text-text-primary uppercase tracking-wide mb-3">
                 Lightweight Composition
               </h3>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Combine multiple overlays into one clean setup.
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Consolidate multiple overlay assets under a single optimized browser source. Reduce your OBS Studio CPU overhead and memory footprint by letting Oneverlay handle the rendering.
               </p>
             </div>
           </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="w-full max-w-3xl text-center py-12 border-t border-white/[0.04] flex flex-col items-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-wide text-text-primary mb-6">
-            Start building your overlay setup.
-          </h2>
-          <Link
-            to="/editor"
-            className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-bg-surface hover:bg-bg-hover text-text-primary text-sm font-semibold border border-white/[0.08] hover:border-accent/30 transition-all cursor-pointer"
-          >
-            Launch Editor
-            <LuArrowRight size={16} />
-          </Link>
         </section>
       </main>
 
