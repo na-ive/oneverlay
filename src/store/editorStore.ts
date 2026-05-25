@@ -11,6 +11,8 @@ interface EditorState {
   setSettingsOpen: (open: boolean) => void;
   isPropertiesOpen: boolean;
   setPropertiesOpen: (open: boolean) => void;
+  isHelpOpen: boolean;
+  setHelpOpen: (open: boolean) => void;
   propertiesElementId: string | null;
   openProperties: (id: string) => void;
   closeProperties: () => void;
@@ -42,6 +44,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   setSettingsOpen: (open) => set({ isSettingsOpen: open }),
   isPropertiesOpen: false,
   setPropertiesOpen: (open) => set({ isPropertiesOpen: open }),
+  isHelpOpen: false,
+  setHelpOpen: (open) => set({ isHelpOpen: open }),
   propertiesElementId: null,
   openProperties: (id) =>
     set({ isPropertiesOpen: true, propertiesElementId: id, selectedElementId: id }),

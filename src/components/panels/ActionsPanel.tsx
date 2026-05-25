@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
-import { LuSave, LuHeart, LuGlobe } from 'react-icons/lu';
+import { LuSave, LuGlobe } from 'react-icons/lu';
 import { useSceneStore } from '../../store/sceneStore';
 import { saveProject } from '../../lib/persistence';
-import { SUPPORT_URL } from '../../lib/constants';
 
 export function ActionsPanel() {
   const getSnapshot = useSceneStore((s) => s.getSnapshot);
@@ -26,10 +25,6 @@ export function ActionsPanel() {
       window.open(`/o/${slug}`, '_blank', 'noopener,noreferrer');
     }
   }, [activeScene]);
-
-  const handleSupport = useCallback(() => {
-    window.open(SUPPORT_URL, '_blank', 'noopener,noreferrer');
-  }, []);
 
   return (
     <div className="flex flex-col h-full bg-bg-secondary/10">
@@ -57,17 +52,6 @@ export function ActionsPanel() {
           >
             <LuGlobe size={13} />
             Open Overlay
-          </button>
-        </div>
-
-        {/* Bottom Actions (Support) */}
-        <div>
-          <button
-            onClick={handleSupport}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer"
-          >
-            <LuHeart size={13} />
-            Support
           </button>
         </div>
       </div>

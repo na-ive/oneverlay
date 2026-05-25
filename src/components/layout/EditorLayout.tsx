@@ -8,6 +8,7 @@ import { CanvasPanel } from '../panels/CanvasPanel';
 import { ActionsPanel } from '../panels/ActionsPanel';
 import { SettingsModal } from '../modals/SettingsModal';
 import { PropertiesModal } from '../modals/PropertiesModal';
+import { HelpModal } from '../modals/HelpModal';
 import { ContextMenu } from '../ui/ContextMenu';
 import { usePersistence } from '../../hooks/usePersistence';
 import { useHistoryStore } from '../../store/historyStore';
@@ -227,6 +228,7 @@ export function EditorLayout() {
 
       <SettingsModal />
       <PropertiesModal />
+      <HelpModal />
       <ContextMenu />
     </div>
   );

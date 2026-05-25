@@ -9,16 +9,19 @@ import {
   LuPlus,
   LuRotateCcw,
   LuCrosshair,
+  LuHeart,
+  LuCircleHelp,
 } from 'react-icons/lu';
 import { Link } from 'react-router-dom';
 import { IconButton } from '../ui/IconButton';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { zoomIn, zoomOut, zoomReset } from '../../hooks/useCanvasZoom';
-import { APP_NAME, NAVBAR_HEIGHT } from '../../lib/constants';
+import { APP_NAME, NAVBAR_HEIGHT, SUPPORT_URL } from '../../lib/constants';
 
 export function Navbar() {
   const setSettingsOpen = useEditorStore((s) => s.setSettingsOpen);
+  const setHelpOpen = useEditorStore((s) => s.setHelpOpen);
   const zoom = useEditorStore((s) => s.zoom);
   const toolMode = useEditorStore((s) => s.toolMode);
   const setToolMode = useEditorStore((s) => s.setToolMode);
@@ -31,6 +34,9 @@ export function Navbar() {
 
   const handleUndo = useCallback(() => undo(), [undo]);
   const handleRedo = useCallback(() => redo(), [redo]);
+  const handleSupport = useCallback(() => {
+    window.open(SUPPORT_URL, '_blank', 'noopener,noreferrer');
+  }, []);
 
   const canUndo = pastLength > 0;
   const canRedo = futureLength > 0;
@@ -120,8 +126,20 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Right — Settings */}
+      {/* Right — Help / Support / Settings */}
       <div className="flex items-center gap-1">
+        <IconButton
+          tooltip="Keyboard Shortcuts"
+          onClick={() => setHelpOpen(true)}
+        >
+          <LuCircleHelp size={14} />
+        </IconButton>
+        <IconButton
+          tooltip="Support"
+          onClick={handleSupport}
+        >
+          <LuHeart size={14} />
+        </IconButton>
         <IconButton
           tooltip="Settings"
           onClick={() => setSettingsOpen(true)}
