@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/editor" element={<EditorLayout />} />
-        <Route path="/o/:sceneSlug" element={<BrowserSourceView />} />
+        <Route path="/o/:overlayCode" element={<BrowserSourceView />} />
       </Routes>
     </BrowserRouter>
   );
