@@ -16,9 +16,14 @@ import { useHistoryStore } from '../../store/historyStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore } from '../../store/sceneStore';
 import { SECRET_KEY_STORAGE_KEY } from '../../lib/api';
+import { useWindowSize } from '../../hooks/useWindowSize';
+import { Link } from 'react-router-dom';
+import { LuMonitor, LuArrowLeft } from 'react-icons/lu';
+
 
 export function EditorLayout() {
   usePersistence();
+  const { isDesktop } = useWindowSize();
 
   const setOnboardingOpen = useEditorStore((s) => s.setOnboardingOpen);
 
@@ -219,6 +224,59 @@ export function EditorLayout() {
     document.addEventListener('contextmenu', suppress);
     return () => document.removeEventListener('contextmenu', suppress);
   }, []);
+
+  if (!isDesktop) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col items-center justify-center p-6 relative">
+        {/* Glow backdrop */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-accent/10 rounded-full blur-[100px] pointer-events-none -z-10" />
+        
+        {/* Modal style container */}
+        <div
+          className="rounded-3xl border border-white/[0.08] overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.6)] backdrop-blur-3xl animate-slide-up text-left"
+          style={{
+            width: 'min(440px, 90vw)',
+            backgroundColor: 'rgba(24, 24, 27, 0.92)',
+          }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center justify-between px-6 py-4.5 border-b border-white/[0.06]"
+            style={{ backgroundColor: 'rgba(32, 32, 36, 0.4)' }}
+          >
+            <h2 className="text-xs font-bold text-text-primary uppercase tracking-wider m-0">
+              Compatibility Notice
+            </h2>
+          </div>
+
+          {/* Body */}
+          <div className="p-7 flex flex-col items-center text-center gap-5">
+            <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+              <LuMonitor size={24} />
+            </div>
+            
+            <h3 className="text-base font-bold text-text-primary uppercase tracking-wide">
+              Desktop Only Workspace
+            </h3>
+            
+            <p className="text-text-secondary leading-relaxed text-xs">
+              Oneverlay Editor is designed for desktop workflows. Please open the editor on a desktop device for the best experience.
+            </p>
+            
+            <div className="w-full h-[1px] bg-white/[0.04]" />
+            
+            <Link
+              to="/"
+              className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-text-primary text-xs font-bold transition-all border border-white/[0.06] cursor-pointer"
+            >
+              <LuArrowLeft size={14} />
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col overflow-hidden">

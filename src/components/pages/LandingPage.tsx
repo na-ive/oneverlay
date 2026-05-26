@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LuArrowRight, LuGithub, LuStar, LuHeart } from 'react-icons/lu';
 import { SUPPORT_URL } from '../../lib/constants';
+import { useWindowSize } from '../../hooks/useWindowSize';
+
 
 export function LandingPage() {
   const [stars, setStars] = useState<number | string>('...');
+  const { isDesktop } = useWindowSize();
 
   useEffect(() => {
     document.title = 'Oneverlay — Streaming Overlay Compositor';
@@ -81,7 +84,7 @@ export function LandingPage() {
               to="/editor"
               className="flex items-center gap-2 px-9 py-4.5 rounded-2xl bg-accent hover:bg-accent-hover text-white text-base font-bold shadow-lg shadow-accent/15 transition-all cursor-pointer border-none"
             >
-              Open Editor
+              {isDesktop ? 'Open Editor' : 'Open Editor on Desktop'}
               <LuArrowRight size={18} />
             </Link>
             <span className="text-xs text-text-muted font-bold uppercase tracking-wider mt-2">
