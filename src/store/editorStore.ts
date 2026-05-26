@@ -13,6 +13,8 @@ interface EditorState {
   setPropertiesOpen: (open: boolean) => void;
   isHelpOpen: boolean;
   setHelpOpen: (open: boolean) => void;
+  isOnboardingOpen: boolean;
+  setOnboardingOpen: (open: boolean) => void;
   propertiesElementId: string | null;
   openProperties: (id: string) => void;
   closeProperties: () => void;
@@ -46,6 +48,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   setPropertiesOpen: (open) => set({ isPropertiesOpen: open }),
   isHelpOpen: false,
   setHelpOpen: (open) => set({ isHelpOpen: open }),
+  isOnboardingOpen: false,
+  setOnboardingOpen: (open) => set({ isOnboardingOpen: open }),
   propertiesElementId: null,
   openProperties: (id) =>
     set({ isPropertiesOpen: true, propertiesElementId: id, selectedElementId: id }),

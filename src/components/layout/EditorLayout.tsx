@@ -9,14 +9,18 @@ import { ActionsPanel } from '../panels/ActionsPanel';
 import { SettingsModal } from '../modals/SettingsModal';
 import { PropertiesModal } from '../modals/PropertiesModal';
 import { HelpModal } from '../modals/HelpModal';
+import { OnboardingModal } from '../modals/OnboardingModal';
 import { ContextMenu } from '../ui/ContextMenu';
 import { usePersistence } from '../../hooks/usePersistence';
 import { useHistoryStore } from '../../store/historyStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore } from '../../store/sceneStore';
+import { SECRET_KEY_STORAGE_KEY } from '../../lib/api';
 
 export function EditorLayout() {
   usePersistence();
+
+  const setOnboardingOpen = useEditorStore((s) => s.setOnboardingOpen);
 
   // Dynamic page scroll locking (prevents scrollbars on workspace view)
   useEffect(() => {
@@ -32,6 +36,14 @@ export function EditorLayout() {
       document.documentElement.style.overflow = origHtmlOverflow;
     };
   }, []);
+
+  // First-run detection: show onboarding if no secret key is stored
+  useEffect(() => {
+    const hasKey = !!localStorage.getItem(SECRET_KEY_STORAGE_KEY);
+    if (!hasKey) {
+      setOnboardingOpen(true);
+    }
+  }, [setOnboardingOpen]);
 
   const undo = useHistoryStore((s) => s.undo);
   const redo = useHistoryStore((s) => s.redo);
@@ -230,6 +242,7 @@ export function EditorLayout() {
       <SettingsModal />
       <PropertiesModal />
       <HelpModal />
+      <OnboardingModal />
       <ContextMenu />
     </div>
   );
