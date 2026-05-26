@@ -1,21 +1,18 @@
 import type { ProjectData } from '../types/elements';
 import { STORAGE_KEY } from './constants';
+import { syncScenes, SECRET_KEY_STORAGE_KEY } from './api';
 
 export function saveProject(project: ProjectData): void {
   try {
     const json = JSON.stringify(project);
     localStorage.setItem(STORAGE_KEY, json);
 
-    // Sync to local Vite dev server file on disk so OBS can read it
-    fetch('/api/project', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json,
-    }).catch((err) => {
-      console.warn('[Oneverlay] Failed to sync project layout to disk:', err);
-    });
+    // Sync to Cloudflare D1 if secret key exists
+    if (localStorage.getItem(SECRET_KEY_STORAGE_KEY)) {
+      syncScenes(project).catch((err) => {
+        console.warn('[Oneverlay] Failed to sync project layout to cloud:', err);
+      });
+    }
   } catch (e) {
     console.warn('[Oneverlay] Failed to save project:', e);
   }
