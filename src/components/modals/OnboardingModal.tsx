@@ -6,7 +6,6 @@ import { useSceneStore } from '../../store/sceneStore';
 import {
   initProject,
   validateSecretKey,
-  fetchProject,
   SECRET_KEY_STORAGE_KEY,
   PROJECT_ID_KEY,
   type CloudScene,
