@@ -28,7 +28,7 @@ export function LandingPage() {
       <div className="absolute top-[250px] left-1/2 -translate-x-1/2 w-[300px] sm:w-[600px] md:w-[900px] h-[300px] bg-gradient-to-r from-indigo-600/12 to-purple-600/8 rounded-full blur-[120px] sm:blur-[140px] pointer-events-none -z-10" />
 
       {/* Navigation Header */}
-      <header className="w-full max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between border-b border-white/[0.04] z-10">
+      <header className="w-full max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between border-b border-white/[0.04] z-10 animate-fade-in">
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-black uppercase tracking-widest text-text-primary">
             ONEVERLAY
@@ -55,7 +55,7 @@ export function LandingPage() {
       {/* Main Body */}
       <main className="flex-1 flex flex-col items-center max-w-[1400px] mx-auto px-6 pb-20 w-full">
         {/* Screenshot Showcase Section (At the top, cropped from the top edge, bottom fully shown) */}
-        <section className="w-full flex justify-center mb-3 md:mb-4">
+        <section className="w-full flex justify-center mb-3 md:mb-4 animate-slide-down">
           <div className="w-full max-w-[1200px] h-[220px] sm:h-[300px] md:h-[380px] rounded-b-3xl border-x border-b border-white/[0.08] bg-bg-surface overflow-hidden relative shadow-[0_24px_80px_rgba(0,0,0,0.85)] shadow-accent/5 hover:border-accent/15 transition-all duration-300 -mt-px">
             <img
               src="/landing.png"
@@ -67,15 +67,15 @@ export function LandingPage() {
 
         {/* Hero Section (Below the screenshot) */}
         <section className="text-center max-w-5xl flex flex-col items-center mb-24 md:mb-32">
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] text-text-primary uppercase mb-6 max-w-4xl">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] text-text-primary uppercase mb-6 max-w-4xl animate-slide-up" style={{ animationDelay: '150ms' }}>
             One browser source <br className="hidden md:inline" />
             for your entire stream overlay.
           </h1>
-          <p className="text-base md:text-xl text-text-secondary leading-relaxed max-w-3xl mb-10">
+          <p className="text-base md:text-xl text-text-secondary leading-relaxed max-w-3xl mb-10 animate-slide-up" style={{ animationDelay: '250ms' }}>
             Compose, organize, and manage multiple streaming widgets and scene overlays in a single lightweight workspace.
             Boost your OBS stream performance with a single highly optimized browser source.
           </p>
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 animate-slide-up" style={{ animationDelay: '350ms' }}>
             <Link
               to="/editor"
               className="flex items-center gap-2 px-9 py-4.5 rounded-2xl bg-accent hover:bg-accent-hover text-white text-base font-bold shadow-lg shadow-accent/15 transition-all cursor-pointer border-none"
@@ -90,7 +90,7 @@ export function LandingPage() {
         </section>
 
         {/* Features Grid Section */}
-        <section className="w-full max-w-[1200px] mb-12 md:mb-16">
+        <section className="w-full max-w-[1200px] mb-12 md:mb-16 animate-slide-up" style={{ animationDelay: '450ms' }}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
             <div className="p-8 rounded-2xl border border-white/[0.06] bg-bg-secondary/40 hover:border-accent/25 hover:bg-bg-secondary/60 hover:shadow-2xl hover:shadow-accent/[0.02] transition-all duration-300">
