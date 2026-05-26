@@ -20,6 +20,7 @@ export function EditorLayout() {
 
   // Dynamic page scroll locking (prevents scrollbars on workspace view)
   useEffect(() => {
+    document.title = 'Oneverlay - Editor';
     const origBodyOverflow = document.body.style.overflow;
     const origHtmlOverflow = document.documentElement.style.overflow;
     

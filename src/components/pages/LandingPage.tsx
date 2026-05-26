@@ -7,6 +7,7 @@ export function LandingPage() {
   const [stars, setStars] = useState<number | string>('...');
 
   useEffect(() => {
+    document.title = 'Oneverlay — Streaming Overlay Compositor';
     fetch('https://api.github.com/repos/na-ive/oneverlay')
       .then((res) => res.json())
       .then((data) => {

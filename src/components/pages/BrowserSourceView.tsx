@@ -99,6 +99,15 @@ export function BrowserSourceView() {
     return () => window.removeEventListener('storage', handleStorage);
   }, [sceneSlug]);
 
+  // Update document title dynamically based on the current scene name
+  useEffect(() => {
+    if (scene) {
+      document.title = `Oneverlay - ${scene.name}`;
+    } else {
+      document.title = 'Oneverlay - Overlay';
+    }
+  }, [scene]);
+
   if (loading) {
     return null; // transparent loading state
   }
