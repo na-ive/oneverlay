@@ -9,6 +9,19 @@ import type {
 import { createElement, createDefaultProject, createDefaultScene } from '../lib/defaults';
 import { loadProject } from '../lib/persistence';
 
+/**
+ * Helper to ensure element names are unique within a scene
+ */
+function getUniqueName(baseName: string, existingNames: string[]): string {
+  let name = baseName;
+  let counter = 1;
+  while (existingNames.includes(name)) {
+    name = `${baseName} (${counter})`;
+    counter++;
+  }
+  return name;
+}
+
 interface SceneStoreState extends ProjectData {
   // ── Element actions (operate on active scene) ──
   addElement: (type: ElementType, name?: string) => void;
@@ -68,7 +81,9 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
     updateActiveScene(set, (scene) => {
       const element = createElement(type);
       element.zIndex = scene.elements.length;
-      element.name = name || `${element.name} ${scene.elements.filter((e) => e.type === type).length + 1}`;
+      const existingNames = scene.elements.map((e) => e.name);
+      const defaultName = `${element.name} ${scene.elements.filter((e) => e.type === type).length + 1}`;
+      element.name = getUniqueName(name || defaultName, existingNames);
       return { elements: [...scene.elements, element] };
     });
   },
@@ -118,10 +133,11 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
     updateActiveScene(set, (scene) => {
       const original = scene.elements.find((el) => el.id === id);
       if (!original) return {};
+      const existingNames = scene.elements.map((e) => e.name);
       const dup = {
         ...original,
         id: uuidv4(),
-        name: `${original.name} Copy`,
+        name: getUniqueName(original.name, existingNames),
         x: original.x + 20,
         y: original.y + 20,
         zIndex: scene.elements.length,
@@ -132,10 +148,11 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
 
   importElement: (element: OverlayElement) => {
     updateActiveScene(set, (scene) => {
+      const existingNames = scene.elements.map((e) => e.name);
       const dup = {
         ...element,
         id: uuidv4(),
-        name: `${element.name}`, // Keep same name or append (Copy)? Let's keep the exact same name to mimic OBS.
+        name: getUniqueName(element.name, existingNames),
         zIndex: scene.elements.length,
       };
       return { elements: [...scene.elements, dup] };
