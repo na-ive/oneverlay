@@ -1,6 +1,7 @@
-import { useCallback, useState, useEffect } from 'react';
-import { LuEye, LuEyeOff, LuCopy, LuRefreshCw, LuLogOut, LuTrash2, LuLoader } from 'react-icons/lu';
+import { useCallback, useState, useEffect, useRef } from 'react';
+import { LuEye, LuEyeOff, LuCopy, LuRefreshCw, LuLogOut, LuTrash2, LuLoader, LuDownload, LuUpload } from 'react-icons/lu';
 import { Modal } from '../ui/Modal';
+import { ConfirmModal, type ConfirmModalOptions } from './ConfirmModal';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
@@ -11,6 +12,8 @@ export function SettingsModal() {
   const setOpen = useEditorStore((s) => s.setSettingsOpen);
   const setOnboardingOpen = useEditorStore((s) => s.setOnboardingOpen);
   const resetProject = useSceneStore((s) => s.resetProject);
+  const getSnapshot = useSceneStore((s) => s.getSnapshot);
+  const loadProjectData = useSceneStore((s) => s.loadProjectData);
   const clearHistory = useHistoryStore((s) => s.clear);
 
   const [showKey, setShowKey] = useState(false);
@@ -18,6 +21,54 @@ export function SettingsModal() {
   const [secretKey, setSecretKey] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    options: ConfirmModalOptions | null;
+    onConfirm: () => void;
+    onCancel: () => void;
+  }>({
+    open: false,
+    options: null,
+    onConfirm: () => {},
+    onCancel: () => {},
+  });
+
+  const showConfirm = useCallback((options: ConfirmModalOptions) => {
+    return new Promise<boolean>((resolve) => {
+      setConfirmState({
+        open: true,
+        options,
+        onConfirm: () => {
+          setConfirmState((prev) => ({ ...prev, open: false }));
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState((prev) => ({ ...prev, open: false }));
+          resolve(false);
+        }
+      });
+    });
+  }, []);
+
+  const showAlert = useCallback((options: Omit<ConfirmModalOptions, 'isAlert'>) => {
+    return new Promise<void>((resolve) => {
+      setConfirmState({
+        open: true,
+        options: { ...options, isAlert: true },
+        onConfirm: () => {
+          setConfirmState((prev) => ({ ...prev, open: false }));
+          resolve();
+        },
+        onCancel: () => {
+          setConfirmState((prev) => ({ ...prev, open: false }));
+          resolve();
+        }
+      });
+    });
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -35,7 +86,14 @@ export function SettingsModal() {
   }, [secretKey]);
 
   const handleRegenerateKey = useCallback(async () => {
-    if (!window.confirm('Regenerate secret key? Your old key will no longer work on other devices.')) return;
+    const confirmed = await showConfirm({
+      title: 'Regenerate Key',
+      message: 'Regenerate secret key? Your old key will no longer work on other devices.',
+      isDanger: true,
+      confirmText: 'Regenerate'
+    });
+    if (!confirmed) return;
+
     setIsRegenerating(true);
     try {
       const newKey = await regenerateSecretKey();
@@ -43,24 +101,37 @@ export function SettingsModal() {
       setSecretKey(newKey);
     } catch (err) {
       console.warn('[Oneverlay] Failed to regenerate secret key:', err);
-      alert('Failed to regenerate secret key.');
+      await showAlert({ title: 'Error', message: 'Failed to regenerate secret key.', isDanger: true });
     } finally {
       setIsRegenerating(false);
     }
-  }, []);
+  }, [showConfirm, showAlert]);
 
-  const handleLogout = useCallback(() => {
-    if (!window.confirm('Log out? This will clear your credentials from this browser. Your scenes will remain safe in the cloud.')) return;
+  const handleLogout = useCallback(async () => {
+    const confirmed = await showConfirm({
+      title: 'Log Out',
+      message: 'Log out? This will clear your credentials from this browser. Your scenes will remain safe in the cloud.',
+      confirmText: 'Log Out'
+    });
+    if (!confirmed) return;
+
     localStorage.removeItem(SECRET_KEY_STORAGE_KEY);
     localStorage.removeItem(PROJECT_ID_KEY);
     resetProject();
     clearHistory();
     handleClose();
     setOnboardingOpen(true);
-  }, [resetProject, clearHistory, handleClose, setOnboardingOpen]);
+  }, [resetProject, clearHistory, handleClose, setOnboardingOpen, showConfirm]);
 
   const handleDeleteAccount = useCallback(async () => {
-    if (!window.confirm('WARNING: This will permanently delete your workspace, all scenes, and overlay codes from the cloud. This cannot be undone. Are you sure?')) return;
+    const confirmed = await showConfirm({
+      title: 'Delete Account',
+      message: 'WARNING: This will permanently delete your workspace, all scenes, and overlay codes from the cloud. This cannot be undone. Are you sure?',
+      isDanger: true,
+      confirmText: 'Delete Everything'
+    });
+    if (!confirmed) return;
+
     setIsDeleting(true);
     try {
       await deleteAccount();
@@ -72,22 +143,84 @@ export function SettingsModal() {
       setOnboardingOpen(true);
     } catch (err) {
       console.warn('[Oneverlay] Failed to delete account:', err);
-      alert('Failed to delete account.');
+      await showAlert({ title: 'Error', message: 'Failed to delete account.', isDanger: true });
     } finally {
       setIsDeleting(false);
     }
-  }, [resetProject, clearHistory, handleClose, setOnboardingOpen]);
+  }, [resetProject, clearHistory, handleClose, setOnboardingOpen, showConfirm, showAlert]);
 
-  const handleReset = useCallback(() => {
-    if (window.confirm('Reset all local elements and settings? This does not delete the cloud project, just clears the local editor.')) {
+  const handleReset = useCallback(async () => {
+    const confirmed = await showConfirm({
+      title: 'Clear Local Canvas',
+      message: 'Reset all local elements and settings? This does not delete the cloud project, just clears the local editor.',
+      isDanger: true,
+      confirmText: 'Clear Local Editor'
+    });
+    if (confirmed) {
       resetProject();
       clearHistory();
       handleClose();
     }
-  }, [resetProject, clearHistory, handleClose]);
+  }, [resetProject, clearHistory, handleClose, showConfirm]);
+
+  const handleExport = useCallback(() => {
+    const data = getSnapshot();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `oneverlay-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [getSnapshot]);
+
+  const handleImportClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const confirmed = await showConfirm({
+      title: 'Import Backup',
+      message: 'WARNING: Importing a backup will overwrite your current workspace entirely. Are you sure you want to proceed?',
+      isDanger: true,
+      confirmText: 'Import and Overwrite'
+    });
+
+    if (!confirmed) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const content = event.target?.result as string;
+        const data = JSON.parse(content);
+        
+        // Basic validation
+        if (data && Array.isArray(data.scenes) && data.activeSceneId) {
+          loadProjectData(data);
+          await showAlert({ title: 'Success', message: 'Backup imported successfully!' });
+        } else {
+          await showAlert({ title: 'Error', message: 'Invalid backup file format.', isDanger: true });
+        }
+      } catch (err) {
+        console.error('[Oneverlay] Failed to parse backup file:', err);
+        await showAlert({ title: 'Error', message: 'Failed to read the backup file.', isDanger: true });
+      }
+      
+      // Reset input so the same file can be selected again if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
+  }, [loadProjectData, showConfirm, showAlert]);
 
   return (
-    <Modal open={isOpen} onClose={handleClose} title="Settings" width="480px">
+    <>
+      <Modal open={isOpen} onClose={handleClose} title="Settings" width="480px">
       <div className="space-y-5">
         {/* Account Section */}
         <div className="flex flex-col gap-3">
@@ -150,6 +283,40 @@ export function SettingsModal() {
           </div>
         </div>
 
+        {/* Data Management */}
+        <div className="flex flex-col gap-3 pt-4 border-t border-white/[0.06]">
+          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
+            Data Management
+          </label>
+          <div className="flex flex-col gap-2 pt-1">
+            <button
+              onClick={handleExport}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <LuDownload size={14} />
+                Export Backup (JSON)
+              </span>
+            </button>
+            <button
+              onClick={handleImportClick}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <LuUpload size={14} />
+                Import Backup (JSON)
+              </span>
+            </button>
+            <input 
+              type="file" 
+              accept=".json" 
+              ref={fileInputRef}
+              onChange={handleImportFile}
+              className="hidden" 
+            />
+          </div>
+        </div>
+
         {/* Danger zone */}
         <div className="flex flex-col gap-2 pt-4 border-t border-white/[0.06]">
           <button
@@ -175,6 +342,8 @@ export function SettingsModal() {
           </p>
         </div>
       </div>
-    </Modal>
+      </Modal>
+      <ConfirmModal {...confirmState} />
+    </>
   );
 }
