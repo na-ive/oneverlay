@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "oneverlay",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-05-26",
   "observability": {
     "enabled": true
@@ -10,5 +11,12 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "oneverlay-db",
+      "database_id": "3072b708-268c-4078-bf4b-7ed106fb877f"
+    }
   ]
 }

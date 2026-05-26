@@ -11,6 +11,7 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "hono": "^4.12.23",
     "konva": "^10.3.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
