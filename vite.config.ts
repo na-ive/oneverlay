@@ -5,6 +5,8 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -69,7 +71,7 @@ function projectStoragePlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), projectStoragePlugin()],
+  plugins: [react(), tailwindcss(), projectStoragePlugin(), cloudflare()],
   server: {
     watch: {
       ignored: ['**/project.json'],
