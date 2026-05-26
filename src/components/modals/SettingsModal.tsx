@@ -2,18 +2,14 @@ import { useCallback, useState, useEffect } from 'react';
 import { LuEye, LuEyeOff, LuCopy, LuRefreshCw, LuLogOut, LuTrash2, LuLoader } from 'react-icons/lu';
 import { Modal } from '../ui/Modal';
 import { useEditorStore } from '../../store/editorStore';
-import { useSceneStore, selectActiveScene } from '../../store/sceneStore';
+import { useSceneStore } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
-import { APP_NAME } from '../../lib/constants';
 import { regenerateSecretKey, deleteAccount, SECRET_KEY_STORAGE_KEY, PROJECT_ID_KEY } from '../../lib/api';
 
 export function SettingsModal() {
   const isOpen = useEditorStore((s) => s.isSettingsOpen);
   const setOpen = useEditorStore((s) => s.setSettingsOpen);
   const setOnboardingOpen = useEditorStore((s) => s.setOnboardingOpen);
-  const activeSceneId = useSceneStore((s) => s.activeSceneId);
-  const sceneName = useSceneStore((s) => selectActiveScene(s).name);
-  const setSceneName = useSceneStore((s) => s.setSceneName);
   const resetProject = useSceneStore((s) => s.resetProject);
   const clearHistory = useHistoryStore((s) => s.clear);
 
@@ -93,22 +89,8 @@ export function SettingsModal() {
   return (
     <Modal open={isOpen} onClose={handleClose} title="Settings" width="480px">
       <div className="space-y-5">
-        {/* Scene name */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
-            Scene Name
-          </label>
-          <input
-            type="text"
-            value={sceneName}
-            onChange={(e) => setSceneName(activeSceneId, e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
-            placeholder="My Overlay"
-          />
-        </div>
-
         {/* Account Section */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-white/[0.06]">
+        <div className="flex flex-col gap-3">
           <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Account & Security
           </label>
@@ -187,11 +169,10 @@ export function SettingsModal() {
         </div>
 
         {/* App info */}
-        <div className="flex flex-col gap-1 pt-3 border-t border-white/[0.06]">
-          <p className="text-[11px] text-text-muted pl-1">
-            {APP_NAME} — Lightweight streaming overlay compositor
+        <div className="pt-3 border-t border-white/[0.06] text-center">
+          <p className="text-[11px] text-text-muted">
+            Oneverlay 0.1.0
           </p>
-          <p className="text-[11px] text-text-muted pl-1">v0.1.0 MVP</p>
         </div>
       </div>
     </Modal>
