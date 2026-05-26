@@ -10,6 +10,7 @@ import { SettingsModal } from '../modals/SettingsModal';
 import { PropertiesModal } from '../modals/PropertiesModal';
 import { HelpModal } from '../modals/HelpModal';
 import { OnboardingModal } from '../modals/OnboardingModal';
+import { AddElementModal } from '../modals/AddElementModal';
 import { ContextMenu } from '../ui/ContextMenu';
 import { usePersistence } from '../../hooks/usePersistence';
 import { useHistoryStore } from '../../store/historyStore';
@@ -291,6 +292,7 @@ export function EditorLayout() {
       <PropertiesModal />
       <HelpModal />
       <OnboardingModal />
+      <AddElementModal />
       <ContextMenu />
     </div>
   );

@@ -131,7 +131,6 @@ export function CanvasEditor() {
   const elements = useSceneStore(selectElements);
   const canvasWidth = useSceneStore((s) => selectCanvas(s).width);
   const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
-  const addElement = useSceneStore((s) => s.addElement);
   const moveElement = useSceneStore((s) => s.moveElement);
   const updateElement = useSceneStore((s) => s.updateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
@@ -143,6 +142,7 @@ export function CanvasEditor() {
   const selectElement = useEditorStore((s) => s.selectElement);
   const bottomDockHeight = useEditorStore((s) => s.bottomDockHeight);
   const openProperties = useEditorStore((s) => s.openProperties);
+  const openAddElementModal = useEditorStore((s) => s.openAddElementModal);
   const pushHistory = useHistoryStore((s) => s.push);
   const showMenu = useContextMenuStore((s) => s.show);
   const toolMode = useEditorStore((s) => s.toolMode);
@@ -229,18 +229,9 @@ export function CanvasEditor() {
 
   const handleQuickAdd = useCallback(
     (type: 'text' | 'image' | 'browser') => {
-      pushHistory();
-      addElement(type);
-
-      // Auto-select the newly added element
-      const updatedElements = selectElements(useSceneStore.getState());
-      const newElement = updatedElements[updatedElements.length - 1];
-      if (newElement) {
-        selectElement(newElement.id);
-        openProperties(newElement.id);
-      }
+      openAddElementModal(type);
     },
-    [addElement, selectElement, openProperties, pushHistory],
+    [openAddElementModal],
   );
 
   const { scale, offsetX, offsetY } = useCanvasZoom(

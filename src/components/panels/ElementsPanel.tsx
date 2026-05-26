@@ -37,7 +37,6 @@ const TYPE_ICONS: Record<ElementType, typeof LuType> = {
 
 export function ElementsPanel() {
   const elements = useSceneStore(selectElements);
-  const addElement = useSceneStore((s) => s.addElement);
   const removeElement = useSceneStore((s) => s.removeElement);
   const toggleVisibility = useSceneStore((s) => s.toggleVisibility);
   const reorderElement = useSceneStore((s) => s.reorderElement);
@@ -46,6 +45,7 @@ export function ElementsPanel() {
   const selectedId = useEditorStore((s) => s.selectedElementId);
   const selectElement = useEditorStore((s) => s.selectElement);
   const openProperties = useEditorStore((s) => s.openProperties);
+  const openAddElementModal = useEditorStore((s) => s.openAddElementModal);
   const pushHistory = useHistoryStore((s) => s.push);
   const showMenu = useContextMenuStore((s) => s.show);
 
@@ -77,19 +77,10 @@ export function ElementsPanel() {
 
   const handleAdd = useCallback(
     (type: ElementType) => {
-      pushHistory();
-      addElement(type);
+      openAddElementModal(type);
       setShowAddMenu(false);
-
-      // Auto-select and open properties for the newly added element
-      const updatedElements = selectElements(useSceneStore.getState());
-      const newElement = updatedElements[updatedElements.length - 1];
-      if (newElement) {
-        selectElement(newElement.id);
-        openProperties(newElement.id);
-      }
     },
-    [addElement, selectElement, openProperties, pushHistory],
+    [openAddElementModal],
   );
 
   const handleDelete = useCallback(

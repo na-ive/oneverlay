@@ -11,13 +11,14 @@ import { loadProject } from '../lib/persistence';
 
 interface SceneStoreState extends ProjectData {
   // ── Element actions (operate on active scene) ──
-  addElement: (type: ElementType) => void;
+  addElement: (type: ElementType, name?: string) => void;
   updateElement: (id: string, updates: Partial<OverlayElement>) => void;
   removeElement: (id: string) => void;
   moveElement: (id: string, x: number, y: number) => void;
   toggleVisibility: (id: string) => void;
   reorderElement: (fromIndex: number, toIndex: number) => void;
   duplicateElement: (id: string) => void;
+  importElement: (element: OverlayElement) => void;
 
   // ── Canvas actions (operate on active scene) ──
   setCanvasSize: (width: number, height: number) => void;
@@ -63,11 +64,11 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
   ...initialProject,
 
   // ── Element actions ──
-  addElement: (type: ElementType) => {
+  addElement: (type: ElementType, name?: string) => {
     updateActiveScene(set, (scene) => {
       const element = createElement(type);
       element.zIndex = scene.elements.length;
-      element.name = `${element.name} ${scene.elements.filter((e) => e.type === type).length + 1}`;
+      element.name = name || `${element.name} ${scene.elements.filter((e) => e.type === type).length + 1}`;
       return { elements: [...scene.elements, element] };
     });
   },
@@ -123,6 +124,18 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
         name: `${original.name} Copy`,
         x: original.x + 20,
         y: original.y + 20,
+        zIndex: scene.elements.length,
+      };
+      return { elements: [...scene.elements, dup] };
+    });
+  },
+
+  importElement: (element: OverlayElement) => {
+    updateActiveScene(set, (scene) => {
+      const dup = {
+        ...element,
+        id: uuidv4(),
+        name: `${element.name}`, // Keep same name or append (Copy)? Let's keep the exact same name to mimic OBS.
         zIndex: scene.elements.length,
       };
       return { elements: [...scene.elements, dup] };

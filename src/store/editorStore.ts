@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { DOCK_DEFAULT_HEIGHT } from '../lib/constants';
+import type { ElementType } from '../types/elements';
 
 interface EditorState {
   // ── Selection ──
@@ -15,6 +16,10 @@ interface EditorState {
   setHelpOpen: (open: boolean) => void;
   isOnboardingOpen: boolean;
   setOnboardingOpen: (open: boolean) => void;
+  isAddElementOpen: boolean;
+  addElementType: ElementType | null;
+  openAddElementModal: (type: ElementType) => void;
+  closeAddElementModal: () => void;
   propertiesElementId: string | null;
   openProperties: (id: string) => void;
   closeProperties: () => void;
@@ -50,6 +55,10 @@ export const useEditorStore = create<EditorState>((set) => ({
   setHelpOpen: (open) => set({ isHelpOpen: open }),
   isOnboardingOpen: false,
   setOnboardingOpen: (open) => set({ isOnboardingOpen: open }),
+  isAddElementOpen: false,
+  addElementType: null,
+  openAddElementModal: (type) => set({ isAddElementOpen: true, addElementType: type }),
+  closeAddElementModal: () => set({ isAddElementOpen: false, addElementType: null }),
   propertiesElementId: null,
   openProperties: (id) =>
     set({ isPropertiesOpen: true, propertiesElementId: id, selectedElementId: id }),
