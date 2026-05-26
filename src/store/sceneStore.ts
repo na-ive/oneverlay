@@ -27,6 +27,7 @@ interface SceneStoreState extends ProjectData {
   removeScene: (id: string) => void;
   setActiveScene: (id: string) => void;
   setSceneName: (id: string, name: string) => void;
+  setOverlayCode: (id: string, code: string | null) => void;
   reorderScene: (fromIndex: number, toIndex: number) => void;
 
   // ── Entire project state replacement ──
@@ -175,6 +176,15 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
     set((state) => ({
       scenes: state.scenes.map((s) =>
         s.id === id ? { ...s, name, updatedAt: Date.now() } : s
+      ),
+      updatedAt: Date.now(),
+    }));
+  },
+
+  setOverlayCode: (id: string, code: string | null) => {
+    set((state) => ({
+      scenes: state.scenes.map((s) =>
+        s.id === id ? { ...s, overlayCode: code, updatedAt: Date.now() } : s
       ),
       updatedAt: Date.now(),
     }));

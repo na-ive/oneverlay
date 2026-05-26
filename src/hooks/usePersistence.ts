@@ -12,6 +12,7 @@ function cloudSceneToLocal(cloudScene: CloudScene): SceneData {
     canvas: cloudScene.canvas,
     elements: cloudScene.elements,
     updatedAt: cloudScene.updatedAt,
+    overlayCode: cloudScene.overlayCode,
   };
 }
 

@@ -59,6 +59,7 @@ export interface SceneData {
   canvas: CanvasSettings;
   elements: OverlayElement[];
   updatedAt: number;
+  overlayCode?: string | null;
 }
 
 export interface ProjectData {
