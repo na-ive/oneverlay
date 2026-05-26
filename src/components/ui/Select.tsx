@@ -48,6 +48,8 @@ export function Select({
       const next = !prev;
       if (next) {
         updateCoords();
+      } else {
+        triggerRef.current?.blur();
       }
       return next;
     });
@@ -57,6 +59,7 @@ export function Select({
     (val: any) => {
       onChange(val);
       setIsOpen(false);
+      triggerRef.current?.blur();
     },
     [onChange],
   );
@@ -75,9 +78,13 @@ export function Select({
         return;
       }
       setIsOpen(false);
+      triggerRef.current?.blur();
     };
 
-    const handleClose = () => setIsOpen(false);
+    const handleClose = () => {
+      setIsOpen(false);
+      triggerRef.current?.blur();
+    };
 
     window.addEventListener('mousedown', handleOutsideClick, { capture: true });
     window.addEventListener('scroll', handleClose, { capture: true });
@@ -117,6 +124,7 @@ export function Select({
         type="button"
         onClick={handleToggle}
         className={`
+          select-trigger
           w-full flex items-center justify-between px-3 py-2 rounded-xl 
           border border-white/[0.08] bg-bg-primary/30 text-text-primary 
           text-xs outline-none cursor-pointer transition-all duration-200
