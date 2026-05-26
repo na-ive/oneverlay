@@ -1,59 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { loadProject } from '../../lib/persistence';
-import { STORAGE_KEY } from '../../lib/constants';
+import { fetchOverlayScene, type CloudScene } from '../../lib/api';
 import type { SceneData, TextElement, ImageElement, BrowserElement } from '../../types/elements';
 
-// Helper to slugify scene names for route matching
-function slugify(text: string): string {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')           // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-    .replace(/\-\-+/g, '-');        // Replace multiple - with single -
+// Helper to convert CloudScene to SceneData
+function cloudSceneToLocal(cloudScene: CloudScene): SceneData {
+  return {
+    id: cloudScene.id,
+    name: cloudScene.name,
+    canvas: cloudScene.canvas,
+    elements: cloudScene.elements,
+    updatedAt: cloudScene.updatedAt,
+  };
 }
 
 export function BrowserSourceView() {
-  const { sceneSlug } = useParams<{ sceneSlug: string }>();
+  const { overlayCode } = useParams<{ overlayCode: string }>();
   const [scene, setScene] = useState<SceneData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchSceneData = () => {
-    if (!sceneSlug) return;
+  const fetchSceneData = async () => {
+    if (!overlayCode) return;
     
-    // Try loading from local Vite disk API (works inside OBS browser source sandbox)
-    fetch('/api/project')
-      .then((res) => res.json())
-      .then((project) => {
-        let matched: SceneData | undefined;
-
-        if (project && Array.isArray(project.scenes)) {
-          matched = project.scenes.find((s: SceneData) => slugify(s.name) === sceneSlug);
-        }
-
-        // If not found in the disk API, fallback to LocalStorage (works for standard tabs in same browser)
-        if (!matched) {
-          const localProject = loadProject();
-          if (localProject && Array.isArray(localProject.scenes)) {
-            matched = localProject.scenes.find((s) => slugify(s.name) === sceneSlug);
-          }
-        }
-
-        setScene(matched || null);
-      })
-      .catch((err) => {
-        console.warn('[Oneverlay] Failed to fetch project from local disk API, falling back to LocalStorage:', err);
-        const localProject = loadProject();
-        if (localProject) {
-          const matched = localProject.scenes.find((s) => slugify(s.name) === sceneSlug);
-          setScene(matched || null);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      const cloudScene = await fetchOverlayScene(overlayCode);
+      setScene(cloudSceneToLocal(cloudScene));
+    } catch (err) {
+      console.warn('[Oneverlay] Failed to fetch overlay scene:', err);
+      setScene(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Set transparent background for OBS browser source
@@ -82,22 +59,10 @@ export function BrowserSourceView() {
   useEffect(() => {
     fetchSceneData();
 
-    const intervalId = setInterval(fetchSceneData, 1500); // poll every 1.5 seconds
+    const intervalId = setInterval(fetchSceneData, 2000); // poll every 2 seconds
 
     return () => clearInterval(intervalId);
-  }, [sceneSlug]);
-
-  // Real-time synchronization using storage events (works instantly when in same browser)
-  useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY || e.key === null) {
-        fetchSceneData();
-      }
-    };
-
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, [sceneSlug]);
+  }, [overlayCode]);
 
   // Update document title dynamically based on the current scene name
   useEffect(() => {
@@ -118,8 +83,8 @@ export function BrowserSourceView() {
         <div>
           <h2 className="text-xl font-bold uppercase tracking-wide text-text-primary mb-2">Scene Not Found</h2>
           <p className="text-sm max-w-md leading-relaxed">
-            No active project or scene matches the path <code className="bg-bg-surface px-1.5 py-0.5 rounded border border-white/[0.08] text-white">/o/{sceneSlug}</code>. 
-            Open the editor and create a scene with this name first.
+            No active project or scene matches the path <code className="bg-bg-surface px-1.5 py-0.5 rounded border border-white/[0.08] text-white">/o/{overlayCode}</code>. 
+            Open the editor and regenerate the overlay link.
           </p>
         </div>
       </div>
