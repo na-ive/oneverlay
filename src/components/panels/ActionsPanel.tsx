@@ -84,23 +84,22 @@ export function ActionsPanel() {
               </button>
 
               <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.06]">
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-[11px] font-medium transition-all cursor-pointer"
-                  >
-                    <LuCopy size={12} />
-                    {copiedLink ? 'Copied' : 'Copy'}
-                  </button>
-                  <button
-                    onClick={handleGenerateLink}
-                    disabled={isGenerating}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-[11px] font-medium transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    {isGenerating ? <LuLoader size={12} className="animate-spin" /> : <LuRefreshCw size={12} />}
-                    Regenerate
-                  </button>
-                </div>
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer"
+                >
+                  <LuCopy size={13} />
+                  {copiedLink ? 'Copied to Clipboard' : 'Copy Overlay Link'}
+                </button>
+                <button
+                  onClick={handleGenerateLink}
+                  disabled={isGenerating}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-text-secondary hover:text-text-primary text-xs font-medium transition-all cursor-pointer disabled:opacity-50"
+                  title="Regenerate Link (invalidates old link)"
+                >
+                  {isGenerating ? <LuLoader size={13} className="animate-spin" /> : <LuRefreshCw size={13} />}
+                  Regenerate Link
+                </button>
                 <button
                   onClick={handleOpenOverlay}
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-surface hover:bg-white/[0.06] text-text-primary text-xs font-medium transition-all cursor-pointer"
