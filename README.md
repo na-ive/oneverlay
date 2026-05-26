@@ -1,24 +1,41 @@
-# Oneverlay
+<h1 align="center">【 Oneverlay 】</h1>
 
-Oneverlay is a premium, lightweight browser source overlay editor designed for live streamers. It provides a visual, drag-and-drop workspace that lets you compose, customize, and align overlay elements, then render them instantly in OBS Studio or any other streaming software with absolute transparency.
+<p align="center">
+  <a href="https://github.com/na-ive/oneverlay/commits/main">
+    <img src="https://img.shields.io/github/last-commit/na-ive/oneverlay?style=for-the-badge&logo=git&color=8be9fd&logoColor=fff" alt="Last Commit">
+  </a>
+  <a href="https://github.com/na-ive/oneverlay/stargazers">
+    <img src="https://img.shields.io/github/stars/na-ive/oneverlay?style=for-the-badge&logo=github&color=50fa7b&logoColor=fff" alt="Stars">
+  </a>
+  <a href="https://tako.id/naive">
+    <img src="https://img.shields.io/badge/Support-Tako-ff79c6?style=for-the-badge&logo=ko-fi&logoColor=fff" alt="Support Tako">
+  </a>
+</p>
+
+<p align="center">
+  <strong>Oneverlay is a premium, lightweight browser source overlay editor designed for live streamers. It provides a visual, drag-and-drop workspace that lets you compose, customize, and align overlay elements, then render them instantly in OBS Studio or any other streaming software with absolute transparency.</strong>
+</p>
 
 ![Oneverlay Showcase](./public/landing.png)
 
+
 ## Core Architecture
 
-Building overlays that sync seamlessly with OBS Studio presents a unique challenge: OBS Browser Sources run in heavily sandboxed, isolated Chromium Embedded Framework (CEF) containers. They do not share LocalStorage, cookies, or session states with your main desktop browser.
-
-Oneverlay solves this sandboxing constraint with a dual-sync architecture:
-1. **Local Disk Storage API**: During development, the editor automatically persists your layout changes to a local file (`project.json`) on your disk through a custom Vite server middleware.
-2. **OBS Polling Fallback**: The overlay pages (`/o/:sceneSlug`) query this server API in real-time, bypassing the isolated browser container sandbox to reflect live editor updates within 1.5 seconds.
-3. **Storage Event Listeners**: Standard browser tabs use low-overhead storage events to sync updates instantaneously when previewed on the same machine.
+Oneverlay operates on a modern, full-stack serverless architecture powered by Cloudflare:
+1. **Frontend (Vite + React)**: A sleek, high-performance visual WYSIWYG editor for designing scenes.
+2. **Backend (Hono + Cloudflare Workers)**: A lightweight, low-latency REST API running at the edge.
+3. **Cloud Database (Cloudflare D1)**: An edge-native SQL database that stores user configurations, projects, and scenes securely.
+4. **OBS Synchronization (Short-Polling)**: The overlay pages (`/o/:overlayCode`) query the Hono API dynamically to sync visual updates to OBS Studio within 2 seconds, completely bypassing OBS's isolated browser CEF container constraints.
+5. **Secret Key Portability**: Users get a unique, anonymous project key to access their workspaces from any machine without needing traditional password authentication.
 
 ## Key Features
 
 * **Visual WYSIWYG Workspace**: Add, position, resize, rotate, scale, and crop elements (text labels, static images, and embedded web pages).
-* **Multi-Scene Management**: Organize different setups into scenes, accessible via human-readable URL slugs (such as `/o/scene-1`).
-* **Absolute Transparency**: The overlay engine automatically eliminates page backgrounds and containers upon rendering, leaving a clean, transparent canvas perfect for overlays.
-* **Sleek Dark Aesthetics**: Features a premium, space-efficient dark interface for designing, alongside a clean landing page for new users.
+* **Multi-Scene Management**: Organize different layouts into scenes, managed under a single workspace.
+* **Anonymous Accounts & Portability**: Start editing instantly. Save your project to get a `Secret Key`, which you can enter on any device to load and resume your workspace.
+* **Secure Random Overlay URLs**: Overlay links use randomized 8-character codes (e.g., `/o/7j6fqxox`) to prevent route collisions and protect privacy.
+* **Link Regeneration**: The owner can instantly regenerate the overlay code in settings if the link is accidentally leaked, invalidating the old URL.
+* **Absolute Transparency**: The overlay engine automatically eliminates page backgrounds and containers upon rendering, leaving a clean, transparent canvas perfect for OBS.
 
 ## Quick Start
 
@@ -32,43 +49,42 @@ npm install
 
 ### Running the Development Server
 
-Start the Vite development server:
+To run the full-stack application locally (Vite frontend + Hono API + local D1 database):
 
 ```bash
-npm run dev
+npx wrangler dev
 ```
 
-Open `http://localhost:5173` in your browser to view the landing page, or go straight to the editor at `http://localhost:5173/editor`.
+Open `http://localhost:8787` in your browser to view the landing page or design overlays.
 
 ### Adding to OBS Studio
 
-1. In the editor, click **Open Overlay** to get the unique link for your active scene (e.g. `http://localhost:5173/o/scene-1`).
+1. In the editor, click **Open Overlay** or copy the link for your active scene (e.g., `http://127.0.0.1:8787/o/7j6fqxox`).
 2. Open OBS Studio, add a new **Browser** source.
 3. Paste the URL into the **URL** field.
 4. Set the width and height to match your scene canvas dimensions (usually `1920` x `1080`).
-5. Ensure the **Local file** checkbox is unchecked so OBS queries the local development server.
-6. Click **OK**.
+5. Ensure the **Local file** checkbox is unchecked.
+6. Click **OK**. (Use IP address `127.0.0.1` rather than `localhost` to avoid OBS IPv6 resolution bugs).
 
 ---
 
-## Future Goals and Roadmap
+## Future Goals and Roadmap (Plan R2, Offline & Native Overlay)
 
-Our immediate focus is scaling Oneverlay from a local application into a robust, cloud-hosted platform:
+Our immediate focus is continuing to expand Oneverlay into the ultimate streaming toolkit:
 
-### 1. Serverless Database Migration
-Currently, layouts are saved locally to a disk file. We plan to migrate the persistence layer to a serverless backend using:
-* **Hono** framework for high-performance routing.
-* **Cloudflare Workers** for low-latency serverless computing.
-* **Cloudflare D1 (SQL)** or **KV Storage** to store user configurations and project data permanently in the cloud.
+### 1. Cloudflare R2 Asset Hosting (Plan R2)
+Currently, images must be linked via external HTTPS URLs or embedded as base64 strings.
+* **Edge Storage**: Integrate Cloudflare R2 to allow drag-and-drop uploads of image assets, custom fonts, video clips, and audio directly within the editor.
+* **Direct CDNs**: Automatically generate high-performance CDN URLs for uploaded assets.
 
-### 2. Secret Key System and Portable Workspace
-To keep the application simple to start while allowing users to move across different computers:
-* **No Sign-Up Editor**: Users can open the editor and design their overlays immediately without creating an account or providing credentials.
-* **Save to Generate Secret Key**: When the project is saved for the first time, a unique project secret key is generated for the user.
-* **Workspace Portability**: By entering this secret key on any other PC, the editor will load and allow the user to resume working on their existing project.
+### 2. Full Offline Mode
+For creators who want absolute privacy, local-only performance, or need to run overlays in LAN settings without internet access:
+* **IndexedDB & LocalStorage**: Store all workspace states entirely inside the browser's local sandbox.
+* **Local Export/Import**: Export layouts to a standard `project.json` file on disk and re-import them.
+* **Zero Cloud Dependency**: A dedicated local mode toggle that bypasses Cloudflare Workers entirely, enabling the app to run as a purely static client-side tool.
 
-### 3. Random Unique Overlay URLs with Regeneration
-To prevent route collisions and ensure privacy:
-* **Unique Tokens**: Instead of slugs based on scene names (which could clash with other creators' setups), overlays are served via unique random codes (e.g. `/o/:uniqueCode`).
-* **Unauthenticated Access**: These overlay links remain fully public and lightweight for OBS to load with zero overhead.
-* **Token Regeneration**: The owner of the secret key can regenerate a new unique overlay code at any time, instantly invalidating the old link if it gets leaked or shared.
+### 3. Native Overlay Elements
+Support for built-in, dynamic overlay widgets directly inside Oneverlay:
+* **Built-in Utility Elements**: Introduce ready-to-use widgets (such as a digital clock, timers, or custom counters) to make scene creation faster and more interactive without needing third-party integrations.
+
+
