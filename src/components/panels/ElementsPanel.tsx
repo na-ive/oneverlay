@@ -26,6 +26,7 @@ import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useContextMenuStore } from '../../store/contextMenuStore';
 import { createElement } from '../../lib/defaults';
+import { rotateAroundCenter } from '../../lib/math';
 import type { ElementType, OverlayElement } from '../../types/elements';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 
@@ -267,9 +268,7 @@ export function ElementsPanel() {
               label: 'Reset Rotation (0°)',
               onClick: () => {
                 pushHistory();
-                updateElement(el.id, {
-                  rotation: 0,
-                });
+                updateElement(el.id, rotateAroundCenter(el, 0));
               },
             },
             { type: 'separator' },
@@ -279,9 +278,7 @@ export function ElementsPanel() {
               label: 'Rotate 90° CW',
               onClick: () => {
                 pushHistory();
-                updateElement(el.id, {
-                  rotation: Math.round((el.rotation + 90) % 360),
-                });
+                updateElement(el.id, rotateAroundCenter(el, Math.round((el.rotation + 90) % 360)));
               },
             },
             {
@@ -290,9 +287,7 @@ export function ElementsPanel() {
               label: 'Rotate 180°',
               onClick: () => {
                 pushHistory();
-                updateElement(el.id, {
-                  rotation: Math.round((el.rotation + 180) % 360),
-                });
+                updateElement(el.id, rotateAroundCenter(el, Math.round((el.rotation + 180) % 360)));
               },
             },
             {
@@ -301,9 +296,7 @@ export function ElementsPanel() {
               label: 'Rotate 90° CCW',
               onClick: () => {
                 pushHistory();
-                updateElement(el.id, {
-                  rotation: Math.round((el.rotation + 270) % 360),
-                });
+                updateElement(el.id, rotateAroundCenter(el, Math.round((el.rotation + 270) % 360)));
               },
             },
           ],

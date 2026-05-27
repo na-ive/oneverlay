@@ -30,6 +30,7 @@ import {
 import { APP_NAME } from '../../lib/constants';
 import { createElement } from '../../lib/defaults';
 import { loadGoogleFont } from '../../lib/fonts';
+import { rotateAroundCenter } from '../../lib/math';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 interface HTMLTextElementProps {
   el: TextElement;
@@ -522,9 +523,7 @@ export function CanvasEditor() {
                 label: 'Reset Rotation (0°)',
                 onClick: () => {
                   pushHistory();
-                  updateElement(clickedEl.id, {
-                    rotation: 0,
-                  });
+                  updateElement(clickedEl.id, rotateAroundCenter(clickedEl, 0));
                 },
               },
               { type: 'separator' },
@@ -534,9 +533,7 @@ export function CanvasEditor() {
                 label: 'Rotate 90° CW',
                 onClick: () => {
                   pushHistory();
-                  updateElement(clickedEl.id, {
-                    rotation: Math.round((clickedEl.rotation + 90) % 360),
-                  });
+                  updateElement(clickedEl.id, rotateAroundCenter(clickedEl, Math.round((clickedEl.rotation + 90) % 360)));
                 },
               },
               {
@@ -545,9 +542,7 @@ export function CanvasEditor() {
                 label: 'Rotate 180°',
                 onClick: () => {
                   pushHistory();
-                  updateElement(clickedEl.id, {
-                    rotation: Math.round((clickedEl.rotation + 180) % 360),
-                  });
+                  updateElement(clickedEl.id, rotateAroundCenter(clickedEl, Math.round((clickedEl.rotation + 180) % 360)));
                 },
               },
               {
@@ -556,9 +551,7 @@ export function CanvasEditor() {
                 label: 'Rotate 90° CCW',
                 onClick: () => {
                   pushHistory();
-                  updateElement(clickedEl.id, {
-                    rotation: Math.round((clickedEl.rotation + 270) % 360),
-                  });
+                  updateElement(clickedEl.id, rotateAroundCenter(clickedEl, Math.round((clickedEl.rotation + 270) % 360)));
                 },
               },
             ],
