@@ -169,7 +169,10 @@ export function SettingsModal() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `oneverlay-backup-${new Date().toISOString().split('T')[0]}.json`;
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+    a.download = `oneverlay-backup-${dateStr}_${timeStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [getSnapshot]);
