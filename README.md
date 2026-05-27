@@ -66,6 +66,10 @@ Open `http://localhost:8787` in your browser to view the landing page or design 
 5. Ensure the **Local file** checkbox is unchecked.
 6. Click **OK**. (Use IP address `127.0.0.1` rather than `localhost` to avoid OBS IPv6 resolution bugs).
 
+### Self-Hosting (Production)
+
+Want to run your own live instance of Oneverlay on the internet for free? Check out our [Self-Hosting Guide](./docs/SELF_HOSTING.md) for step-by-step instructions on deploying to Cloudflare Workers and D1. You can also read more about the technical design in our [Architecture Overview](./docs/ARCHITECTURE.md) and [API Documentation](./docs/API_DOCUMENTATION.md).
+
 ---
 
 ## Future Goals and Roadmap (Plan R2, Offline & Native Overlay)
