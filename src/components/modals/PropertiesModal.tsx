@@ -5,6 +5,7 @@ import { Select } from '../ui/Select';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
+import { GOOGLE_FONTS } from '../../lib/fonts';
 import type { OverlayElement, TextElement, ImageElement, BrowserElement } from '../../types/elements';
 
 export function PropertiesModal() {
@@ -201,12 +202,13 @@ function TextProperties({
           <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide pl-1">
             Font Family
           </label>
-          <input
-            type="text"
+          <Select
             value={element.fontFamily}
-            onChange={(e) => onUpdate({ fontFamily: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all"
-            placeholder="Inter"
+            onChange={(val) => onUpdate({ fontFamily: val })}
+            options={GOOGLE_FONTS.flatMap((group) => [
+              { value: `label-${group.label}`, label: group.label, isLabel: true },
+              ...group.fonts.map((f) => ({ value: f, label: f })),
+            ])}
           />
         </div>
       </div>

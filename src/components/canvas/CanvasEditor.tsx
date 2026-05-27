@@ -29,6 +29,7 @@ import {
 } from 'react-icons/lu';
 import { APP_NAME } from '../../lib/constants';
 import { createElement } from '../../lib/defaults';
+import { loadGoogleFont } from '../../lib/fonts';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 interface HTMLTextElementProps {
   el: TextElement;
@@ -37,6 +38,23 @@ interface HTMLTextElementProps {
 
 const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
   const ref = useRef<HTMLSpanElement>(null);
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useLayoutEffect(() => {
+    let mounted = true;
+    setFontLoaded(false);
+
+    loadGoogleFont(el.fontFamily).then(() => {
+      if (mounted) {
+        setFontLoaded(true);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [el.fontFamily]);
+
   useLayoutEffect(() => {
     if (ref.current) {
       const width = ref.current.offsetWidth;
@@ -45,7 +63,7 @@ const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
         updateElement(el.id, { width, height });
       }
     }
-  }, [el.text, el.fontSize, el.fontFamily, el.fontWeight, el.id, updateElement]);
+  }, [el.text, el.fontSize, el.fontFamily, el.fontWeight, el.id, updateElement, fontLoaded]);
 
   return (
     <span
@@ -53,7 +71,7 @@ const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
       style={{
         fontSize: `${el.fontSize}px`,
         color: el.color,
-        fontFamily: el.fontFamily,
+        fontFamily: fontLoaded ? el.fontFamily : 'Arial',
         fontWeight: el.fontWeight,
         whiteSpace: 'pre-wrap',
         userSelect: 'none',

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchOverlayScene, type CloudScene } from '../../lib/api';
+import { loadGoogleFont } from '../../lib/fonts';
 import type { SceneData, TextElement, ImageElement, BrowserElement } from '../../types/elements';
 
 // Helper to convert CloudScene to SceneData
@@ -24,7 +25,19 @@ export function BrowserSourceView() {
     
     try {
       const cloudScene = await fetchOverlayScene(overlayCode);
-      setScene(cloudSceneToLocal(cloudScene));
+      const localScene = cloudSceneToLocal(cloudScene);
+
+      // Preload all fonts used in this scene before rendering
+      const uniqueFonts = new Set<string>();
+      localScene.elements.forEach(el => {
+        if (el.type === 'text') {
+          uniqueFonts.add((el as TextElement).fontFamily);
+        }
+      });
+
+      await Promise.all(Array.from(uniqueFonts).map(font => loadGoogleFont(font)));
+
+      setScene(localScene);
     } catch (err) {
       console.warn('[Oneverlay] Failed to fetch overlay scene:', err);
       setScene(null);
