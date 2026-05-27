@@ -64,7 +64,7 @@ export function createBrowserElement(overrides?: Partial<BrowserElement>): Brows
   return {
     ...baseDefaults('browser', 'Browser'),
     type: 'browser',
-    url: 'https://example.com',
+    url: `${window.location.origin}/placeholder`,
     browserWidth: 800,
     browserHeight: 600,
     width: 800,
