@@ -41,12 +41,12 @@ export function ContextMenu() {
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     if (activeSubmenu === entryId) return;
 
-    if (activeSubmenu) {
-      closeTimeoutRef.current = setTimeout(() => {
-        setActiveSubmenu(hasSubmenu ? entryId : null);
-      }, 350);
-    } else if (hasSubmenu) {
+    if (hasSubmenu) {
       setActiveSubmenu(entryId);
+    } else if (activeSubmenu) {
+      closeTimeoutRef.current = setTimeout(() => {
+        setActiveSubmenu(null);
+      }, 350);
     }
   };
 
