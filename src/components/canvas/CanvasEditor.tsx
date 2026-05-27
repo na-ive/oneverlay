@@ -545,6 +545,10 @@ export function CanvasEditor() {
   // Transform end (resize or crop)
   const handleTransformEnd = useCallback(
     (id: string, node: Konva.Node) => {
+      if (vGuideRef.current) vGuideRef.current.hide();
+      if (hGuideRef.current) hGuideRef.current.hide();
+      if (guidesLayerRef.current) guidesLayerRef.current.batchDraw();
+
       const updates: Partial<OverlayElement> = {
         x: node.x(),
         y: node.y(),
@@ -565,6 +569,133 @@ export function CanvasEditor() {
     },
     [updateElement],
   );
+
+  // Snapping logic for transform
+  const handleTransformBoundBox = useCallback((id: string, oldBox: any, newBox: any, keepRatio: boolean = true) => {
+    const SNAP_THRESHOLD = 10 / scale; // Note: SNAP_THRESHOLD in logical pixels
+    
+    // Convert absolute stage coordinates to logical canvas coordinates
+    const lNewX = (newBox.x - offsetX) / scale;
+    const lNewY = (newBox.y - offsetY) / scale;
+    const lNewW = Math.max(1, newBox.width / scale);
+    const lNewH = Math.max(1, newBox.height / scale);
+
+    const lOldX = (oldBox.x - offsetX) / scale;
+    const lOldY = (oldBox.y - offsetY) / scale;
+    const lOldW = Math.max(1, oldBox.width / scale);
+    const lOldH = Math.max(1, oldBox.height / scale);
+
+    // Find all snapping targets for X and Y edges
+    const targetsX: number[] = [0, canvasWidth];
+    const targetsY: number[] = [0, canvasHeight];
+
+    elements.forEach((other) => {
+      if (other.id === id || other.hidden) return;
+      const otherBox = getActualBoundingBox(other);
+      targetsX.push(otherBox.minX, otherBox.maxX);
+      targetsY.push(otherBox.minY, otherBox.maxY);
+    });
+
+    // Check which edges are changing
+    const isChangingMinX = Math.abs(lNewX - lOldX) > 0.001;
+    const isChangingMaxX = Math.abs((lNewX + lNewW) - (lOldX + lOldW)) > 0.001;
+    const isChangingMinY = Math.abs(lNewY - lOldY) > 0.001;
+    const isChangingMaxY = Math.abs((lNewY + lNewH) - (lOldY + lOldH)) > 0.001;
+
+    // Determine anchors (stationary opposite edge)
+    const anchorX = isChangingMinX ? (lOldX + lOldW) : lOldX;
+    const anchorY = isChangingMinY ? (lOldY + lOldH) : lOldY;
+
+    let snapX = null;
+    let snapY = null;
+    let distX = Infinity;
+    let distY = Infinity;
+
+    if (isChangingMinX) {
+      for (const tx of targetsX) {
+        const d = Math.abs(lNewX - tx);
+        if (d < SNAP_THRESHOLD && d < distX) { distX = d; snapX = tx; }
+      }
+    } else if (isChangingMaxX) {
+      const maxX = lNewX + lNewW;
+      for (const tx of targetsX) {
+        const d = Math.abs(maxX - tx);
+        if (d < SNAP_THRESHOLD && d < distX) { distX = d; snapX = tx; }
+      }
+    }
+
+    if (isChangingMinY) {
+      for (const ty of targetsY) {
+        const d = Math.abs(lNewY - ty);
+        if (d < SNAP_THRESHOLD && d < distY) { distY = d; snapY = ty; }
+      }
+    } else if (isChangingMaxY) {
+      const maxY = lNewY + lNewH;
+      for (const ty of targetsY) {
+        const d = Math.abs(maxY - ty);
+        if (d < SNAP_THRESHOLD && d < distY) { distY = d; snapY = ty; }
+      }
+    }
+
+    let finalW = lNewW;
+    let finalH = lNewH;
+
+    if (keepRatio) {
+      if (snapX !== null || snapY !== null) {
+        let scaleFactor = 1;
+        if (snapX !== null && distX <= distY) {
+          const targetW = Math.abs(snapX - anchorX);
+          scaleFactor = targetW / lNewW;
+          snapY = null; // hide Y guide
+        } else if (snapY !== null) {
+          const targetH = Math.abs(snapY - anchorY);
+          scaleFactor = targetH / lNewH;
+          snapX = null; // hide X guide
+        }
+        finalW = lNewW * scaleFactor;
+        finalH = lNewH * scaleFactor;
+      }
+    } else {
+      if (snapX !== null) {
+        finalW = Math.abs(snapX - anchorX);
+      }
+      if (snapY !== null) {
+        finalH = Math.abs(snapY - anchorY);
+      }
+    }
+
+    // Minimum size constraint before finalizing X and Y
+    if (finalW * scale < 5) finalW = lOldW;
+    if (finalH * scale < 5) finalH = lOldH;
+
+    const finalX = isChangingMinX ? (anchorX - finalW) : anchorX;
+    const finalY = isChangingMinY ? (anchorY - finalH) : anchorY;
+
+    // Apply back to newBox
+    newBox.x = finalX * scale + offsetX;
+    newBox.y = finalY * scale + offsetY;
+    newBox.width = finalW * scale;
+    newBox.height = finalH * scale;
+
+    // Show/hide guides (vGuideRef and hGuideRef are inside a Layer that uses scale/offsetX, so they expect logical coords!)
+    if (snapX !== null && vGuideRef.current) {
+      vGuideRef.current.points([snapX, -10000, snapX, 10000]);
+      vGuideRef.current.show();
+    } else if (snapX === null && vGuideRef.current) {
+      vGuideRef.current.hide();
+    }
+
+    if (snapY !== null && hGuideRef.current) {
+      hGuideRef.current.points([-10000, snapY, 10000, snapY]);
+      hGuideRef.current.show();
+    } else if (snapY === null && hGuideRef.current) {
+      hGuideRef.current.hide();
+    }
+
+    if (guidesLayerRef.current) guidesLayerRef.current.batchDraw();
+
+    return newBox;
+  }, [elements, canvasWidth, canvasHeight, scale, offsetX, offsetY]);
 
   // Double-click to open properties
   const handleDoubleClick = useCallback(
@@ -1103,6 +1234,7 @@ export function CanvasEditor() {
                 onDragEnd={(e) => handleDragEnd(el.id, e)}
                 onTransformStart={handleDragStart}
                 onTransformEnd={(node) => handleTransformEnd(el.id, node)}
+                boundBoxFunc={(oldBox, newBox) => handleTransformBoundBox(el.id, oldBox, newBox)}
                 onDoubleClick={() => handleDoubleClick(el.id)}
               />
             );

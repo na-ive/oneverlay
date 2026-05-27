@@ -15,6 +15,7 @@ interface CanvasElementProps {
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformStart: () => void;
   onTransformEnd: (node: Konva.Node) => void;
+  boundBoxFunc?: (oldBox: any, newBox: any, keepRatio: boolean) => any;
   onDoubleClick: () => void;
 }
 
@@ -28,6 +29,7 @@ export function CanvasElement({
   onDragEnd,
   onTransformStart,
   onTransformEnd,
+  boundBoxFunc,
   onDoubleClick,
 }: CanvasElementProps) {
   const toolMode = useEditorStore((s) => s.toolMode);
@@ -398,6 +400,11 @@ export function CanvasElement({
             if (Math.abs(newBox.width) < 10 || Math.abs(newBox.height) < 10) {
               return oldBox;
             }
+
+            if (boundBoxFunc) {
+              return boundBoxFunc(oldBox, newBox, !isShiftDown.current);
+            }
+
             return newBox;
           }}
         />
