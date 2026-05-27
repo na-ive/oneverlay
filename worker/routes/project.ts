@@ -125,29 +125,42 @@ projectRoutes.post('/scenes', async (c) => {
     }
   }
 
-  // Upsert each scene
+  // Upsert each scene safely
   for (const scene of body.scenes) {
-    await db
-      .prepare(`
-        INSERT INTO scenes (id, project_id, name, canvas_data, elements, z_order, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          name = excluded.name,
-          canvas_data = excluded.canvas_data,
-          elements = excluded.elements,
-          z_order = excluded.z_order,
-          updated_at = excluded.updated_at
-      `)
-      .bind(
-        scene.id,
-        project.id,
-        scene.name,
-        JSON.stringify(scene.canvas),
-        JSON.stringify(scene.elements),
-        scene.zOrder,
-        scene.updatedAt
-      )
-      .run();
+    if (existingIds.has(scene.id)) {
+      await db
+        .prepare(`
+          UPDATE scenes 
+          SET name = ?, canvas_data = ?, elements = ?, z_order = ?, updated_at = ? 
+          WHERE id = ? AND project_id = ?
+        `)
+        .bind(
+          scene.name,
+          JSON.stringify(scene.canvas),
+          JSON.stringify(scene.elements),
+          scene.zOrder,
+          scene.updatedAt,
+          scene.id,
+          project.id
+        )
+        .run();
+    } else {
+      await db
+        .prepare(`
+          INSERT INTO scenes (id, project_id, name, canvas_data, elements, z_order, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `)
+        .bind(
+          scene.id,
+          project.id,
+          scene.name,
+          JSON.stringify(scene.canvas),
+          JSON.stringify(scene.elements),
+          scene.zOrder,
+          scene.updatedAt
+        )
+        .run();
+    }
   }
 
   // Note: We no longer update projects.updated_at here.
