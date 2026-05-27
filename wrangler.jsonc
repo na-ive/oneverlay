@@ -18,5 +18,10 @@
       "database_name": "oneverlay-db",
       "database_id": "3072b708-268c-4078-bf4b-7ed106fb877f"
     }
-  ]
+  ],
+  "triggers": {
+    "crons": [
+      "0 0 * * *"
+    ]
+  }
 }
