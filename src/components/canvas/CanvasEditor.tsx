@@ -394,12 +394,26 @@ export function CanvasEditor() {
       let closestXDist = Infinity;
       let snapX: number | null = null;
       let shiftX = 0;
+      let isCanvasSnapX = false;
 
       const pointsX = [box.minX, box.centerX, box.maxX];
       for (const px of pointsX) {
-        for (const tx of targetsX) {
+        // First check canvas targets (higher priority)
+        for (const tx of [0, canvasWidth / 2, canvasWidth]) {
           const dist = Math.abs(px - tx);
-          if (dist < SNAP_THRESHOLD && dist < closestXDist) {
+          if (dist < SNAP_THRESHOLD && (!isCanvasSnapX || dist < closestXDist)) {
+            closestXDist = dist;
+            snapX = tx;
+            shiftX = tx - px;
+            isCanvasSnapX = true;
+          }
+        }
+        
+        // Then check element targets if no canvas snap yet, or if we want to allow closer element snaps (but we prefer canvas)
+        for (const tx of targetsX) {
+          if (tx === 0 || tx === canvasWidth / 2 || tx === canvasWidth) continue; // already checked
+          const dist = Math.abs(px - tx);
+          if (dist < SNAP_THRESHOLD && !isCanvasSnapX && dist < closestXDist) {
             closestXDist = dist;
             snapX = tx;
             shiftX = tx - px;
@@ -420,12 +434,26 @@ export function CanvasEditor() {
       let closestYDist = Infinity;
       let snapY: number | null = null;
       let shiftY = 0;
+      let isCanvasSnapY = false;
 
       const pointsY = [box.minY, box.centerY, box.maxY];
       for (const py of pointsY) {
-        for (const ty of targetsY) {
+        // First check canvas targets (higher priority)
+        for (const ty of [0, canvasHeight / 2, canvasHeight]) {
           const dist = Math.abs(py - ty);
-          if (dist < SNAP_THRESHOLD && dist < closestYDist) {
+          if (dist < SNAP_THRESHOLD && (!isCanvasSnapY || dist < closestYDist)) {
+            closestYDist = dist;
+            snapY = ty;
+            shiftY = ty - py;
+            isCanvasSnapY = true;
+          }
+        }
+        
+        // Then check element targets
+        for (const ty of targetsY) {
+          if (ty === 0 || ty === canvasHeight / 2 || ty === canvasHeight) continue;
+          const dist = Math.abs(py - ty);
+          if (dist < SNAP_THRESHOLD && !isCanvasSnapY && dist < closestYDist) {
             closestYDist = dist;
             snapY = ty;
             shiftY = ty - py;
@@ -441,6 +469,13 @@ export function CanvasEditor() {
         }
       } else {
         if (hGuideRef.current) hGuideRef.current.hide();
+      }
+
+      // Synchronize HTML DOM element instantly during drag
+      const htmlEl = document.getElementById(`html-overlay-${el.id}`);
+      if (htmlEl) {
+        htmlEl.style.left = `${node.x() * scale}px`;
+        htmlEl.style.top = `${node.y() * scale}px`;
       }
       
       // Update Distance Guides
@@ -900,6 +935,7 @@ export function CanvasEditor() {
             const hasUrl = !!browserEl.url && browserEl.url !== 'about:blank';
             return (
               <div
+                id={`html-overlay-${el.id}`}
                 key={el.id}
                 style={{
                   ...commonStyle,
@@ -935,6 +971,7 @@ export function CanvasEditor() {
             const imageEl = el as ImageElement;
             return (
               <div
+                id={`html-overlay-${el.id}`}
                 key={el.id}
                 style={{ ...commonStyle, borderRadius: '4px' }}
                 onMouseDown={handleMouseDown}
@@ -949,11 +986,15 @@ export function CanvasEditor() {
             const textEl = el as TextElement;
             return (
               <div
+                id={`html-overlay-${el.id}`}
                 key={el.id}
                 style={{
                   ...commonStyle,
                   width: 'auto',
                   height: 'auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
                 onMouseDown={handleMouseDown}
               >
