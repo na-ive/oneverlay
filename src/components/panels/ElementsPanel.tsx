@@ -298,19 +298,54 @@ export function ElementsPanel() {
         },
         {
           type: 'item',
-          id: 'center-canvas',
+          id: 'center-canvas-submenu',
           label: 'Center on Canvas',
           icon: <LuCrosshair size={12} />,
-          onClick: () => {
-            const state = useSceneStore.getState();
-            const activeScene = state.scenes.find((s) => s.id === state.activeSceneId) || state.scenes[0];
-            const canvas = activeScene.canvas;
-            pushHistory();
-            updateElement(el.id, {
-              x: Math.round((canvas.width - el.width) / 2),
-              y: Math.round((canvas.height - el.height) / 2),
-            });
-          },
+          submenu: [
+            {
+              type: 'item',
+              id: 'center-both',
+              label: 'Both',
+              onClick: () => {
+                const state = useSceneStore.getState();
+                const activeScene = state.scenes.find((s) => s.id === state.activeSceneId) || state.scenes[0];
+                const canvas = activeScene.canvas;
+                pushHistory();
+                updateElement(el.id, {
+                  x: Math.round((canvas.width - el.width) / 2),
+                  y: Math.round((canvas.height - el.height) / 2),
+                });
+              },
+            },
+            {
+              type: 'item',
+              id: 'center-horizontal',
+              label: 'Horizontally',
+              onClick: () => {
+                const state = useSceneStore.getState();
+                const activeScene = state.scenes.find((s) => s.id === state.activeSceneId) || state.scenes[0];
+                const canvas = activeScene.canvas;
+                pushHistory();
+                updateElement(el.id, {
+                  x: Math.round((canvas.width - el.width) / 2),
+                });
+              },
+            },
+            {
+              type: 'item',
+              id: 'center-vertical',
+              label: 'Vertically',
+              onClick: () => {
+                const state = useSceneStore.getState();
+                const activeScene = state.scenes.find((s) => s.id === state.activeSceneId) || state.scenes[0];
+                const canvas = activeScene.canvas;
+                pushHistory();
+                updateElement(el.id, {
+                  y: Math.round((canvas.height - el.height) / 2),
+                });
+              },
+            },
+          ],
         },
         {
           type: 'item',

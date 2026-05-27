@@ -553,16 +553,45 @@ export function CanvasEditor() {
           },
           {
             type: 'item',
-            id: 'center-canvas',
+            id: 'center-canvas-submenu',
             label: 'Center on Canvas',
             icon: <LuCrosshair size={12} />,
-            onClick: () => {
-              pushHistory();
-              updateElement(clickedEl.id, {
-                x: Math.round((canvasWidth - clickedEl.width) / 2),
-                y: Math.round((canvasHeight - clickedEl.height) / 2),
-              });
-            },
+            submenu: [
+              {
+                type: 'item',
+                id: 'center-both',
+                label: 'Both',
+                onClick: () => {
+                  pushHistory();
+                  updateElement(clickedEl.id, {
+                    x: Math.round((canvasWidth - clickedEl.width) / 2),
+                    y: Math.round((canvasHeight - clickedEl.height) / 2),
+                  });
+                },
+              },
+              {
+                type: 'item',
+                id: 'center-horizontal',
+                label: 'Horizontally',
+                onClick: () => {
+                  pushHistory();
+                  updateElement(clickedEl.id, {
+                    x: Math.round((canvasWidth - clickedEl.width) / 2),
+                  });
+                },
+              },
+              {
+                type: 'item',
+                id: 'center-vertical',
+                label: 'Vertically',
+                onClick: () => {
+                  pushHistory();
+                  updateElement(clickedEl.id, {
+                    y: Math.round((canvasHeight - clickedEl.height) / 2),
+                  });
+                },
+              },
+            ],
           },
           {
             type: 'item',
