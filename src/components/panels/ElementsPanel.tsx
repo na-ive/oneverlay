@@ -263,6 +263,18 @@ export function ElementsPanel() {
           submenu: [
             {
               type: 'item',
+              id: 'rotate-0',
+              label: 'Reset Rotation (0°)',
+              onClick: () => {
+                pushHistory();
+                updateElement(el.id, {
+                  rotation: 0,
+                });
+              },
+            },
+            { type: 'separator' },
+            {
+              type: 'item',
               id: 'rotate-90',
               label: 'Rotate 90° CW',
               onClick: () => {
