@@ -61,7 +61,7 @@ export function ActionsPanel() {
         </span>
       </div>
 
-      <div className="flex-1 flex flex-col justify-between p-3.5">
+      <div className="flex-1 flex flex-col p-3.5 overflow-y-auto">
         {/* Top Actions */}
         <div className="flex flex-col gap-2">
           {!hasCode ? (
