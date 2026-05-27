@@ -72,6 +72,13 @@ Want to run your own live instance of Oneverlay on the internet for free? Check 
 
 ---
 
+## Known Limitations
+
+1. **No Live In-Stream Editing**: You cannot edit the overlay directly from within your streaming software. Because OBS Browser Sources are designed to be display-only, you must use the Oneverlay web-based editor to move or change elements.
+2. **Manual OBS Refresh**: To keep Oneverlay 100% free with absolutely zero server costs for self-hosters (staying within the Cloudflare Workers free tier), we deliberately avoided real-time WebSockets and background polling. Because of this, when you edit a scene and press Save, the changes will *not* automatically pop up on your live stream. You must right-click the Browser Source in OBS and click **"Refresh cache of current page"** to pull the latest updates. 
+
+---
+
 ## Future Goals and Roadmap (Plan R2, Offline & Native Overlay)
 
 Our immediate focus is continuing to expand Oneverlay into the ultimate streaming toolkit:

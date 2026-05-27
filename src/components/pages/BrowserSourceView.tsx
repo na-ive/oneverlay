@@ -55,13 +55,17 @@ export function BrowserSourceView() {
     };
   }, []);
 
-  // Initial load and polling fallback for OBS (OBS LocalStorage is isolated from main browser)
+  // Initial load only for OBS. Updates require a manual browser source refresh.
+  // 
+  // [OPTIONAL: AUTO-RELOAD (WARNING: HIGH COST)]
+  // Uncomment the lines below to enable short-polling. 
+  // This will auto-refresh the overlay every 2 seconds, but WILL rapidly consume 
+  // Cloudflare Free Tier request limits (100k requests/day).
   useEffect(() => {
     fetchSceneData();
 
-    const intervalId = setInterval(fetchSceneData, 2000); // poll every 2 seconds
-
-    return () => clearInterval(intervalId);
+    // const intervalId = setInterval(fetchSceneData, 2000); // poll every 2 seconds
+    // return () => clearInterval(intervalId);
   }, [overlayCode]);
 
   // Update document title dynamically based on the current scene name

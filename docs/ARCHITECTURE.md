@@ -35,8 +35,8 @@ A critical challenge for browser-based overlay editors is that streaming softwar
 **How Oneverlay Solves This:**
 1. **Public Overlay Codes**: When a user clicks "Generate Link", the backend assigns a random 8-character string (e.g., `o/x7b9z1q2`) to that specific scene.
 2. **The Render Route**: The user pastes `http://oneverlay.domain/o/x7b9z1q2` into OBS.
-3. **Short-Polling**: The React component loaded inside OBS mounts without the editor UI. It immediately begins polling `GET /api/overlay/x7b9z1q2` every 2 seconds.
-4. **Data Sync**: When the user edits the scene in their primary browser, the changes are throttled and synced to D1 (Cloudflare Database). Within a maximum of 2 seconds, the OBS browser source detects the new `updatedAt` timestamp, fetches the new JSON layout, and re-renders the canvas natively.
+3. **One-Time Fetch**: To maintain exactly $0 in server costs and avoid hitting Cloudflare's free tier request limits, Oneverlay completely avoids short-polling. The OBS browser source fetches the JSON layout exactly once when it mounts.
+4. **Manual Sync**: If a user updates their overlay in the web editor, they must manually right-click the Browser Source in OBS and select "Refresh cache of current page" to pull the new data. This is a deliberate architectural limitation to prioritize free self-hosting scalability over live auto-syncing.
 
 ## 5. Cloud Sync Throttling
 

@@ -61,3 +61,27 @@ That is it. Cloudflare will output a public URL (e.g., `https://oneverlay.<your-
 ## Automated Cleanup (Cron Job)
 Oneverlay comes with a built-in automated cleanup system to prevent database bloating. Projects that are completely inactive for over 90 days are automatically swept from the database. 
 This is handled via a Cron Trigger configured in `wrangler.jsonc` (`0 0 * * *`) and executed by the worker at midnight UTC. No manual maintenance is required.
+
+## Live Auto-Reload vs Cost (Why Manual Refresh?)
+By default, Oneverlay relies on a **One-Time Fetch** architecture. The OBS Browser Source fetches your overlay exactly once when it loads. If you edit the overlay, you must manually right-click the browser source in OBS and click "Refresh cache of current page" to see the updates.
+
+**Why is it built this way?**
+To keep self-hosting **100% free**. 
+Real-time "auto-reloading" requires the server to push updates directly to OBS. On Cloudflare Workers, this requires keeping HTTP connections open indefinitely via **WebSockets** and **Durable Objects**. 
+- Cloudflare Durable Objects do not have a free tier (Requires the $5/month Workers Paid plan).
+- Short-polling (making a request every 2 seconds) rapidly consumes the Cloudflare Free Tier limit of 100,000 requests per day (one streamer can consume 9,000 requests in 5 hours).
+
+If you are deploying Oneverlay and are willing to pay for Cloudflare Durable Objects (or integrate a third-party service like Pusher or Firebase Realtime Database), you can implement WebSockets. 
+
+Alternatively, if you have very low traffic and want to **force enable short-polling anyway**, you can uncomment the polling logic in `src/components/pages/BrowserSourceView.tsx` before deploying:
+
+```javascript
+  // [OPTIONAL: AUTO-RELOAD (WARNING: HIGH COST)]
+  // Uncomment the lines below to enable short-polling. 
+  useEffect(() => {
+    fetchSceneData();
+
+    const intervalId = setInterval(fetchSceneData, 2000); // poll every 2 seconds
+    return () => clearInterval(intervalId);
+  }, [overlayCode]);
+```
