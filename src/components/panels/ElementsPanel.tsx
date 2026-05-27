@@ -475,6 +475,7 @@ function ElementRow({
         }
       `}
       onClick={onSelect}
+      onDoubleClick={onOpenProperties}
       onContextMenu={onContextMenu}
       draggable
       onDragStart={onDragStart}
