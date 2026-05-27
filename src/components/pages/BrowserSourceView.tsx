@@ -176,6 +176,12 @@ export function BrowserSourceView() {
           const browserEl = el as BrowserElement;
           const hasUrl = !!browserEl.url && browserEl.url !== 'about:blank';
           if (!hasUrl) return null;
+
+          // XSS Protection: Ensure URL is HTTP/HTTPS to prevent javascript: execution
+          const urlStr = browserEl.url.trim().toLowerCase();
+          const isSafeUrl = urlStr.startsWith('http://') || urlStr.startsWith('https://');
+          if (!isSafeUrl) return null;
+
           return (
             <div
               key={el.id}

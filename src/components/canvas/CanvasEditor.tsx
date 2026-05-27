@@ -933,6 +933,10 @@ export function CanvasEditor() {
           if (el.type === 'browser') {
             const browserEl = el as BrowserElement;
             const hasUrl = !!browserEl.url && browserEl.url !== 'about:blank';
+            const urlStr = browserEl.url?.trim().toLowerCase() || '';
+            const isSafeUrl = urlStr.startsWith('http://') || urlStr.startsWith('https://');
+            const shouldRenderIframe = hasUrl && isSafeUrl;
+
             return (
               <div
                 id={`html-overlay-${el.id}`}
@@ -948,7 +952,7 @@ export function CanvasEditor() {
               >
                 {/* Transparent click catcher to prevent direct iframe interaction during layout */}
                 <div className="absolute inset-0 z-10 cursor-pointer" />
-                {hasUrl ? (
+                {shouldRenderIframe ? (
                   <iframe
                     src={browserEl.url}
                     title={`browser-source-${browserEl.id}`}
