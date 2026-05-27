@@ -26,6 +26,39 @@ export function ContextMenu() {
     setIsFlippedLeft(false);
   }
 
+  // Submenu hover logic with delay
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setActiveSubmenu(null);
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    }
+  }, [open]);
+
+  const handleMouseEnterItem = (entryId: string, hasSubmenu: boolean) => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    if (activeSubmenu === entryId) return;
+
+    if (activeSubmenu) {
+      closeTimeoutRef.current = setTimeout(() => {
+        setActiveSubmenu(hasSubmenu ? entryId : null);
+      }, 350);
+    } else if (hasSubmenu) {
+      setActiveSubmenu(entryId);
+    }
+  };
+
+  const handleMouseLeaveItem = (entryId: string) => {
+    if (activeSubmenu === entryId) {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = setTimeout(() => {
+        setActiveSubmenu(null);
+      }, 350);
+    }
+  };
+
   // Close on outside click, scroll, Escape
   useEffect(() => {
     if (!open) return;
@@ -109,7 +142,12 @@ export function ContextMenu() {
         }
 
         return (
-          <div key={entry.id} className="relative group/menu-item w-full">
+          <div
+            key={entry.id}
+            className="relative w-full"
+            onMouseEnter={() => handleMouseEnterItem(entry.id, !!entry.submenu)}
+            onMouseLeave={() => handleMouseLeaveItem(entry.id)}
+          >
             <button
               disabled={entry.disabled}
               onClick={() => {
@@ -149,10 +187,10 @@ export function ContextMenu() {
               )}
             </button>
 
-            {entry.submenu && (
+            {entry.submenu && activeSubmenu === entry.id && (
               <div
                 className={`
-                  absolute top-0 hidden group-hover/menu-item:block min-w-[150px] py-1.5 rounded-2xl border border-white/[0.10] shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-2xl z-[10000]
+                  absolute top-0 min-w-[150px] py-1.5 rounded-2xl border border-white/[0.10] shadow-[0_16px_48px_rgba(0,0,0,0.65)] backdrop-blur-2xl z-[10000]
                   ${isFlippedLeft ? 'right-full mr-0.5' : 'left-full ml-0.5'}
                 `}
                 style={{
