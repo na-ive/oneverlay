@@ -15,7 +15,7 @@ export function ActionsPanel() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const handleSave = useCallback(() => {
-    saveProject(getSnapshot());
+    saveProject(getSnapshot(), true);
   }, [getSnapshot]);
 
   const handleGenerateLink = useCallback(async () => {

@@ -22,9 +22,10 @@ CREATE TABLE IF NOT EXISTS scenes (
 
 -- Overlay codes: one active code per scene at a time, publicly accessible
 CREATE TABLE IF NOT EXISTS overlay_codes (
-  overlay_code  TEXT PRIMARY KEY,           -- random 8-char alphanumeric token
-  scene_id      TEXT NOT NULL UNIQUE REFERENCES scenes(id) ON DELETE CASCADE,
-  created_at    INTEGER NOT NULL
+  overlay_code      TEXT PRIMARY KEY,           -- random 8-char alphanumeric token
+  scene_id          TEXT NOT NULL UNIQUE REFERENCES scenes(id) ON DELETE CASCADE,
+  created_at        INTEGER NOT NULL,
+  last_accessed_at  INTEGER NOT NULL DEFAULT 0
 );
 
 -- Indexes for fast lookups

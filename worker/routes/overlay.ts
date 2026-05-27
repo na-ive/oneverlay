@@ -26,9 +26,9 @@ overlayRoutes.get('/:code', async (c) => {
   const db = c.env.DB;
 
   const codeRow = await db
-    .prepare('SELECT scene_id FROM overlay_codes WHERE overlay_code = ?')
+    .prepare('SELECT scene_id, last_accessed_at FROM overlay_codes WHERE overlay_code = ?')
     .bind(code)
-    .first<{ scene_id: string }>();
+    .first<{ scene_id: string; last_accessed_at: number }>();
 
   if (!codeRow) return c.json({ error: 'Overlay not found' }, 404);
 
@@ -44,6 +44,17 @@ overlayRoutes.get('/:code', async (c) => {
     }>();
 
   if (!scene) return c.json({ error: 'Scene not found' }, 404);
+
+  // Background task: Update last_accessed_at if older than 24 hours (86400000 ms)
+  const now = Date.now();
+  if (now - (codeRow.last_accessed_at || 0) > 86400000) {
+    c.executionCtx.waitUntil(
+      db
+        .prepare('UPDATE overlay_codes SET last_accessed_at = ? WHERE overlay_code = ?')
+        .bind(now, code)
+        .run()
+    );
+  }
 
   return c.json({
     id: scene.id,

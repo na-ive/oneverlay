@@ -150,11 +150,10 @@ projectRoutes.post('/scenes', async (c) => {
       .run();
   }
 
-  // Update project updated_at
-  await db
-    .prepare('UPDATE projects SET updated_at = ? WHERE id = ?')
-    .bind(now, project.id)
-    .run();
+  // Note: We no longer update projects.updated_at here.
+  // projects.updated_at strictly tracks project creation and key regeneration.
+  // Editor activity is tracked by MAX(scenes.updated_at) which is inherently updated
+  // by the client via the ON CONFLICT DO UPDATE SET updated_at = excluded.updated_at above.
 
   return c.json({ ok: true });
 });
