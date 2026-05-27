@@ -8,7 +8,14 @@ Oneverlay operates on a modern, serverless architecture that drastically minimiz
 - **Backend (`worker/`)**: A Cloudflare Worker using Hono for REST API routing.
 - **Database**: Cloudflare D1 (SQLite at the edge).
 
-## 2. Stateless Authentication (The Secret Key Concept)
+## 2. The Frontend Canvas Engine
+
+Oneverlay’s visual editor is heavily optimized for performance and fluid interactions using the following stack:
+- **State Management (Zustand)**: `useSceneStore` and `useEditorStore` handle complex, deeply nested canvas state without triggering unnecessary React re-renders. Zustand acts as the single source of truth for element positions, transformations, and scene data.
+- **Rendering Engine (Konva & React-Konva)**: Instead of manipulating the DOM, the editor draws directly onto an HTML5 `<canvas>` using Konva.js. This guarantees 60fps dragging, scaling, and rotation of elements, ensuring that the editor feels like a native desktop application (e.g., Photoshop or Figma).
+- **Styling (Tailwind CSS v4)**: The user interface panels and modals are built rapidly using the latest Tailwind CSS v4, which operates via Vite plugins for near-instant HMR and zero-config CSS variables.
+
+## 3. Stateless Authentication (The Secret Key Concept)
 
 Oneverlay discards the traditional Username/Password paradigm in favor of anonymous, portable workspaces.
 
@@ -21,7 +28,7 @@ When a user opens the application for the first time:
 
 If the key is compromised, the user can call `PUT /api/project/key` to invalidate the old key and generate a new one without losing their scenes.
 
-## 3. The OBS Synchronization Engine
+## 4. The OBS Synchronization Engine
 
 A critical challenge for browser-based overlay editors is that streaming software like OBS Studio runs browser sources inside isolated CEF (Chromium Embedded Framework) containers. These containers cannot access the host browser's `localStorage` or `sessionStorage`.
 
@@ -31,14 +38,14 @@ A critical challenge for browser-based overlay editors is that streaming softwar
 3. **Short-Polling**: The React component loaded inside OBS mounts without the editor UI. It immediately begins polling `GET /api/overlay/x7b9z1q2` every 2 seconds.
 4. **Data Sync**: When the user edits the scene in their primary browser, the changes are throttled and synced to D1 (Cloudflare Database). Within a maximum of 2 seconds, the OBS browser source detects the new `updatedAt` timestamp, fetches the new JSON layout, and re-renders the canvas natively.
 
-## 4. Cloud Sync Throttling
+## 5. Cloud Sync Throttling
 
 To prevent D1 database write exhaustion when a user is actively dragging elements across the canvas, Oneverlay decouples local state from remote state.
 
 - **Local Storage (0.5s Debounce)**: Changes are saved to `localStorage` almost instantly, ensuring crash recovery.
 - **Cloud Sync (15s Throttle)**: A background timer ensures that changes are batched and sent to the Hono API a maximum of once every 15 seconds. If the user stops interacting, the final state is guaranteed to be pushed to the Cloudflare Worker.
 
-## 5. Automated Data Lifecycle (Cron Job)
+## 6. Automated Data Lifecycle (Cron Job)
 
 To ensure the database remains lightweight and performant without manual maintenance, Oneverlay features an automated garbage collection routine.
 
