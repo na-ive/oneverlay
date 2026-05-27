@@ -26,10 +26,9 @@ app.get('/api/health', (c) => c.json({ ok: true }));
 export default {
   fetch: app.fetch,
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    // 90 days ago
-    const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    // 1. Clean up inactive projects (older than 90 days with no recent activity)
+    const inactiveCutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
     
-    // Clean up inactive projects
     await env.DB.prepare(`
       DELETE FROM projects
       WHERE created_at < ? 
@@ -42,6 +41,17 @@ export default {
           JOIN overlay_codes ON scenes.id = overlay_codes.scene_id 
           WHERE scenes.project_id = projects.id AND overlay_codes.last_accessed_at >= ?
         )
-    `).bind(cutoff, cutoff, cutoff, cutoff).run();
+    `).bind(inactiveCutoff, inactiveCutoff, inactiveCutoff, inactiveCutoff).run();
+
+    // 2. Anti-Spam / DoS mitigation: Clean up empty projects older than 1 hour
+    const spamCutoff = Date.now() - 1 * 60 * 60 * 1000;
+    
+    await env.DB.prepare(`
+      DELETE FROM projects
+      WHERE created_at < ?
+        AND NOT EXISTS (
+          SELECT 1 FROM scenes WHERE project_id = projects.id
+        )
+    `).bind(spamCutoff).run();
   }
 };
