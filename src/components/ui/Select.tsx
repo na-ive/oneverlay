@@ -5,6 +5,7 @@ import { LuChevronDown, LuCheck } from 'react-icons/lu';
 interface SelectOption {
   value: string | number;
   label: string;
+  isLabel?: boolean;
 }
 
 interface SelectProps {
@@ -81,19 +82,28 @@ export function Select({
       triggerRef.current?.blur();
     };
 
-    const handleClose = () => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as Node;
+      if (dropdownRef.current?.contains(target)) {
+        return;
+      }
+      setIsOpen(false);
+      triggerRef.current?.blur();
+    };
+
+    const handleResize = () => {
       setIsOpen(false);
       triggerRef.current?.blur();
     };
 
     window.addEventListener('mousedown', handleOutsideClick, { capture: true });
-    window.addEventListener('scroll', handleClose, { capture: true });
-    window.addEventListener('resize', handleClose);
+    window.addEventListener('scroll', handleScroll, { capture: true });
+    window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('mousedown', handleOutsideClick, { capture: true });
-      window.removeEventListener('scroll', handleClose, { capture: true });
-      window.removeEventListener('resize', handleClose);
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+      window.removeEventListener('resize', handleResize);
     };
   }, [isOpen, updateCoords]);
 
@@ -156,6 +166,13 @@ export function Select({
             }}
           >
             {options.map((opt) => {
+              if (opt.isLabel) {
+                return (
+                  <div key={`label-${opt.label}`} className="px-3 py-1.5 mt-1 text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                    {opt.label}
+                  </div>
+                );
+              }
               const isSelected = opt.value === value;
               return (
                 <button
