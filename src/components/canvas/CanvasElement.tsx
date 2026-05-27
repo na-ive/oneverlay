@@ -11,6 +11,7 @@ interface CanvasElementProps {
   scale: number;
   onSelect: () => void;
   onDragStart: () => void;
+  onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformStart: () => void;
   onTransformEnd: (node: Konva.Node) => void;
@@ -23,6 +24,7 @@ export function CanvasElement({
   scale,
   onSelect,
   onDragStart,
+  onDragMove,
   onDragEnd,
   onTransformStart,
   onTransformEnd,
@@ -265,6 +267,7 @@ export function CanvasElement({
         onMouseDown={onSelect}
         onTouchStart={onSelect}
         onDragStart={onDragStart}
+        onDragMove={onDragMove}
         onDragEnd={(e) => {
           onDragEnd(e);
           const stage = e.target.getStage();

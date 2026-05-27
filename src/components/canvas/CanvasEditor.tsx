@@ -1,5 +1,5 @@
 import { useCallback, useRef, useEffect, useState, useLayoutEffect } from 'react';
-import { Stage, Layer, Rect } from 'react-konva';
+import { Stage, Layer, Rect, Line } from 'react-konva';
 import type Konva from 'konva';
 import { useSceneStore, selectElements, selectCanvas } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
@@ -31,7 +31,7 @@ import {
 import { APP_NAME } from '../../lib/constants';
 import { createElement } from '../../lib/defaults';
 import { loadGoogleFont } from '../../lib/fonts';
-import { rotateAroundCenter } from '../../lib/math';
+import { rotateAroundCenter, getActualBoundingBox } from '../../lib/math';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 interface HTMLTextElementProps {
   el: TextElement;
@@ -168,6 +168,11 @@ export function CanvasEditor() {
   const toolMode = useEditorStore((s) => s.toolMode);
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ startX: 0, startY: 0, panX: 0, panY: 0 });
+
+  // Guides refs
+  const guidesLayerRef = useRef<Konva.Layer>(null);
+  const hGuideRef = useRef<Konva.Line>(null);
+  const vGuideRef = useRef<Konva.Line>(null);
 
   const handleMouseDown = useCallback(() => {
     const currentToolMode = useEditorStore.getState().toolMode;
@@ -347,8 +352,92 @@ export function CanvasEditor() {
   const handleDragEnd = useCallback(
     (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
       moveElement(id, e.target.x(), e.target.y());
+      if (vGuideRef.current) vGuideRef.current.hide();
+      if (hGuideRef.current) hGuideRef.current.hide();
+      if (guidesLayerRef.current) guidesLayerRef.current.batchDraw();
     },
     [moveElement],
+  );
+
+  // Drag move (Snapping logic)
+  const handleDragMove = useCallback(
+    (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
+      const node = e.target;
+      const el = elements.find((el) => el.id === id);
+      if (!el) return;
+
+      const SNAP_THRESHOLD = 5 / scale;
+      
+      const currentEl = { ...el, x: node.x(), y: node.y() };
+      const box = getActualBoundingBox(currentEl);
+      
+      const targetsX: number[] = [0, canvasWidth / 2, canvasWidth];
+      const targetsY: number[] = [0, canvasHeight / 2, canvasHeight];
+
+      elements.forEach((other) => {
+        if (other.id === id || other.hidden) return;
+        const otherBox = getActualBoundingBox(other);
+        targetsX.push(otherBox.minX, otherBox.centerX, otherBox.maxX);
+        targetsY.push(otherBox.minY, otherBox.centerY, otherBox.maxY);
+      });
+
+      let closestXDist = Infinity;
+      let snapX: number | null = null;
+      let shiftX = 0;
+
+      const pointsX = [box.minX, box.centerX, box.maxX];
+      for (const px of pointsX) {
+        for (const tx of targetsX) {
+          const dist = Math.abs(px - tx);
+          if (dist < SNAP_THRESHOLD && dist < closestXDist) {
+            closestXDist = dist;
+            snapX = tx;
+            shiftX = tx - px;
+          }
+        }
+      }
+
+      if (snapX !== null) {
+        node.x(node.x() + shiftX);
+        if (vGuideRef.current) {
+          vGuideRef.current.points([snapX, -10000, snapX, 10000]);
+          vGuideRef.current.show();
+        }
+      } else {
+        if (vGuideRef.current) vGuideRef.current.hide();
+      }
+
+      let closestYDist = Infinity;
+      let snapY: number | null = null;
+      let shiftY = 0;
+
+      const pointsY = [box.minY, box.centerY, box.maxY];
+      for (const py of pointsY) {
+        for (const ty of targetsY) {
+          const dist = Math.abs(py - ty);
+          if (dist < SNAP_THRESHOLD && dist < closestYDist) {
+            closestYDist = dist;
+            snapY = ty;
+            shiftY = ty - py;
+          }
+        }
+      }
+
+      if (snapY !== null) {
+        node.y(node.y() + shiftY);
+        if (hGuideRef.current) {
+          hGuideRef.current.points([-10000, snapY, 10000, snapY]);
+          hGuideRef.current.show();
+        }
+      } else {
+        if (hGuideRef.current) hGuideRef.current.hide();
+      }
+      
+      if (guidesLayerRef.current) {
+        guidesLayerRef.current.batchDraw();
+      }
+    },
+    [elements, canvasWidth, canvasHeight, scale],
   );
 
   // Drag start — push history
@@ -866,6 +955,7 @@ export function CanvasEditor() {
                   selectElement(el.id);
                   handleDragStart();
                 }}
+                onDragMove={(e) => handleDragMove(el.id, e)}
                 onDragEnd={(e) => handleDragEnd(el.id, e)}
                 onTransformStart={handleDragStart}
                 onTransformEnd={(node) => handleTransformEnd(el.id, node)}
@@ -873,6 +963,26 @@ export function CanvasEditor() {
               />
             );
           })}
+        </Layer>
+
+        {/* Guides Layer */}
+        <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale} ref={guidesLayerRef} listening={false}>
+          <Line
+            ref={vGuideRef}
+            points={[0, -10000, 0, 10000]}
+            stroke="#ff0044"
+            strokeWidth={1 / scale}
+            dash={[4 / scale, 4 / scale]}
+            visible={false}
+          />
+          <Line
+            ref={hGuideRef}
+            points={[-10000, 0, 10000, 0]}
+            stroke="#ff0044"
+            strokeWidth={1 / scale}
+            dash={[4 / scale, 4 / scale]}
+            visible={false}
+          />
         </Layer>
       </Stage>
 
