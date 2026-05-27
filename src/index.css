@@ -53,7 +53,7 @@ html, body {
 /* ── Scrollbar ── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+  scrollbar-color: var(--color-border-light) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -66,12 +66,12 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--color-border-light);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-light);
+  background: var(--color-text-muted);
 }
 
 /* ── Selection ── */
