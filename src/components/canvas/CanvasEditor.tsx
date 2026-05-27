@@ -1,5 +1,5 @@
 import { useCallback, useRef, useEffect, useState, useLayoutEffect } from 'react';
-import { Stage, Layer, Rect, Line } from 'react-konva';
+import { Stage, Layer, Rect, Line, Group, Text } from 'react-konva';
 import type Konva from 'konva';
 import { useSceneStore, selectElements, selectCanvas } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
@@ -173,6 +173,12 @@ export function CanvasEditor() {
   const guidesLayerRef = useRef<Konva.Layer>(null);
   const hGuideRef = useRef<Konva.Line>(null);
   const vGuideRef = useRef<Konva.Line>(null);
+  
+  // Distance guides refs
+  const distGuideTopRef = useRef<Konva.Group>(null);
+  const distGuideBottomRef = useRef<Konva.Group>(null);
+  const distGuideLeftRef = useRef<Konva.Group>(null);
+  const distGuideRightRef = useRef<Konva.Group>(null);
 
   const handleMouseDown = useCallback(() => {
     const currentToolMode = useEditorStore.getState().toolMode;
@@ -348,12 +354,16 @@ export function CanvasEditor() {
     [selectElement],
   );
 
-  // Drag end
   const handleDragEnd = useCallback(
     (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
       moveElement(id, e.target.x(), e.target.y());
       if (vGuideRef.current) vGuideRef.current.hide();
       if (hGuideRef.current) hGuideRef.current.hide();
+      
+      [distGuideTopRef, distGuideBottomRef, distGuideLeftRef, distGuideRightRef].forEach(ref => {
+        if (ref.current) ref.current.hide();
+      });
+
       if (guidesLayerRef.current) guidesLayerRef.current.batchDraw();
     },
     [moveElement],
@@ -433,6 +443,58 @@ export function CanvasEditor() {
         if (hGuideRef.current) hGuideRef.current.hide();
       }
       
+      // Update Distance Guides
+      const updateDistGuide = (groupRef: React.RefObject<Konva.Group | null>, linePts: number[], textX: number, textY: number, text: string, visible: boolean) => {
+        const group = groupRef.current;
+        if (!group) return;
+        if (visible) {
+          group.show();
+          const line = group.findOne('Line') as Konva.Line;
+          const textNode = group.findOne('Text') as Konva.Text;
+          if (line) line.points(linePts);
+          if (textNode) {
+            textNode.text(text);
+            textNode.x(textX);
+            textNode.y(textY);
+          }
+        } else {
+          group.hide();
+        }
+      };
+
+      // We need the updated box after snapping
+      const finalBox = getActualBoundingBox({ ...el, x: node.x(), y: node.y() });
+      
+      // Top
+      if (finalBox.minY > 0) {
+        updateDistGuide(distGuideTopRef, [finalBox.centerX, 0, finalBox.centerX, finalBox.minY], finalBox.centerX + 10, finalBox.minY / 2 - 8, `${Math.round(finalBox.minY)} px`, true);
+      } else {
+        updateDistGuide(distGuideTopRef, [], 0, 0, '', false);
+      }
+      
+      // Bottom
+      if (finalBox.maxY < canvasHeight) {
+        const dist = canvasHeight - finalBox.maxY;
+        updateDistGuide(distGuideBottomRef, [finalBox.centerX, finalBox.maxY, finalBox.centerX, canvasHeight], finalBox.centerX + 10, finalBox.maxY + dist / 2 - 8, `${Math.round(dist)} px`, true);
+      } else {
+        updateDistGuide(distGuideBottomRef, [], 0, 0, '', false);
+      }
+      
+      // Left
+      if (finalBox.minX > 0) {
+        updateDistGuide(distGuideLeftRef, [0, finalBox.centerY, finalBox.minX, finalBox.centerY], finalBox.minX / 2 - 20, finalBox.centerY - 20, `${Math.round(finalBox.minX)} px`, true);
+      } else {
+        updateDistGuide(distGuideLeftRef, [], 0, 0, '', false);
+      }
+      
+      // Right
+      if (finalBox.maxX < canvasWidth) {
+        const dist = canvasWidth - finalBox.maxX;
+        updateDistGuide(distGuideRightRef, [finalBox.maxX, finalBox.centerY, canvasWidth, finalBox.centerY], finalBox.maxX + dist / 2 - 20, finalBox.centerY - 20, `${Math.round(dist)} px`, true);
+      } else {
+        updateDistGuide(distGuideRightRef, [], 0, 0, '', false);
+      }
+
       if (guidesLayerRef.current) {
         guidesLayerRef.current.batchDraw();
       }
@@ -927,6 +989,43 @@ export function CanvasEditor() {
           cursor: toolMode === 'hand' ? (isPanning ? 'grabbing' : 'grab') : 'default',
         }}
       >
+        {/* Guides Layer (Rendered below elements so handlers stay on top) */}
+        <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale} ref={guidesLayerRef} listening={false}>
+          <Line
+            ref={vGuideRef}
+            points={[0, -10000, 0, 10000]}
+            stroke="#4a9eff"
+            strokeWidth={1 / scale}
+            dash={[4 / scale, 4 / scale]}
+            visible={false}
+          />
+          <Line
+            ref={hGuideRef}
+            points={[-10000, 0, 10000, 0]}
+            stroke="#4a9eff"
+            strokeWidth={1 / scale}
+            dash={[4 / scale, 4 / scale]}
+            visible={false}
+          />
+          
+          {/* Distance Guides */}
+          {[distGuideTopRef, distGuideBottomRef, distGuideLeftRef, distGuideRightRef].map((ref, i) => (
+            <Group ref={ref} key={i} visible={false}>
+              <Line stroke="#4a9eff" strokeWidth={1.5 / scale} />
+              <Text 
+                fill="#ffffff" 
+                stroke="#000000"
+                strokeWidth={2.5 / scale}
+                fillAfterStrokeEnabled={true}
+                fontSize={12 / scale} 
+                fontFamily="monospace" 
+                fontStyle="bold" 
+                align="center" 
+              />
+            </Group>
+          ))}
+        </Layer>
+
         <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>
           {/* Canvas background outline only */}
           <Rect
@@ -963,26 +1062,6 @@ export function CanvasEditor() {
               />
             );
           })}
-        </Layer>
-
-        {/* Guides Layer */}
-        <Layer x={offsetX} y={offsetY} scaleX={scale} scaleY={scale} ref={guidesLayerRef} listening={false}>
-          <Line
-            ref={vGuideRef}
-            points={[0, -10000, 0, 10000]}
-            stroke="#ff0044"
-            strokeWidth={1 / scale}
-            dash={[4 / scale, 4 / scale]}
-            visible={false}
-          />
-          <Line
-            ref={hGuideRef}
-            points={[-10000, 0, 10000, 0]}
-            stroke="#ff0044"
-            strokeWidth={1 / scale}
-            dash={[4 / scale, 4 / scale]}
-            visible={false}
-          />
         </Layer>
       </Stage>
 
