@@ -25,7 +25,7 @@ Oneverlay operates on a modern, full-stack serverless architecture powered by Cl
 1. **Frontend (Vite + React)**: A sleek, high-performance visual WYSIWYG editor for designing scenes.
 2. **Backend (Hono + Cloudflare Workers)**: A lightweight, low-latency REST API running at the edge.
 3. **Cloud Database (Cloudflare D1)**: An edge-native SQL database that stores user configurations, projects, and scenes securely.
-4. **OBS Synchronization (Short-Polling)**: The overlay pages (`/o/:overlayCode`) query the Hono API dynamically to sync visual updates to OBS Studio within 2 seconds, completely bypassing OBS's isolated browser CEF container constraints.
+4. **OBS Synchronization (On-Load / Refresh)**: The overlay pages (`/o/:overlayCode`) query the Hono API dynamically. To conserve Cloudflare Free Tier limits, it fetches the layout once upon loading.
 5. **Secret Key Portability**: Users get a unique, anonymous project key to access their workspaces from any machine without needing traditional password authentication.
 
 ## Key Features

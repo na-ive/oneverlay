@@ -45,15 +45,24 @@ To prevent D1 database write exhaustion when a user is actively dragging element
 - **Local Storage (0.5s Debounce)**: Changes are saved to `localStorage` almost instantly, ensuring crash recovery.
 - **Cloud Sync (15s Throttle)**: A background timer ensures that changes are batched and sent to the Hono API a maximum of once every 15 seconds. If the user stops interacting, the final state is guaranteed to be pushed to the Cloudflare Worker.
 
-## 6. Automated Data Lifecycle (Cron Job)
+## 6. Automated Data Lifecycle & Anti-Spam (Cron Job)
 
 To ensure the database remains lightweight and performant without manual maintenance, Oneverlay features an automated garbage collection routine.
 
-A Cloudflare Cron Trigger (`0 0 * * *`) executes daily to purge completely abandoned projects. 
-A project is deemed safely inactive and hard-deleted only if ALL of the following are true:
-- The project is older than 90 days.
-- The `secret_key` has not been regenerated in the last 90 days.
-- No scene within the project has been modified in the editor for the last 90 days.
-- **Crucially**: No overlay code belonging to the project has been polled by an OBS browser source in the last 90 days.
+A Cloudflare Cron Trigger (`*/15 * * * *`) executes every 15 minutes to perform two vital tasks:
+
+1. **DoS / Spam Mitigation**: Any project that is completely empty (has no scenes) and is older than 1 hour is hard-deleted. This prevents automated bots from exhausting the D1 database capacity by spamming the `/init` endpoint.
+2. **Abandoned Project Purge**: A project is deemed safely inactive and hard-deleted only if ALL of the following are true:
+   - The project is older than 90 days.
+   - The `secret_key` has not been regenerated in the last 90 days.
+   - No scene within the project has been modified in the editor for the last 90 days.
+   - No overlay code belonging to the project has been polled by an OBS browser source in the last 90 days.
 
 *Note: The OBS read activity is tracked via a non-blocking `c.executionCtx.waitUntil` routine on the `GET /api/overlay/:code` endpoint, updating the `last_accessed_at` column seamlessly in the background.*
+
+## 7. Security Architecture
+
+Oneverlay is designed defensively to protect users in a serverless, multi-tenant environment:
+- **IDOR Prevention**: All API mutations (e.g., `POST /api/project/scenes`) strictly verify that the `project_id` mapped to the provided `X-Secret-Key` owns the target `scene_id`. Secondary protection is enforced at the database level via Foreign Key constraints.
+- **XSS Protection**: While the editor allows users to input URLs for Browser Source elements, the frontend strictly validates `iframe` `src` attributes to only permit `http://` and `https://` schemas, completely neutralizing Stored XSS vectors (e.g., `javascript:alert(1)` payloads).
+- **Cryptographic Obscurity**: Public overlay links use cryptographically secure 8-character codes generated via `crypto.getRandomValues()`. With over 2.8 trillion combinations and Cloudflare's edge rate-limiting, brute-forcing a user's overlay URL is computationally unfeasible.
