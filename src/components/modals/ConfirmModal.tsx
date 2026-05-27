@@ -1,5 +1,6 @@
 import { Modal } from '../ui/Modal';
 import { LuTriangleAlert, LuInfo } from 'react-icons/lu';
+import { useConfirmStore } from '../../store/confirmStore';
 
 export interface ConfirmModalOptions {
   title: string;
@@ -10,14 +11,9 @@ export interface ConfirmModalOptions {
   isAlert?: boolean;
 }
 
-interface ConfirmModalProps {
-  open: boolean;
-  options: ConfirmModalOptions | null;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+export function ConfirmModal() {
+  const { open, options, onConfirm, onCancel } = useConfirmStore();
 
-export function ConfirmModal({ open, options, onConfirm, onCancel }: ConfirmModalProps) {
   if (!options) return null;
 
   return (

@@ -6,6 +6,7 @@ import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useCanvasZoom } from '../../hooks/useCanvasZoom';
 import { useContextMenuStore } from '../../store/contextMenuStore';
+import { useConfirmStore } from '../../store/confirmStore';
 import { CanvasElement } from './CanvasElement';
 import type { TextElement, ImageElement, BrowserElement, OverlayElement } from '../../types/elements';
 import {
@@ -622,9 +623,18 @@ export function CanvasEditor() {
             icon: <LuTrash2 size={12} />,
             danger: true,
             onClick: () => {
-              pushHistory();
-              removeElement(clickedEl.id);
-              selectElement(null);
+              useConfirmStore.getState().showConfirm({
+                title: 'Delete Element',
+                message: 'Are you sure you want to delete this element?',
+                confirmText: 'Delete',
+                isDanger: true,
+              }).then((confirmed) => {
+                if (confirmed) {
+                  pushHistory();
+                  removeElement(clickedEl.id);
+                  selectElement(null);
+                }
+              });
             },
           },
         ];

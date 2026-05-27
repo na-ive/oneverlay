@@ -24,6 +24,7 @@ import { IconButton } from '../ui/IconButton';
 import { useSceneStore, selectElements } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useHistoryStore } from '../../store/historyStore';
+import { useConfirmStore } from '../../store/confirmStore';
 import { useContextMenuStore } from '../../store/contextMenuStore';
 import { createElement } from '../../lib/defaults';
 import { rotateAroundCenter } from '../../lib/math';
@@ -86,9 +87,18 @@ export function ElementsPanel() {
 
   const handleDelete = useCallback(
     (id: string) => {
-      pushHistory();
-      removeElement(id);
-      if (selectedId === id) selectElement(null);
+      useConfirmStore.getState().showConfirm({
+        title: 'Delete Element',
+        message: 'Are you sure you want to delete this element?',
+        confirmText: 'Delete',
+        isDanger: true,
+      }).then((confirmed) => {
+        if (confirmed) {
+          pushHistory();
+          removeElement(id);
+          if (selectedId === id) selectElement(null);
+        }
+      });
     },
     [removeElement, selectedId, selectElement, pushHistory],
   );

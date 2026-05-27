@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { LuEye, LuEyeOff, LuCopy, LuRefreshCw, LuLogOut, LuTrash2, LuLoader, LuDownload, LuUpload } from 'react-icons/lu';
 import { Modal } from '../ui/Modal';
-import { ConfirmModal, type ConfirmModalOptions } from './ConfirmModal';
+import { useConfirmStore } from '../../store/confirmStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore } from '../../store/sceneStore';
 import { useHistoryStore } from '../../store/historyStore';
@@ -24,51 +24,8 @@ export function SettingsModal() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [confirmState, setConfirmState] = useState<{
-    open: boolean;
-    options: ConfirmModalOptions | null;
-    onConfirm: () => void;
-    onCancel: () => void;
-  }>({
-    open: false,
-    options: null,
-    onConfirm: () => {},
-    onCancel: () => {},
-  });
-
-  const showConfirm = useCallback((options: ConfirmModalOptions) => {
-    return new Promise<boolean>((resolve) => {
-      setConfirmState({
-        open: true,
-        options,
-        onConfirm: () => {
-          setConfirmState((prev) => ({ ...prev, open: false }));
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState((prev) => ({ ...prev, open: false }));
-          resolve(false);
-        }
-      });
-    });
-  }, []);
-
-  const showAlert = useCallback((options: Omit<ConfirmModalOptions, 'isAlert'>) => {
-    return new Promise<void>((resolve) => {
-      setConfirmState({
-        open: true,
-        options: { ...options, isAlert: true },
-        onConfirm: () => {
-          setConfirmState((prev) => ({ ...prev, open: false }));
-          resolve();
-        },
-        onCancel: () => {
-          setConfirmState((prev) => ({ ...prev, open: false }));
-          resolve();
-        }
-      });
-    });
-  }, []);
+  const showConfirm = useConfirmStore((s) => s.showConfirm);
+  const showAlert = useConfirmStore((s) => s.showAlert);
 
   useEffect(() => {
     if (isOpen) {
@@ -346,7 +303,6 @@ export function SettingsModal() {
         </div>
       </div>
       </Modal>
-      <ConfirmModal {...confirmState} />
     </>
   );
 }

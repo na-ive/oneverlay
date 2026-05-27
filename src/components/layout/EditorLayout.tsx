@@ -11,8 +11,10 @@ import { PropertiesModal } from '../modals/PropertiesModal';
 import { HelpModal } from '../modals/HelpModal';
 import { OnboardingModal } from '../modals/OnboardingModal';
 import { AddElementModal } from '../modals/AddElementModal';
+import { ConfirmModal } from '../modals/ConfirmModal';
 import { ContextMenu } from '../ui/ContextMenu';
 import { usePersistence } from '../../hooks/usePersistence';
+import { useConfirmStore } from '../../store/confirmStore';
 import { useHistoryStore } from '../../store/historyStore';
 import { useEditorStore } from '../../store/editorStore';
 import { useSceneStore } from '../../store/sceneStore';
@@ -121,9 +123,18 @@ export function EditorLayout() {
       // Delete selected element
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
         e.preventDefault();
-        pushHistory();
-        removeElement(selectedId);
-        selectElement(null);
+        useConfirmStore.getState().showConfirm({
+          title: 'Delete Element',
+          message: 'Are you sure you want to delete this element?',
+          confirmText: 'Delete',
+          isDanger: true,
+        }).then((confirmed) => {
+          if (confirmed) {
+            pushHistory();
+            removeElement(selectedId);
+            selectElement(null);
+          }
+        });
       }
 
       // Escape to deselect
@@ -293,6 +304,7 @@ export function EditorLayout() {
       <HelpModal />
       <OnboardingModal />
       <AddElementModal />
+      <ConfirmModal />
       <ContextMenu />
     </div>
   );
