@@ -30,6 +30,7 @@ export function AddElementModal() {
   const pushHistory = useHistoryStore((s) => s.push);
 
   const [mode, setMode] = useState<'new' | 'existing'>('new');
+  const [preset, setPreset] = useState<'normal' | 'clock' | 'countdown'>('normal');
   const [selectedExisting, setSelectedExisting] = useState<OverlayElement | null>(null);
   const [expandedScenes, setExpandedScenes] = useState<Record<string, boolean>>({});
   const [newName, setNewName] = useState('');
@@ -38,6 +39,7 @@ export function AddElementModal() {
   useEffect(() => {
     if (open && type) {
       setMode('new');
+      setPreset('normal');
       setSelectedExisting(null);
       
       const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
@@ -66,7 +68,12 @@ export function AddElementModal() {
     pushHistory();
 
     if (mode === 'new') {
-      addElement(type, newName.trim() || undefined);
+      let overrides = {};
+      if (type === 'text') {
+        if (preset === 'clock') overrides = { text: '{{time}}' };
+        if (preset === 'countdown') overrides = { text: '{{timer:05:00|hide}}' };
+      }
+      addElement(type, newName.trim() || undefined, overrides);
       
       setTimeout(() => {
         const updatedElements = useSceneStore.getState().scenes.find(s => s.id === activeSceneId)?.elements || [];
@@ -118,6 +125,53 @@ export function AddElementModal() {
             Add Existing
           </button>
         </div>
+
+        {/* Text Presets */}
+        {type === 'text' && mode === 'new' && (
+          <div className="mb-2">
+            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-1.5 px-1">
+              Widget Preset
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setPreset('normal');
+                  const defaultName = 'Text ' + (currentSceneElements.filter(e => e.type === 'text').length + 1);
+                  if (newName === 'Clock Widget' || newName === 'Countdown Timer') {
+                    setNewName(defaultName);
+                  }
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${preset === 'normal' ? 'bg-accent/10 border-accent/30 text-accent' : 'bg-black/20 border-white/[0.08] text-text-secondary hover:text-text-primary'}`}
+              >
+                Normal
+              </button>
+              <button
+                onClick={() => {
+                  setPreset('clock');
+                  const defaultName = 'Text ' + (currentSceneElements.filter(e => e.type === 'text').length + 1);
+                  if (newName === defaultName || newName === 'Countdown Timer') {
+                    setNewName('Clock Widget');
+                  }
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${preset === 'clock' ? 'bg-accent/10 border-accent/30 text-accent' : 'bg-black/20 border-white/[0.08] text-text-secondary hover:text-text-primary'}`}
+              >
+                Clock
+              </button>
+              <button
+                onClick={() => {
+                  setPreset('countdown');
+                  const defaultName = 'Text ' + (currentSceneElements.filter(e => e.type === 'text').length + 1);
+                  if (newName === defaultName || newName === 'Clock Widget') {
+                    setNewName('Countdown Timer');
+                  }
+                }}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${preset === 'countdown' ? 'bg-accent/10 border-accent/30 text-accent' : 'bg-black/20 border-white/[0.08] text-text-secondary hover:text-text-primary'}`}
+              >
+                Countdown
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* New Element Name Input */}
         <div className={`transition-all overflow-hidden ${mode === 'new' ? 'opacity-100 mb-2' : 'h-0 opacity-0 mb-0 pointer-events-none'}`}>

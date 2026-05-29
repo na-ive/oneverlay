@@ -24,7 +24,7 @@ function getUniqueName(baseName: string, existingNames: string[]): string {
 
 interface SceneStoreState extends ProjectData {
   // ── Element actions (operate on active scene) ──
-  addElement: (type: ElementType, name?: string) => void;
+  addElement: (type: ElementType, name?: string, overrides?: Partial<OverlayElement>) => void;
   updateElement: (id: string, updates: Partial<OverlayElement>) => void;
   updateElements: (updates: { id: string; updates: Partial<OverlayElement> }[]) => void;
   removeElement: (id: string) => void;
@@ -79,9 +79,9 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
   ...initialProject,
 
   // ── Element actions ──
-  addElement: (type: ElementType, name?: string) => {
+  addElement: (type: ElementType, name?: string, overrides?: Partial<OverlayElement>) => {
     updateActiveScene(set, (scene) => {
-      const element = createElement(type);
+      const element = createElement(type, overrides);
       element.zIndex = scene.elements.length;
       const existingNames = scene.elements.map((e) => e.name);
       const defaultName = `${element.name} ${scene.elements.filter((e) => e.type === type).length + 1}`;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchOverlayScene, type CloudScene } from '../../lib/api';
 import { loadGoogleFont } from '../../lib/fonts';
+import { useDynamicText } from '../../hooks/useDynamicText';
 import type { SceneData, TextElement, ImageElement, BrowserElement } from '../../types/elements';
 
 // Helper to convert CloudScene to SceneData
@@ -13,6 +14,28 @@ function cloudSceneToLocal(cloudScene: CloudScene): SceneData {
     elements: cloudScene.elements,
     updatedAt: cloudScene.updatedAt,
   };
+}
+
+function DynamicTextDisplay({ textEl, commonStyle }: { textEl: TextElement, commonStyle: React.CSSProperties }) {
+  const { displayText, opacity } = useDynamicText(textEl.text);
+  
+  return (
+    <div style={{ ...commonStyle, width: 'auto', height: 'auto', opacity: opacity * (commonStyle.opacity as number) }}>
+      <span
+        style={{
+          fontSize: `${textEl.fontSize}px`,
+          fontFamily: textEl.fontFamily,
+          color: textEl.color,
+          fontWeight: textEl.fontWeight,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          display: 'inline-block',
+        }}
+      >
+        {displayText}
+      </span>
+    </div>
+  );
 }
 
 export function BrowserSourceView() {
@@ -139,23 +162,7 @@ export function BrowserSourceView() {
 
         if (el.type === 'text') {
           const textEl = el as TextElement;
-          return (
-            <div key={el.id} style={{ ...commonStyle, width: 'auto', height: 'auto' }}>
-              <span
-                style={{
-                  fontSize: `${textEl.fontSize}px`,
-                  fontFamily: textEl.fontFamily,
-                  color: textEl.color,
-                  fontWeight: textEl.fontWeight,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  display: 'inline-block',
-                }}
-              >
-                {textEl.text}
-              </span>
-            </div>
-          );
+          return <DynamicTextDisplay key={el.id} textEl={textEl} commonStyle={commonStyle} />;
         }
 
         if (el.type === 'image') {

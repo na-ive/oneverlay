@@ -4,6 +4,7 @@ import type Konva from 'konva';
 import type { TextElement } from '../../types/elements';
 import { useSceneStore } from '../../store/sceneStore';
 import { loadGoogleFont } from '../../lib/fonts';
+import { useDynamicText } from '../../hooks/useDynamicText';
 
 interface TextElementNodeProps {
   element: TextElement;
@@ -16,6 +17,7 @@ interface TextElementNodeProps {
 export const TextElementNode = ({ element, x, y }: TextElementNodeProps) => {
   const textRef = useRef<Konva.Text>(null);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const { displayText, opacity } = useDynamicText(element.text, true);
 
   useLayoutEffect(() => {
     let mounted = true;
@@ -41,16 +43,17 @@ export const TextElementNode = ({ element, x, y }: TextElementNodeProps) => {
         useSceneStore.getState().updateElement(element.id, { width, height });
       }
     }
-  }, [element.id, element.text, element.fontSize, element.fontFamily, element.fontWeight, element.width, element.height]);
+  }, [element.id, displayText, element.fontSize, element.fontFamily, element.fontWeight, element.width, element.height]);
 
   return (
     <Text
       ref={textRef}
-      text={element.text}
+      text={displayText}
       fontSize={element.fontSize}
       fontStyle={element.fontWeight >= 700 ? 'bold' : element.fontWeight >= 500 ? '500' : 'normal'}
       fontFamily={fontLoaded ? element.fontFamily : 'Arial'}
       fill={element.color}
+      opacity={opacity}
       x={x}
       y={y}
     />

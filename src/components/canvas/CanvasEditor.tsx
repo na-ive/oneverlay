@@ -32,6 +32,7 @@ import { APP_NAME } from '../../lib/constants';
 import { createElement } from '../../lib/defaults';
 import { loadGoogleFont } from '../../lib/fonts';
 import { rotateAroundCenter, getActualBoundingBox } from '../../lib/math';
+import { useDynamicText } from '../../hooks/useDynamicText';
 import type { ContextMenuEntry } from '../../store/contextMenuStore';
 interface HTMLTextElementProps {
   el: TextElement;
@@ -41,6 +42,7 @@ interface HTMLTextElementProps {
 const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
   const ref = useRef<HTMLSpanElement>(null);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const { displayText, opacity } = useDynamicText(el.text, true);
 
   useLayoutEffect(() => {
     let mounted = true;
@@ -65,7 +67,7 @@ const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
         updateElement(el.id, { width, height });
       }
     }
-  }, [el.text, el.fontSize, el.fontFamily, el.fontWeight, el.id, updateElement, fontLoaded]);
+  }, [displayText, el.fontSize, el.fontFamily, el.fontWeight, el.id, updateElement, fontLoaded]);
 
   return (
     <span
@@ -78,9 +80,10 @@ const HTMLTextElement = ({ el, updateElement }: HTMLTextElementProps) => {
         whiteSpace: 'pre-wrap',
         userSelect: 'none',
         display: 'inline-block',
+        opacity: opacity,
       }}
     >
-      {el.text}
+      {displayText}
     </span>
   );
 };

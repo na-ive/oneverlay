@@ -139,17 +139,45 @@ function TextProperties({
 }) {
   return (
     <div className="space-y-3 pt-3 border-t border-white/[0.06]">
-      <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide block pl-1">
-        Text
-      </label>
+      <div className="flex flex-col">
+        <label className="text-[11px] text-text-secondary font-semibold uppercase tracking-wide block pl-1 mb-1.5">
+          Text
+        </label>
 
-      <textarea
-        value={element.text}
-        onChange={(e) => onUpdate({ text: e.target.value })}
-        rows={3}
-        className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all resize-y"
-        placeholder="Enter text..."
-      />
+        <textarea
+          value={element.text}
+          onChange={(e) => onUpdate({ text: e.target.value })}
+          rows={3}
+          className="w-full px-3 py-2 rounded-xl border border-white/[0.08] bg-bg-primary/30 text-text-primary text-xs outline-none focus:border-accent focus:bg-bg-primary/60 focus:shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all resize-y"
+          placeholder="Enter text..."
+        />
+        <details className="text-[10px] text-text-secondary/80 mt-1.5">
+          <summary className="cursor-pointer font-medium hover:text-text-primary transition-colors select-none outline-none pl-1">
+            View Dynamic Variables Guide
+          </summary>
+        <div className="mt-2 bg-black/20 p-2.5 rounded-lg border border-white/[0.04] leading-relaxed space-y-2.5">
+          <div>
+            <div className="font-semibold text-text-secondary mb-1">Clock</div>
+            <ul className="list-disc pl-3.5 opacity-90 space-y-1">
+              <li><code className="bg-bg-primary/50 px-1 py-0.5 rounded text-accent">{'{{time}}'}</code> &rarr; 17:50 (Default 24h)</li>
+              <li><code className="bg-bg-primary/50 px-1 py-0.5 rounded text-accent">{'{{time:hh:mm A}}'}</code> &rarr; 05:30 PM</li>
+              <li><code className="bg-bg-primary/50 px-1 py-0.5 rounded text-accent">{'{{time:h.mm a}}'}</code> &rarr; 5.30 pm</li>
+              <li className="text-[9px] text-text-secondary/70 list-none -ml-3.5 mt-1">
+                Tokens: HH (24h), H, hh (12h), h, mm, ss, A (PM), a (pm)
+              </li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-semibold text-text-secondary mb-1">Countdown Timer</div>
+            <ul className="list-disc pl-3.5 opacity-90 space-y-1">
+              <li><code className="bg-bg-primary/50 px-1 py-0.5 rounded text-accent">{'{{timer:05:00}}'}</code> &rarr; Stops at 00:00</li>
+              <li><code className="bg-bg-primary/50 px-1 py-0.5 rounded text-accent">{'{{timer:05:00|hide}}'}</code> &rarr; Disappears at 00:00</li>
+              <li><code className="bg-bg-primary/50 px-1 py-0.5 rounded text-accent">{'{{timer:05:00|text:BRB!}}'}</code> &rarr; Shows "BRB!" at 00:00</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <NumberInput

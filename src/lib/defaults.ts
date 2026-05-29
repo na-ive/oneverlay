@@ -73,14 +73,14 @@ export function createBrowserElement(overrides?: Partial<BrowserElement>): Brows
   };
 }
 
-export function createElement(type: ElementType): OverlayElement {
+export function createElement(type: ElementType, overrides?: Partial<OverlayElement>): OverlayElement {
   switch (type) {
     case 'text':
-      return createTextElement();
+      return createTextElement(overrides as Partial<TextElement>);
     case 'image':
-      return createImageElement();
+      return createImageElement(overrides as Partial<ImageElement>);
     case 'browser':
-      return createBrowserElement();
+      return createBrowserElement(overrides as Partial<BrowserElement>);
   }
 }
 
