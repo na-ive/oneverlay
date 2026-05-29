@@ -11,6 +11,7 @@ import type { OverlayElement, TextElement, ImageElement, BrowserElement } from '
 export function PropertiesModal() {
   const isOpen = useEditorStore((s) => s.isPropertiesOpen);
   const elementId = useEditorStore((s) => s.propertiesElementId);
+  const selectedIds = useEditorStore((s) => s.selectedElementIds);
   const closeProperties = useEditorStore((s) => s.closeProperties);
   const elements = useSceneStore(selectElements);
   const updateElement = useSceneStore((s) => s.updateElement);
@@ -27,7 +28,7 @@ export function PropertiesModal() {
     [elementId, updateElement, pushHistory],
   );
 
-  if (!element) return null;
+  if (!element || selectedIds.length > 1) return null;
 
   return (
     <Modal

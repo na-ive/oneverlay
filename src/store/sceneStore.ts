@@ -26,8 +26,10 @@ interface SceneStoreState extends ProjectData {
   // ── Element actions (operate on active scene) ──
   addElement: (type: ElementType, name?: string) => void;
   updateElement: (id: string, updates: Partial<OverlayElement>) => void;
+  updateElements: (updates: { id: string; updates: Partial<OverlayElement> }[]) => void;
   removeElement: (id: string) => void;
   moveElement: (id: string, x: number, y: number) => void;
+  moveElements: (updates: { id: string; x: number; y: number }[]) => void;
   toggleVisibility: (id: string) => void;
   reorderElement: (fromIndex: number, toIndex: number) => void;
   duplicateElement: (id: string) => void;
@@ -107,6 +109,32 @@ export const useSceneStore = create<SceneStoreState>((set, get) => ({
       elements: scene.elements.map((el) =>
         el.id === id ? { ...el, x: Math.round(x), y: Math.round(y) } : el
       ),
+    }));
+  },
+
+  updateElements: (updates: { id: string; updates: Partial<OverlayElement> }[]) => {
+    const updateMap = new Map(updates.map((u) => [u.id, u.updates]));
+    updateActiveScene(set, (scene) => ({
+      elements: scene.elements.map((el) => {
+        const up = updateMap.get(el.id);
+        if (up) {
+          return { ...el, ...up } as OverlayElement;
+        }
+        return el;
+      }),
+    }));
+  },
+
+  moveElements: (updates: { id: string; x: number; y: number }[]) => {
+    const updateMap = new Map(updates.map((u) => [u.id, u]));
+    updateActiveScene(set, (scene) => ({
+      elements: scene.elements.map((el) => {
+        const update = updateMap.get(el.id);
+        if (update) {
+          return { ...el, x: Math.round(update.x), y: Math.round(update.y) };
+        }
+        return el;
+      }),
     }));
   },
 

@@ -55,7 +55,7 @@ export function EditorLayout() {
 
   const undo = useHistoryStore((s) => s.undo);
   const redo = useHistoryStore((s) => s.redo);
-  const selectedId = useEditorStore((s) => s.selectedElementId);
+  const selectedIds = useEditorStore((s) => s.selectedElementIds);
   const selectElement = useEditorStore((s) => s.selectElement);
   const setToolMode = useEditorStore((s) => s.setToolMode);
   const removeElement = useSceneStore((s) => s.removeElement);
@@ -121,17 +121,17 @@ export function EditorLayout() {
       }
 
       // Delete selected element
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.length > 0) {
         e.preventDefault();
         useConfirmStore.getState().showConfirm({
-          title: 'Delete Element',
-          message: 'Are you sure you want to delete this element?',
+          title: `Delete Element${selectedIds.length > 1 ? 's' : ''}`,
+          message: `Are you sure you want to delete ${selectedIds.length > 1 ? 'these elements' : 'this element'}?`,
           confirmText: 'Delete',
           isDanger: true,
         }).then((confirmed) => {
           if (confirmed) {
             pushHistory();
-            removeElement(selectedId);
+            selectedIds.forEach((id) => removeElement(id));
             selectElement(null);
           }
         });
@@ -144,13 +144,13 @@ export function EditorLayout() {
 
       // Arrow keys nudging
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        const activeId = useEditorStore.getState().selectedElementId;
-        if (!activeId) return;
+        const activeIds = useEditorStore.getState().selectedElementIds;
+        if (activeIds.length === 0) return;
 
         const sceneState = useSceneStore.getState();
         const activeScene = sceneState.scenes.find((s) => s.id === sceneState.activeSceneId) || sceneState.scenes[0];
-        const element = activeScene.elements.find((el) => el.id === activeId);
-        if (!element || element.locked) return;
+        const elementsToNudge = activeScene.elements.filter((el) => activeIds.includes(el.id) && !el.locked);
+        if (elementsToNudge.length === 0) return;
 
         e.preventDefault();
 
@@ -174,13 +174,15 @@ export function EditorLayout() {
         if (e.key === 'ArrowUp') dy = -step;
         if (e.key === 'ArrowDown') dy = step;
 
-        sceneState.updateElement(activeId, {
-          x: element.x + dx,
-          y: element.y + dy,
+        elementsToNudge.forEach((element) => {
+          sceneState.updateElement(element.id, {
+            x: element.x + dx,
+            y: element.y + dy,
+          });
         });
       }
     },
-    [undo, redo, selectedId, removeElement, selectElement, pushHistory, setToolMode],
+    [undo, redo, selectedIds, removeElement, selectElement, pushHistory, setToolMode],
   );
 
   const handleKeyUp = useCallback(

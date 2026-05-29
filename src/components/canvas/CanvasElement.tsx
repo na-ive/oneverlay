@@ -8,9 +8,10 @@ import { useEditorStore } from '../../store/editorStore';
 interface CanvasElementProps {
   element: OverlayElement;
   isSelected: boolean;
+  isSingleSelected: boolean;
   scale: number;
-  onSelect: () => void;
-  onDragStart: () => void;
+  onSelect: (e: Konva.KonvaEventObject<MouseEvent | TouchEvent | DragEvent>) => void;
+  onDragStart: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformStart: () => void;
@@ -22,6 +23,7 @@ interface CanvasElementProps {
 export function CanvasElement({
   element,
   isSelected,
+  isSingleSelected,
   scale,
   onSelect,
   onDragStart,
@@ -74,11 +76,11 @@ export function CanvasElement({
       };
     }
 
-    if (isSelected && trRef.current && shapeRef.current) {
+    if (isSingleSelected && isSelected && trRef.current && shapeRef.current) {
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer()?.batchDraw();
     }
-  }, [isSelected]);
+  }, [isSelected, isSingleSelected]);
 
   const isCtrlDown = useRef(false);
   const isShiftDown = useRef(false);
@@ -266,8 +268,6 @@ export function CanvasElement({
         listening={!isHand}
         onClick={onSelect}
         onTap={onSelect}
-        onMouseDown={onSelect}
-        onTouchStart={onSelect}
         onDragStart={onDragStart}
         onDragMove={onDragMove}
         onDragEnd={(e) => {
@@ -344,7 +344,7 @@ export function CanvasElement({
   return (
     <>
       {renderElement()}
-      {isSelected && !element.locked && !isHand && (
+      {isSelected && isSingleSelected && !isHand && (
         <Transformer
           ref={trRef}
           rotateEnabled={true}

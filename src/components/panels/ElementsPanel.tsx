@@ -44,7 +44,7 @@ export function ElementsPanel() {
   const reorderElement = useSceneStore((s) => s.reorderElement);
   const duplicateElement = useSceneStore((s) => s.duplicateElement);
   const updateElement = useSceneStore((s) => s.updateElement);
-  const selectedId = useEditorStore((s) => s.selectedElementId);
+  const selectedIds = useEditorStore((s) => s.selectedElementIds);
   const selectElement = useEditorStore((s) => s.selectElement);
   const openProperties = useEditorStore((s) => s.openProperties);
   const openAddElementModal = useEditorStore((s) => s.openAddElementModal);
@@ -96,11 +96,15 @@ export function ElementsPanel() {
         if (confirmed) {
           pushHistory();
           removeElement(id);
-          if (selectedId === id) selectElement(null);
+          if (selectedIds.includes(id)) {
+            const newSelected = selectedIds.filter(i => i !== id);
+            if (newSelected.length === 0) selectElement(null);
+            else useEditorStore.setState({ selectedElementIds: newSelected });
+          }
         }
       });
     },
-    [removeElement, selectedId, selectElement, pushHistory],
+    [removeElement, selectedIds, selectElement, pushHistory],
   );
 
   const handleToggleVisibility = useCallback(
@@ -463,8 +467,10 @@ export function ElementsPanel() {
               key={el.id}
               element={el}
               index={realIndex}
-              isSelected={selectedId === el.id}
-              onSelect={() => selectElement(el.id)}
+              isSelected={selectedIds.includes(el.id)}
+              onSelect={(e) => {
+                selectElement(el.id, e.ctrlKey || e.metaKey, e.shiftKey, elements);
+              }}
               onToggleVisibility={() => handleToggleVisibility(el.id)}
               onToggleLock={() => handleToggleLock(el.id, el.locked)}
               onDelete={() => handleDelete(el.id)}
@@ -487,7 +493,7 @@ interface ElementRowProps {
   element: OverlayElement;
   index: number;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (e: React.MouseEvent) => void;
   onToggleVisibility: () => void;
   onToggleLock: () => void;
   onDelete: () => void;

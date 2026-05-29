@@ -1,5 +1,5 @@
 import { useCallback, useRef, useEffect, useState, useLayoutEffect } from 'react';
-import { Stage, Layer, Rect, Line, Group, Text } from 'react-konva';
+import { Stage, Layer, Rect, Line, Group, Text, Transformer } from 'react-konva';
 import type Konva from 'konva';
 import { useSceneStore, selectElements, selectCanvas } from '../../store/sceneStore';
 import { useEditorStore } from '../../store/editorStore';
@@ -146,19 +146,33 @@ function isPointInElement(px: number, py: number, el: OverlayElement) {
 export function CanvasEditor() {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
+  const multiTrRef = useRef<Konva.Transformer>(null);
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
 
   const elements = useSceneStore(selectElements);
   const canvasWidth = useSceneStore((s) => selectCanvas(s).width);
   const canvasHeight = useSceneStore((s) => selectCanvas(s).height);
-  const moveElement = useSceneStore((s) => s.moveElement);
+  
   const updateElement = useSceneStore((s) => s.updateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
   const toggleVisibility = useSceneStore((s) => s.toggleVisibility);
   const reorderElement = useSceneStore((s) => s.reorderElement);
   const duplicateElement = useSceneStore((s) => s.duplicateElement);
 
-  const selectedId = useEditorStore((s) => s.selectedElementId);
+  const selectedIds = useEditorStore((s) => s.selectedElementIds);
+
+  // Update multiTrRef when selection changes
+  useEffect(() => {
+    if (selectedIds.length > 1 && multiTrRef.current && stageRef.current) {
+      // Find all selected nodes by ID
+      const nodes = selectedIds.map(id => stageRef.current?.findOne(`#${id}`)).filter(Boolean) as Konva.Node[];
+      multiTrRef.current.nodes(nodes);
+      multiTrRef.current.getLayer()?.batchDraw();
+    } else if (selectedIds.length <= 1 && multiTrRef.current) {
+      multiTrRef.current.nodes([]);
+      multiTrRef.current.getLayer()?.batchDraw();
+    }
+  }, [selectedIds, elements]);
   const selectElement = useEditorStore((s) => s.selectElement);
   const bottomDockHeight = useEditorStore((s) => s.bottomDockHeight);
   const openProperties = useEditorStore((s) => s.openProperties);
@@ -168,6 +182,7 @@ export function CanvasEditor() {
   const toolMode = useEditorStore((s) => s.toolMode);
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ startX: 0, startY: 0, panX: 0, panY: 0 });
+  const dragStartPositions = useRef<{ [key: string]: { x: number; y: number } }>({});
 
   // Guides refs
   const guidesLayerRef = useRef<Konva.Layer>(null);
@@ -355,8 +370,16 @@ export function CanvasEditor() {
   );
 
   const handleDragEnd = useCallback(
-    (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
-      moveElement(id, e.target.x(), e.target.y());
+    () => {
+      const currentSelectedIds = useEditorStore.getState().selectedElementIds;
+      const updates = currentSelectedIds.map(sid => {
+        const n = stageRef.current?.findOne(`#${sid}`);
+        if (n) return { id: sid, x: n.x(), y: n.y() };
+        return null;
+      }).filter(Boolean) as {id: string, x: number, y: number}[];
+      
+      useSceneStore.getState().moveElements(updates);
+
       if (vGuideRef.current) vGuideRef.current.hide();
       if (hGuideRef.current) hGuideRef.current.hide();
       
@@ -366,7 +389,7 @@ export function CanvasEditor() {
 
       if (guidesLayerRef.current) guidesLayerRef.current.batchDraw();
     },
-    [moveElement],
+    [],
   );
 
   // Drag move (Snapping logic)
@@ -378,14 +401,49 @@ export function CanvasEditor() {
 
       const SNAP_THRESHOLD = 5 / scale;
       
-      const currentEl = { ...el, x: node.x(), y: node.y() };
-      const box = getActualBoundingBox(currentEl);
+      // calculate dx, dy from the element's start position
+      const startPos = dragStartPositions.current[id];
+      if (!startPos) return; // fallback
+      const dx = node.x() - startPos.x;
+      const dy = node.y() - startPos.y;
+
+      // move other selected elements visually
+      const currentSelectedIds = useEditorStore.getState().selectedElementIds;
+      currentSelectedIds.forEach(sid => {
+        if (sid === id) return;
+        const otherNode = stageRef.current?.findOne(`#${sid}`);
+        const otherStartPos = dragStartPositions.current[sid];
+        if (otherNode && otherStartPos) {
+          otherNode.x(otherStartPos.x + dx);
+          otherNode.y(otherStartPos.y + dy);
+        }
+      });
+      
+      let groupMinX = Infinity;
+      let groupMinY = Infinity;
+      let groupMaxX = -Infinity;
+      let groupMaxY = -Infinity;
+
+      currentSelectedIds.forEach(sid => {
+        const sEl = elements.find(el => el.id === sid);
+        const sNode = stageRef.current?.findOne(`#${sid}`);
+        if (sEl && sNode) {
+          const box = getActualBoundingBox({ ...sEl, x: sNode.x(), y: sNode.y() });
+          groupMinX = Math.min(groupMinX, box.minX);
+          groupMinY = Math.min(groupMinY, box.minY);
+          groupMaxX = Math.max(groupMaxX, box.maxX);
+          groupMaxY = Math.max(groupMaxY, box.maxY);
+        }
+      });
+
+      const groupCenterX = (groupMinX + groupMaxX) / 2;
+      const groupCenterY = (groupMinY + groupMaxY) / 2;
       
       const targetsX: number[] = [0, canvasWidth / 2, canvasWidth];
       const targetsY: number[] = [0, canvasHeight / 2, canvasHeight];
 
       elements.forEach((other) => {
-        if (other.id === id || other.hidden) return;
+        if (currentSelectedIds.includes(other.id) || other.hidden) return;
         const otherBox = getActualBoundingBox(other);
         targetsX.push(otherBox.minX, otherBox.centerX, otherBox.maxX);
         targetsY.push(otherBox.minY, otherBox.centerY, otherBox.maxY);
@@ -396,9 +454,8 @@ export function CanvasEditor() {
       let shiftX = 0;
       let isCanvasSnapX = false;
 
-      const pointsX = [box.minX, box.centerX, box.maxX];
+      const pointsX = [groupMinX, groupCenterX, groupMaxX];
       for (const px of pointsX) {
-        // First check canvas targets (higher priority)
         for (const tx of [0, canvasWidth / 2, canvasWidth]) {
           const dist = Math.abs(px - tx);
           if (dist < SNAP_THRESHOLD && (!isCanvasSnapX || dist < closestXDist)) {
@@ -408,10 +465,8 @@ export function CanvasEditor() {
             isCanvasSnapX = true;
           }
         }
-        
-        // Then check element targets if no canvas snap yet, or if we want to allow closer element snaps (but we prefer canvas)
         for (const tx of targetsX) {
-          if (tx === 0 || tx === canvasWidth / 2 || tx === canvasWidth) continue; // already checked
+          if (tx === 0 || tx === canvasWidth / 2 || tx === canvasWidth) continue; 
           const dist = Math.abs(px - tx);
           if (dist < SNAP_THRESHOLD && !isCanvasSnapX && dist < closestXDist) {
             closestXDist = dist;
@@ -422,7 +477,10 @@ export function CanvasEditor() {
       }
 
       if (snapX !== null) {
-        node.x(node.x() + shiftX);
+        selectedIds.forEach(sid => {
+          const n = stageRef.current?.findOne(`#${sid}`);
+          if (n) n.x(n.x() + shiftX);
+        });
         if (vGuideRef.current) {
           vGuideRef.current.points([snapX, -10000, snapX, 10000]);
           vGuideRef.current.show();
@@ -436,9 +494,8 @@ export function CanvasEditor() {
       let shiftY = 0;
       let isCanvasSnapY = false;
 
-      const pointsY = [box.minY, box.centerY, box.maxY];
+      const pointsY = [groupMinY, groupCenterY, groupMaxY];
       for (const py of pointsY) {
-        // First check canvas targets (higher priority)
         for (const ty of [0, canvasHeight / 2, canvasHeight]) {
           const dist = Math.abs(py - ty);
           if (dist < SNAP_THRESHOLD && (!isCanvasSnapY || dist < closestYDist)) {
@@ -448,8 +505,6 @@ export function CanvasEditor() {
             isCanvasSnapY = true;
           }
         }
-        
-        // Then check element targets
         for (const ty of targetsY) {
           if (ty === 0 || ty === canvasHeight / 2 || ty === canvasHeight) continue;
           const dist = Math.abs(py - ty);
@@ -460,9 +515,24 @@ export function CanvasEditor() {
           }
         }
       }
+      if (snapX !== null) {
+        currentSelectedIds.forEach(sid => {
+          const n = stageRef.current?.findOne(`#${sid}`);
+          if (n) n.x(n.x() + shiftX);
+        });
+        if (vGuideRef.current) {
+          vGuideRef.current.points([snapX, -10000, snapX, 10000]);
+          vGuideRef.current.show();
+        }
+      } else {
+        if (vGuideRef.current) vGuideRef.current.hide();
+      }
 
       if (snapY !== null) {
-        node.y(node.y() + shiftY);
+        currentSelectedIds.forEach(sid => {
+          const n = stageRef.current?.findOne(`#${sid}`);
+          if (n) n.y(n.y() + shiftY);
+        });
         if (hGuideRef.current) {
           hGuideRef.current.points([-10000, snapY, 10000, snapY]);
           hGuideRef.current.show();
@@ -472,11 +542,15 @@ export function CanvasEditor() {
       }
 
       // Synchronize HTML DOM element instantly during drag
-      const htmlEl = document.getElementById(`html-overlay-${el.id}`);
-      if (htmlEl) {
-        htmlEl.style.left = `${node.x() * scale}px`;
-        htmlEl.style.top = `${node.y() * scale}px`;
-      }
+      currentSelectedIds.forEach(sid => {
+        const n = stageRef.current?.findOne(`#${sid}`);
+        if (!n) return;
+        const htmlEl = document.getElementById(`html-overlay-${sid}`);
+        if (htmlEl) {
+          htmlEl.style.left = `${n.x() * scale}px`;
+          htmlEl.style.top = `${n.y() * scale}px`;
+        }
+      });
       
       // Update Distance Guides
       const updateDistGuide = (groupRef: React.RefObject<Konva.Group | null>, linePts: number[], textX: number, textY: number, text: string, visible: boolean) => {
@@ -498,7 +572,14 @@ export function CanvasEditor() {
       };
 
       // We need the updated box after snapping
-      const finalBox = getActualBoundingBox({ ...el, x: node.x(), y: node.y() });
+      const finalBox = {
+        minX: groupMinX + shiftX,
+        minY: groupMinY + shiftY,
+        maxX: groupMaxX + shiftX,
+        maxY: groupMaxY + shiftY,
+        centerX: groupCenterX + shiftX,
+        centerY: groupCenterY + shiftY,
+      };
       
       // Top
       if (finalBox.minY > 0) {
@@ -538,8 +619,19 @@ export function CanvasEditor() {
   );
 
   // Drag start — push history
-  const handleDragStart = useCallback(() => {
+  const handleDragStart = useCallback((id?: string) => {
     pushHistory();
+    const newPositions: { [key: string]: { x: number; y: number } } = {};
+    const sceneState = useSceneStore.getState();
+    const activeScene = sceneState.scenes.find((s) => s.id === sceneState.activeSceneId) || sceneState.scenes[0];
+    
+    const currentSelectedIds = useEditorStore.getState().selectedElementIds;
+    activeScene.elements.forEach((el) => {
+      if (currentSelectedIds.includes(el.id) || el.id === id) {
+        newPositions[el.id] = { x: el.x, y: el.y };
+      }
+    });
+    dragStartPositions.current = newPositions;
   }, [pushHistory]);
 
   // Transform end (resize or crop)
@@ -987,7 +1079,7 @@ export function CanvasEditor() {
       }
     },
     [
-      selectedId,
+      selectedIds,
       elements,
       canvasWidth,
       canvasHeight,
@@ -1048,8 +1140,8 @@ export function CanvasEditor() {
             top: `${el.y * scale}px`,
             width: `${el.width}px`,
             height: `${el.height}px`,
-            transform: `rotate(${el.rotation}deg) scale(${scale * el.scaleX}, ${scale * el.scaleY})`,
-            transformOrigin: 'top left',
+            transform: `translate(${-(el.cropLeft || 0)}px, ${-(el.cropTop || 0)}px) rotate(${el.rotation}deg) scale(${scale * el.scaleX}, ${scale * el.scaleY})`,
+            transformOrigin: `${el.cropLeft || 0}px ${el.cropTop || 0}px`,
             opacity: el.opacity,
             clipPath: `inset(${el.cropTop || 0}px ${el.cropRight || 0}px ${el.cropBottom || 0}px ${el.cropLeft || 0}px)`,
             zIndex,
@@ -1074,9 +1166,6 @@ export function CanvasEditor() {
                 key={el.id}
                 style={{
                   ...commonStyle,
-                  width: `${browserEl.browserWidth}px`,
-                  height: `${browserEl.browserHeight}px`,
-                  clipPath: `inset(${browserEl.cropTop}px ${browserEl.cropRight}px ${browserEl.cropBottom}px ${browserEl.cropLeft}px)`,
                   borderRadius: '4px',
                 }}
                 onMouseDown={handleMouseDown}
@@ -1218,20 +1307,29 @@ export function CanvasEditor() {
           {/* Render all elements in Konva for dragging and selection */}
           {elements.map((el) => {
             if (el.hidden) return null;
-            const isSel = el.id === selectedId;
+            const isSel = selectedIds.includes(el.id);
             return (
               <CanvasElement
                 key={el.id}
                 element={el}
                 isSelected={isSel}
+                isSingleSelected={selectedIds.length === 1}
                 scale={scale}
-                onSelect={() => selectElement(el.id)}
-                onDragStart={() => {
-                  selectElement(el.id);
-                  handleDragStart();
+                onSelect={(e) => {
+                  const isMulti = e.evt.ctrlKey || e.evt.metaKey;
+                  const isRange = e.evt.shiftKey;
+                  selectElement(el.id, isMulti, isRange, elements);
+                }}
+                onDragStart={(e) => {
+                  const isMulti = e.evt.ctrlKey || e.evt.metaKey;
+                  const isRange = e.evt.shiftKey;
+                  if (!selectedIds.includes(el.id)) {
+                    selectElement(el.id, isMulti, isRange, elements);
+                  }
+                  handleDragStart(el.id);
                 }}
                 onDragMove={(e) => handleDragMove(el.id, e)}
-                onDragEnd={(e) => handleDragEnd(el.id, e)}
+                onDragEnd={() => handleDragEnd()}
                 onTransformStart={handleDragStart}
                 onTransformEnd={(node) => handleTransformEnd(el.id, node)}
                 boundBoxFunc={(oldBox, newBox) => handleTransformBoundBox(el.id, oldBox, newBox)}
@@ -1239,6 +1337,19 @@ export function CanvasEditor() {
               />
             );
           })}
+          
+          {/* Multi-select Bounding Box */}
+          {selectedIds.length > 1 && (
+            <Transformer
+              ref={multiTrRef}
+              resizeEnabled={false}
+              rotateEnabled={false}
+              enabledAnchors={[]}
+              borderStroke="#4a9eff"
+              borderStrokeWidth={1 / scale}
+              padding={0}
+            />
+          )}
         </Layer>
       </Stage>
 
