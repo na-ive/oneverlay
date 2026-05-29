@@ -39,7 +39,9 @@ export function usePersistence() {
             if (scenes.length > 0) {
               const projectData: ProjectData = {
                 scenes,
-                activeSceneId: cloudProject.scenes[0]?.id ?? currentState.activeSceneId,
+                activeSceneId: scenes.some(s => s.id === currentState.activeSceneId)
+                  ? currentState.activeSceneId
+                  : (cloudProject.scenes[0]?.id ?? currentState.activeSceneId),
                 updatedAt: cloudProject.updatedAt,
               };
               currentState.loadProjectData(projectData);
